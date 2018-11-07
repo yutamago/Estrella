@@ -2,19 +2,17 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using Estrella.Util;
+using Estrella.Zone.Managers;
 
 namespace Estrella.Zone
 {
-    [ServerModule(Util.InitializationStage.DataStore)]
+    [ServerModule(InitializationStage.DataStore)]
     public sealed class Worker
     {
-        public static Worker Instance { get; private set; }
-		private readonly ConcurrentQueue<Action> callbacks = new ConcurrentQueue<Action>();
-		private readonly Thread main;
-		private int sleep = 1;
-		private ulong ticksToSleep = 1500;
-		public ulong TicksPerSecond { get; set; }
-        public bool IsRunning { get; set; }
+        private readonly ConcurrentQueue<Action> callbacks = new ConcurrentQueue<Action>();
+        private readonly Thread main;
+        private int sleep = 1;
+        private ulong ticksToSleep = 1500;
 
         public Worker()
         {
@@ -27,6 +25,10 @@ namespace Estrella.Zone
             new PerformCounter();
         }
 
+        public static Worker Instance { get; private set; }
+        public ulong TicksPerSecond { get; set; }
+        public bool IsRunning { get; set; }
+
         public static bool Load()
         {
             try
@@ -35,7 +37,10 @@ namespace Estrella.Zone
                 Instance.sleep = Settings.Instance.WorkInterval;
                 return true;
             }
-            catch { return false; }
+            catch
+            {
+                return false;
+            }
         }
 
         public void AddCallback(Action pCallback)
@@ -56,13 +61,13 @@ namespace Estrella.Zone
         {
             while (Program.ServiceInfo == null)
             {
-                System.Threading.Thread.Sleep(200); // Wait..
+                Thread.Sleep(200); // Wait..
             }
+
             try
             {
-  
-              // Estrella.Database.DatabaseHelper.Initialize(Settings.Instance.WorldConnString, "WorkerConn");
-              //  Program.Entity.Characters.Count(); //test if database is online
+                // Estrella.Database.DatabaseHelper.Initialize(Settings.Instance.WorldConnString, "WorkerConn");
+                //  Program.Entity.Characters.Count(); //test if database is online
                 Log.WriteLine(LogLevel.Info, "Database Initialized.");
             }
             catch (Exception ex)
@@ -70,32 +75,32 @@ namespace Estrella.Zone
                 Log.WriteLine(LogLevel.Exception, "Error initializing database: {0}", ex.ToString());
                 return;
             }
+
             Action action;
             ulong last = 0;
-            DateTime lastCheck = DateTime.Now;
-            DateTime lastPing = DateTime.Now;
-			DateTime lastGC = DateTime.Now;
-			DateTime lastClientTime = DateTime.Now;
-            DateTime LastMountCheck = DateTime.Now;
-            for (ulong i = 0; ; i++)
+            var lastCheck = DateTime.Now;
+            var lastPing = DateTime.Now;
+            var lastGC = DateTime.Now;
+            var lastClientTime = DateTime.Now;
+            var LastMountCheck = DateTime.Now;
+            for (ulong i = 0;; i++)
             {
-                if (!this.IsRunning)
+                if (!IsRunning)
                 {
                     break;
                 }
 
                 try
                 {
-                    DateTime now = Program.CurrentTime;
+                    var now = Program.CurrentTime;
 
                     while (callbacks.TryDequeue(out action))
                     {
                         try
                         {
-
-                            UserWorkItem Work = new UserWorkItem(action);
+                            var Work = new UserWorkItem(action);
                             Work.Queue();
-                          //  action();
+                            //  action();
                         }
                         catch (Exception ex)
                         {
@@ -126,22 +131,24 @@ namespace Estrella.Zone
                         GC.Collect();
                         lastGC = now;
                     }
+
                     if (now.Subtract(lastClientTime).TotalSeconds >= 60)
                     {
-                     
                     }
+
                     if (now.Subtract(LastMountCheck).TotalSeconds >= 30)
                     {
                         ClientManager.Instance.UpdateMountTicks(now);
                         LastMountCheck = now;
                     }
+
                     if (i % 2000 == 0 && MapManager.Instance != null)
                     {
                         foreach (var val in MapManager.Instance.Maps)
                         {
                             foreach (var map in val.Value)
                             {
-                               map.Update(now); //test
+                                map.Update(now); //test
                             }
                         }
                     }
@@ -157,6 +164,7 @@ namespace Estrella.Zone
                     Log.WriteLine(LogLevel.Exception, "Ohgod. {0}", ex.ToString());
                 }
             }
+
             Log.WriteLine(LogLevel.Info, "Server stopped handling callbacks.");
         }
     }

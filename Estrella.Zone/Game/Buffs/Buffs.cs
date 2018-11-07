@@ -1,11 +1,18 @@
-﻿﻿/*File for this file Basic Copyright 2012 no0dl */
+﻿/*File for this file Basic Copyright 2012 no0dl */
+
 using System.Collections.Generic;
 
 namespace Estrella.Zone.Game.Buffs
 {
-	public class Buffs
+    public class Buffs
     {
-        private ZoneCharacter Character {get;set;}
+        public Buffs(ZoneCharacter pChar)
+        {
+            Character = pChar;
+            CurrentBuffs = new List<Buff>();
+        }
+
+        private ZoneCharacter Character { get; set; }
 
         public int MinDamage { get; set; }
         public int MaxDamage { get; set; }
@@ -25,11 +32,5 @@ namespace Estrella.Zone.Game.Buffs
         public int MaxSP { get; set; }
 
         private List<Buff> CurrentBuffs { get; set; }
-
-        public Buffs(ZoneCharacter pChar)
-        {
-            Character = pChar;
-            CurrentBuffs = new List<Buff>();
-        }
     }
 }

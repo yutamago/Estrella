@@ -2,18 +2,18 @@ using System;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
-using System.Text;
 using Estrella.Util;
+using MySql.Data.MySqlClient;
 
 namespace Estrella.Database
 {
     /// <summary>
-    /// DatabaseManager acts as a proxy towards an encapsulated Database at a DatabaseServer.
+    ///     DatabaseManager acts as a proxy towards an encapsulated Database at a DatabaseServer.
     /// </summary>
     public class DatabaseManager
     {
         #region Fields
+
         private DatabaseServer mServer;
         private Database mDatabase;
         private int MaxCacheQuerysPerClient;
@@ -23,6 +23,7 @@ namespace Estrella.Database
         private object mLockObject;
         private int overloadflags;
         private Task mClientMonitor;
+
         #endregion
 
         #region Properties
@@ -30,21 +31,24 @@ namespace Estrella.Database
         #endregion
 
         #region Constructor
+
         /// <summary>
-        /// Constructs a DatabaseManager for a given DatabaseServer and Database.
+        ///     Constructs a DatabaseManager for a given DatabaseServer and Database.
         /// </summary>
         /// <param name="pServer">The DatabaseServer for this database proxy.</param>
         /// <param name="pDatabase">The Database for this database proxy.</param>
-        public DatabaseManager(DatabaseServer pServer, Database pDatabase, int MaxCacheQuerysPerClientCount, int Overloadflags)
+        public DatabaseManager(DatabaseServer pServer, Database pDatabase, int MaxCacheQuerysPerClientCount,
+            int Overloadflags)
         {
-            this.MaxCacheQuerysPerClient = MaxCacheQuerysPerClientCount;
-            this.overloadflags = Overloadflags;
+            MaxCacheQuerysPerClient = MaxCacheQuerysPerClientCount;
+            overloadflags = Overloadflags;
             mServer = pServer;
             mDatabase = pDatabase;
             mLockObject = new object();
         }
+
         /// <summary>
-        /// Constructs a DatabaseManager for given database server and database details.
+        ///     Constructs a DatabaseManager for given database server and database details.
         /// </summary>
         /// <param name="sServer">The network host of the database server, eg 'localhost' or '85.214.55.189'.</param>
         /// <param name="Port">The network port of the database server as an unsigned 32 bit integer.</param>
@@ -53,20 +57,23 @@ namespace Estrella.Database
         /// <param name="sDatabase">The name of the database to connect to.</param>
         /// <param name="minPoolSize">The minimum connection pool size for the database.</param>
         /// <param name="maxPoolSize">The maximum connection pool size for the database.</param>
-        public DatabaseManager(string sServer, uint Port, string sUser, string sPassword, string sDatabase, uint minPoolSize, uint maxPoolSize, int MaxQueryCountPerClient,int OverloadFlags)
+        public DatabaseManager(string sServer, uint Port, string sUser, string sPassword, string sDatabase,
+            uint minPoolSize, uint maxPoolSize, int MaxQueryCountPerClient, int OverloadFlags)
         {
             mServer = new DatabaseServer(sServer, Port, sUser, sPassword);
             mDatabase = new Database(sDatabase, minPoolSize, maxPoolSize);
-            this.MaxCacheQuerysPerClient = MaxQueryCountPerClient;
+            MaxCacheQuerysPerClient = MaxQueryCountPerClient;
             overloadflags = OverloadFlags;
             mClientMonitor = new Task(MonitorClientsLoop);
             //mClientMonitor.Priority = ThreadPriority.Lowest;
             mLockObject = new object();
             mClientMonitor.Start();
         }
+
         #endregion
 
         #region Methods
+
         /// <summary>
         /// Starts the client monitor thread. The client monitor disconnects inactive clients etc.
         /// </summary>
@@ -78,7 +85,7 @@ namespace Estrella.Database
         //    mClientMonitor.Start();
         //}
         /// <summary>
-        /// Stops the client monitor thread.
+        ///     Stops the client monitor thread.
         /// </summary>
         internal void StopMonitor()
         {
@@ -89,15 +96,15 @@ namespace Estrella.Database
         }
 
         /// <summary>
-        /// Disconnects and destroys all database clients.
+        ///     Disconnects and destroys all database clients.
         /// </summary>
         internal void DestroyClients()
         {
             lock (this)
             {
-                for (int i = 0; i < mClients.Length; i++)
+                for (var i = 0; i < mClients.Length; i++)
                 {
-                    DatabaseClient tClient = mClients[i];
+                    var tClient = mClients[i];
                     if (tClient != null)
                     {
                         tClient.Destroy();
@@ -106,8 +113,9 @@ namespace Estrella.Database
                 }
             }
         }
+
         /// <summary>
-        /// Nulls all instance fields of the database manager.
+        ///     Nulls all instance fields of the database manager.
         /// </summary>
         internal void DestroyManager()
         {
@@ -120,7 +128,8 @@ namespace Estrella.Database
         }
 
         /// <summary>
-        /// Closes the connections of database clients that have been inactive for too long. Connections can be opened again when needed.
+        ///     Closes the connections of database clients that have been inactive for too long. Connections can be opened again
+        ///     when needed.
         /// </summary>
         private void MonitorClientsLoop()
         {
@@ -130,8 +139,8 @@ namespace Estrella.Database
                 {
                     lock (mLockObject)
                     {
-                        DateTime dtNow = DateTime.Now;
-                        for (int i = 0; i < mClients.Length; i++)
+                        var dtNow = DateTime.Now;
+                        for (var i = 0; i < mClients.Length; i++)
                         {
                             if (mClients[i].State != ConnectionState.Closed)
                             {
@@ -139,7 +148,8 @@ namespace Estrella.Database
                                 {
                                     mClients[i].Disconnect(); // Temporarily close connection
 
-                                    Log.WriteLine(LogLevel.Debug,"Disconnected database client #" + mClients[i].mHandle);
+                                    Log.WriteLine(LogLevel.Debug,
+                                        "Disconnected database client #" + mClients[i].mHandle);
                                 }
                             }
                         }
@@ -147,17 +157,19 @@ namespace Estrella.Database
                 }
                 catch (Exception ex)
                 {
-                    Log.WriteLine(LogLevel.Error,"" + ex.ToString() + "DatabaseManager task");
+                    Log.WriteLine(LogLevel.Error, "" + ex + "DatabaseManager task");
                 }
+
                 Thread.Sleep(10000); // 10 seconds
             }
         }
+
         /// <summary>
-        /// Creates the connection string for this database proxy.
+        ///     Creates the connection string for this database proxy.
         /// </summary>
         internal string CreateConnectionString()
         {
-            MySqlConnectionStringBuilder pCSB = new MySqlConnectionStringBuilder();
+            var pCSB = new MySqlConnectionStringBuilder();
 
             // Server
             pCSB.Server = mServer.Host;
@@ -177,76 +189,76 @@ namespace Estrella.Database
         {
             lock (this)
             {
-                if(mClients.Length > 2)
-                for (uint i = 0; i < mClients.Length; i++)
-                {
-                    if (mClientAvailable[i] == true)
+                if (mClients.Length > 2)
+                    for (uint i = 0; i < mClients.Length; i++)
                     {
-                        mClientAvailable[i] = false;
-                        mClientStarvationCounter = 0;
-
-                        if (mClients[i].State == ConnectionState.Closed)
+                        if (mClientAvailable[i])
                         {
-                            try
+                            mClientAvailable[i] = false;
+                            mClientStarvationCounter = 0;
+
+                            if (mClients[i].State == ConnectionState.Closed)
                             {
-                                ConnectionState StateConn = mClients[i].Connect();
-                                if (StateConn == ConnectionState.Connecting)
+                                try
                                 {
-                                    Log.WriteLine(LogLevel.Debug,"Opening connection for database client #" + mClients[i].mHandle);
+                                    var StateConn = mClients[i].Connect();
+                                    if (StateConn == ConnectionState.Connecting)
+                                    {
+                                        Log.WriteLine(LogLevel.Debug,
+                                            "Opening connection for database client #" + mClients[i].mHandle);
+                                    }
+                                    else if (StateConn == ConnectionState.Open)
+                                    {
+                                        mClients[i].Destroy();
+                                        mClients[i] = new DatabaseClient(i, this);
+                                        mClients[i].Connect();
+                                    }
+                                    else if (StateConn == ConnectionState.Closed)
+                                    {
+                                        //TODO Caching
+                                        Console.WriteLine("Caching client Message");
+                                        return mClients[i];
+                                    }
+                                    else if (StateConn == ConnectionState.Broken)
+                                    {
+                                        mClients[i].Destroy();
+                                        mClients[i] = new DatabaseClient(i, this);
+                                        mClients[i].Connect();
+                                    }
                                 }
-                                else if (StateConn == ConnectionState.Open)
+                                catch (Exception ex)
                                 {
-                                    mClients[i].Destroy();
-                                    mClients[i] = new DatabaseClient(i, this);
-                                    mClients[i].Connect();
+                                    Log.WriteLine(LogLevel.Exception, "{0}", ex.Message);
                                 }
-                                else if (StateConn == ConnectionState.Closed)
+                            }
+
+                            if (mClients[i].State == ConnectionState.Open)
+                            {
+                                mClients[i].UpdateLastActivity();
+                                if (!mClients[i].IsBusy)
                                 {
-                                   //TODO Caching
-                                    Console.WriteLine("Caching client Message");
+                                    mClients[i].IsBusy = true;
                                     return mClients[i];
                                 }
-                                else if(StateConn == ConnectionState.Broken)
-                                {
-                                    mClients[i].Destroy();
-                                    mClients[i] = new DatabaseClient(i, this);
-                                    mClients[i].Connect();
-                                }
-                            }
-                            catch(Exception ex)
-                            {
-
-                                Log.WriteLine(LogLevel.Exception,"{0}", ex.Message);
-                            }
-                        }
-
-                        if (mClients[i].State == ConnectionState.Open)
-                        {
-                            mClients[i].UpdateLastActivity();
-                            if (!mClients[i].IsBussy)
-                            {
-                                mClients[i].IsBussy = true;
-                                return mClients[i];
                             }
                         }
                     }
-                }
 
                 mClientStarvationCounter++;
 
-                if (mClientStarvationCounter >= ((mClients.Length + 1) / 2))
+                if (mClientStarvationCounter >= (mClients.Length + 1) / 2)
                 {
                     mClientStarvationCounter = 0;
-                    SetClientAmount((uint)(mClients.Length + 1 * 1.3f));
-                   
+                    SetClientAmount((uint) (mClients.Length + 1 * 1.3f));
+
                     return GetClient();
                 }
 
-                DatabaseClient pAnonymous = new DatabaseClient(0, this);
-                ConnectionState StateConns = pAnonymous.Connect();
+                var pAnonymous = new DatabaseClient(0, this);
+                var StateConns = pAnonymous.Connect();
                 if (StateConns == ConnectionState.Connecting)
                 {
-                    pAnonymous.IsBussy = true;
+                    pAnonymous.IsBusy = true;
                     Log.WriteLine(LogLevel.Debug, "Opening connection for database clientanon");
                 }
                 else if (StateConns == ConnectionState.Open)
@@ -269,21 +281,24 @@ namespace Estrella.Database
                 }
 //                pAnonymous.Connect();
 
-                 Log.WriteLine(LogLevel.Debug,"Handed out anonymous client.");
+                Log.WriteLine(LogLevel.Debug, "Handed out anonymous client.");
                 return pAnonymous;
             }
         }
+
         internal void ReleaseClient(uint Handle)
         {
-            if (mClients.Length >= (Handle - 1)) // Ensure client exists
+            if (mClients.Length >= Handle - 1) // Ensure client exists
             {
                 mClientAvailable[Handle - 1] = true;
-                Log.WriteLine(LogLevel.Debug,"Released client #" + Handle);
+                Log.WriteLine(LogLevel.Debug, "Released client #" + Handle);
             }
         }
 
         /// <summary>
-        /// Sets the amount of clients that will be available to requesting methods. If the new amount is lower than the current amount, the 'excluded' connections are destroyed. If the new connection amount is higher than the current amount, new clients are prepared. Already existing clients and their state will be maintained.
+        ///     Sets the amount of clients that will be available to requesting methods. If the new amount is lower than the
+        ///     current amount, the 'excluded' connections are destroyed. If the new connection amount is higher than the current
+        ///     amount, new clients are prepared. Already existing clients and their state will be maintained.
         /// </summary>
         /// <param name="Amount">The new amount of clients.</param>
         internal void SetClientAmount(uint Amount)
@@ -295,15 +310,15 @@ namespace Estrella.Database
 
                 if (Amount < mClients.Length) // Client amount shrinks, dispose clients that will die
                 {
-                    for (uint i = Amount; i < mClients.Length; i++)
+                    for (var i = Amount; i < mClients.Length; i++)
                     {
                         mClients[i].Destroy();
                         mClients[i] = null;
                     }
                 }
 
-                DatabaseClient[] pClients = new DatabaseClient[Amount];
-                bool[] pClientAvailable = new bool[Amount];
+                var pClients = new DatabaseClient[Amount];
+                var pClientAvailable = new bool[Amount];
                 for (uint i = 0; i < Amount; i++)
                 {
                     if (i < mClients.Length) // Keep the existing client and it's available state
@@ -313,7 +328,7 @@ namespace Estrella.Database
                     }
                     else // We are in need of more clients, so make another one
                     {
-                        pClients[i] = new DatabaseClient((i + 1), this);
+                        pClients[i] = new DatabaseClient(i + 1, this);
                         pClientAvailable[i] = true; // Elegant?
                     }
                 }
@@ -350,17 +365,17 @@ namespace Estrella.Database
 
         public override string ToString()
         {
-            return mServer.ToString() + ":" + mDatabase.Name;
+            return mServer + ":" + mDatabase.Name;
         }
 
         internal int ConnectionCount
         {
             get
             {
-                int Count = 0;
-                for (int i = 0; i < mClients.Length; i++)
+                var Count = 0;
+                for (var i = 0; i < mClients.Length; i++)
                 {
-                    DatabaseClient Client = mClients[i];
+                    var Client = mClients[i];
                     if (Client == null)
                         continue;
                     if (Client.State != ConnectionState.Closed)
@@ -370,7 +385,7 @@ namespace Estrella.Database
                 return Count;
             }
         }
+
         #endregion
     }
 }
-

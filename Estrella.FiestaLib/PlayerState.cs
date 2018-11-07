@@ -1,5 +1,4 @@
-﻿
-namespace Estrella.FiestaLib
+﻿namespace Estrella.FiestaLib
 {
     public enum PlayerState : byte
     {

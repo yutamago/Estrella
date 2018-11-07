@@ -1,8 +1,6 @@
-﻿
-using Estrella.FiestaLib;
+﻿using Estrella.FiestaLib;
 using Estrella.FiestaLib.Networking;
 using Estrella.World.Networking;
-using System;
 
 namespace Estrella.World.Handlers
 {
@@ -17,14 +15,18 @@ namespace Estrella.World.Handlers
                 client.Character.BlocketUser.Add(AddBlockname);
                 using (var pp = new Packet(SH42Type.AddToBlockList))
                 {
-                    pp.WriteUShort(7168);//unk
+                    pp.WriteUShort(7168); //unk
                     pp.WriteString(AddBlockname, 16);
-                    pp.WriteUShort(0);//unk
+                    pp.WriteUShort(0); //unk
                     client.SendPacket(pp);
                 }
-                Program.DatabaseManager.GetClient().ExecuteQuery("INSERT INTO BlockUser (CharID,BlockCharname) VALUES ('" + client.Character.ID + "','" + AddBlockname + "')");
+
+                Program.DatabaseManager.GetClient()
+                    .ExecuteQuery("INSERT INTO BlockUser (CharID,BlockCharname) VALUES ('" + client.Character.ID +
+                                  "','" + AddBlockname + "')");
             }
         }
+
         [PacketHandler(CH42Type.RemoveFromBlockList)]
         public static void RemoveFromBlockList(WorldClient client, Packet packet)
         {
@@ -35,25 +37,30 @@ namespace Estrella.World.Handlers
                 {
                     using (var pack = new Packet(SH42Type.RemoveFromBlockList))
                     {
-                        pack.WriteUShort(7184);//unk
+                        pack.WriteUShort(7184); //unk
                         pack.WriteString(removename, 16);
                         client.SendPacket(pack);
                     }
-                    Program.DatabaseManager.GetClient().ExecuteQuery("DELETE FROM BlockUser WHERE CharID = '" + client.Character.ID + "' AND BlockCharname= '" + removename + "'");
+
+                    Program.DatabaseManager.GetClient().ExecuteQuery(
+                        "DELETE FROM BlockUser WHERE CharID = '" + client.Character.ID + "' AND BlockCharname= '" +
+                        removename + "'");
                     client.Character.BlocketUser.Remove(removename);
                 }
             }
         }
+
         [PacketHandler(CH42Type.ClearBlockList)]
         public static void clearBlock(WorldClient client, Packet packet)
         {
-
             using (var pp = new Packet(SH42Type.ClearBlockList))
             {
-                pp.WriteUShort(7200);//unk
+                pp.WriteUShort(7200); //unk
                 client.SendPacket(packet);
             }
-            Program.DatabaseManager.GetClient().ExecuteQuery("DELETE FROM BlockUser WHERE CharID = '" + client.Character.ID + "'");
+
+            Program.DatabaseManager.GetClient()
+                .ExecuteQuery("DELETE FROM BlockUser WHERE CharID = '" + client.Character.ID + "'");
             client.Character.BlocketUser.Clear();
         }
     }

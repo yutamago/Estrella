@@ -1,24 +1,23 @@
-﻿using System;
+﻿using System.Data;
 using Estrella.Database.DataStore;
-using System.Collections.Generic;
-using System.Data;
 
 namespace Estrella.FiestaLib.Data
 {
     public class MasterRewardItem : MasterRewardState
     {
-        public byte Level { get; private set; }
-        public Job Job { get; private set; }
-
         public MasterRewardItem()
         {
         }
+
         public MasterRewardItem(DataRow row)
-         {
-             this.ItemID = GetDataTypes.GetUshort(row["ItemID"]);
-             this.Level = GetDataTypes.GetByte(row["Level"]);
-             this.Job = (FiestaLib.Job)GetDataTypes.GetByte(row["Job"]);
-             this.Count = GetDataTypes.GetByte(row["Count"]);
-         }
+        {
+            ItemID = GetDataTypes.GetUshort(row["ItemID"]);
+            Level = GetDataTypes.GetByte(row["Level"]);
+            Job = (Job) GetDataTypes.GetByte(row["Job"]);
+            Count = GetDataTypes.GetByte(row["Count"]);
+        }
+
+        public byte Level { get; private set; }
+        public Job Job { get; private set; }
     }
 }

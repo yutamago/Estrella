@@ -1,15 +1,7 @@
-﻿
-namespace Estrella.Zone.Game
+﻿namespace Estrella.Zone.Game
 {
     public class SkillVictim
     {
-        public ushort MapObjectID { get; private set; }
-        public uint Damage { get; private set; }
-        public uint HPLeft { get; private set; }
-        public byte Stance1 { get; private set; }
-        public byte Stance2 { get; private set; }
-        public ushort HPCounter { get; private set; }
-
         public SkillVictim(ushort id, uint dmg, uint hpleft, byte s1, byte s2, ushort count)
         {
             MapObjectID = id;
@@ -19,5 +11,12 @@ namespace Estrella.Zone.Game
             Stance2 = s2;
             HPCounter = count;
         }
+
+        public ushort MapObjectID { get; private set; }
+        public uint Damage { get; private set; }
+        public uint HPLeft { get; private set; }
+        public byte Stance1 { get; private set; }
+        public byte Stance2 { get; private set; }
+        public ushort HPCounter { get; private set; }
     }
 }

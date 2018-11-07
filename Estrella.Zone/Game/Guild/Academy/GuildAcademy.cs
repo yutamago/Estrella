@@ -1,28 +1,15 @@
 ﻿/*File for this file Basic Copyright 2012 no0dl */
 
 using System;
-using System.Data;
-using MySql.Data.MySqlClient;
 using System.Collections.Generic;
 using Estrella.Zone.Managers;
+using MySql.Data.MySqlClient;
 
-namespace Estrella.Zone.Game.Guilds.Academy
+namespace Estrella.Zone.Game.Guild.Academy
 {
     public sealed class GuildAcademy
     {
-        public Guild Guild { get; private set; }
-        public string Message { get; set; }
-
-
-        public DateTime GuildBuffUpdateTime { get; set; }
-        public TimeSpan GuildBuffKeepTime { get; set; }
-
-
-
-        public List<GuildAcademyMember> Members { get; private set; }
         public const ushort MaxMembers = 50; // Yes, its up to the server. Max is: 65535
-
-
 
 
         public GuildAcademy(Guild Guild)
@@ -31,6 +18,17 @@ namespace Estrella.Zone.Game.Guilds.Academy
 
             Members = new List<GuildAcademyMember>();
         }
+
+        public Guild Guild { get; private set; }
+        public string Message { get; set; }
+
+
+        public DateTime GuildBuffUpdateTime { get; set; }
+        public TimeSpan GuildBuffKeepTime { get; set; }
+
+
+        public List<GuildAcademyMember> Members { get; private set; }
+
         public void Dispose()
         {
             Guild = null;
@@ -41,10 +39,11 @@ namespace Estrella.Zone.Game.Guilds.Academy
             Members.Clear();
             Members = null;
         }
+
         private void Load()
         {
             //load academy info
-            MySqlConnection con = Program.CharDBManager.GetClient().GetConnection();
+            var con = Program.CharDBManager.GetClient().GetConnection();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = "SELECT * FROM GuildAcademy WHERE GuildID = @pGuildID";
@@ -55,12 +54,12 @@ namespace Estrella.Zone.Game.Guilds.Academy
                 using (var reader = cmd.ExecuteReader())
                 {
                     if (!reader.Read())
-                        throw new InvalidOperationException("Error getting guild academy info from database for guild: " + Guild.Name);
+                        throw new InvalidOperationException(
+                            "Error getting guild academy info from database for guild: " + Guild.Name);
 
                     Message = reader.GetString(1);
                 }
             }
-
 
 
             //members
@@ -93,9 +92,6 @@ namespace Estrella.Zone.Game.Guilds.Academy
         }
 
 
-
-
-
         public bool GetMember(int CharacterID, out GuildAcademyMember Member)
         {
             lock (Guild.ThreadLocker)
@@ -103,7 +99,7 @@ namespace Estrella.Zone.Game.Guilds.Academy
                 Member = Members.Find(m => m.CharacterID.Equals(CharacterID));
             }
 
-            return (Member != null);
+            return Member != null;
         }
     }
 }

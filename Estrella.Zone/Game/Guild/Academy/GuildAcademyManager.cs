@@ -2,17 +2,16 @@
 
 using System;
 using Estrella.InterLib.Networking;
-using Estrella.Zone.Game;
-using Estrella.InterLib;
-using Estrella.Zone.Managers;
 using Estrella.Zone.InterServer;
+using Estrella.Zone.Managers;
 
-namespace Estrella.Zone.Game.Guilds.Academy
+namespace Estrella.Zone.Game.Guild.Academy
 {
     public static class GuildAcademyManager
     {
         #region Internal Client Handlers
-        [InterPacketHandler(InterHeader.ZONE_AcademyMemberJoined)]
+
+        [InterPacketHandler(InterHeader.ZoneAcademyMemberJoined)]
         public static void On_WorldClient_AcademyMemberJoined(WorldConnector pConnector, InterPacket pPacket)
         {
             int guildID, characterID;
@@ -25,13 +24,12 @@ namespace Estrella.Zone.Game.Guilds.Academy
             }
 
 
-
             Guild guild;
             if (GuildManager.GetGuildByID(guildID, out guild))
             {
                 var member = new GuildAcademyMember(guild.Academy, characterID, GuildAcademyRank.Member, registerDate)
                 {
-                    IsOnline = true,
+                    IsOnline = true
                 };
                 guild.Academy.Members.Add(member);
 
@@ -40,7 +38,7 @@ namespace Estrella.Zone.Game.Guilds.Academy
                 if (CharacterManager.GetLoggedInCharacter(characterID, out character))
                 {
                     member.Character = character;
-                    
+
                     character.Guild = guild;
                     character.GuildAcademy = guild.Academy;
                     character.GuildAcademyMember = member;
@@ -51,7 +49,7 @@ namespace Estrella.Zone.Game.Guilds.Academy
             }
         }
 
-        [InterPacketHandler(InterHeader.ZONE_AcademyMemberLeft)]
+        [InterPacketHandler(InterHeader.ZoneAcademyMemberLeft)]
         public static void On_WorldClient_AcademyMemberLeft(WorldConnector pConnector, InterPacket pPacket)
         {
             int guildID, characterID;
@@ -86,7 +84,7 @@ namespace Estrella.Zone.Game.Guilds.Academy
             }
         }
 
-        [InterPacketHandler(InterHeader.ZONE_AcademyMemberOnline)]
+        [InterPacketHandler(InterHeader.ZoneAcademyMemberOnline)]
         public static void On_WorldClient_AcademyMemberOnline(WorldConnector pConnector, InterPacket pPacket)
         {
             int guildID, characterID;
@@ -119,7 +117,7 @@ namespace Estrella.Zone.Game.Guilds.Academy
             }
         }
 
-        [InterPacketHandler(InterHeader.ZONE_AcademyMemberOffline)]
+        [InterPacketHandler(InterHeader.ZoneAcademyMemberOffline)]
         public static void On_WorldClient_AcademyMemberOffline(WorldConnector pConnector, InterPacket pPacket)
         {
             int guildID, characterID;
@@ -152,7 +150,7 @@ namespace Estrella.Zone.Game.Guilds.Academy
             }
         }
 
-        [InterPacketHandler(InterHeader.ZONE_AcademyBuffUpdate)]
+        [InterPacketHandler(InterHeader.ZoneAcademyBuffUpdate)]
         public static void On_WorldClient_AcademyBuffUpdate(WorldConnector pConnector, InterPacket pPacket)
         {
             int guildID;

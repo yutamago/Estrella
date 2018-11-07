@@ -1,8 +1,8 @@
 namespace Estrella.Util
 {
-	public enum TransferType : byte
-	{
-		World,
-		Game
-	}
+    public enum TransferType : byte
+    {
+        World,
+        Game
+    }
 }

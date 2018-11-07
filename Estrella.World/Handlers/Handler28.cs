@@ -1,5 +1,4 @@
-﻿
-using Estrella.FiestaLib;
+﻿using Estrella.FiestaLib;
 using Estrella.FiestaLib.Networking;
 using Estrella.Util;
 using Estrella.World.Networking;
@@ -115,10 +114,10 @@ namespace Estrella.World.Handlers
         {
             using (var packet = new Packet(SH28Type.LoadShortCuts))
             {
-                byte[] data = client.Character.Character.Shortcuts;
-                bool hasData = data != null;
+                var data = client.Character.Character.Shortcuts;
+                var hasData = data != null;
                 packet.WriteBool(hasData);
-                packet.WriteBytes(hasData ? data : new byte[] { 0 });
+                packet.WriteBytes(hasData ? data : new byte[] {0});
                 client.SendPacket(packet);
             }
         }
@@ -127,10 +126,10 @@ namespace Estrella.World.Handlers
         {
             using (var packet = new Packet(SH28Type.LoadGameSettings))
             {
-                byte[] data = client.Character.Character.GameSettings;
-                bool hasData = data != null;
+                var data = client.Character.Character.GameSettings;
+                var hasData = data != null;
                 packet.WriteBool(hasData);
-                packet.WriteBytes(hasData ? data : new byte[] { 0 });
+                packet.WriteBytes(hasData ? data : new byte[] {0});
                 client.SendPacket(packet);
             }
         }
@@ -139,10 +138,10 @@ namespace Estrella.World.Handlers
         {
             using (var packet = new Packet(SH28Type.LoadClientSettings))
             {
-                byte[] data = client.Character.Character.ClientSettings;
-                bool hasData = data != null;
+                var data = client.Character.Character.ClientSettings;
+                var hasData = data != null;
                 packet.WriteBool(hasData);
-                packet.WriteBytes(hasData ? data : new byte[] { 0 });
+                packet.WriteBytes(hasData ? data : new byte[] {0});
                 client.SendPacket(packet);
             }
         }
@@ -151,10 +150,10 @@ namespace Estrella.World.Handlers
         {
             using (var packet = new Packet(SH28Type.LoadQuickBar))
             {
-                byte[] data = client.Character.Character.QuickBar;
-                bool hasData = data != null;
+                var data = client.Character.Character.QuickBar;
+                var hasData = data != null;
                 packet.WriteBool(hasData);
-                packet.WriteBytes(hasData ? data : new byte[] { 0 });
+                packet.WriteBytes(hasData ? data : new byte[] {0});
                 client.SendPacket(packet);
             }
         }
@@ -163,10 +162,10 @@ namespace Estrella.World.Handlers
         {
             using (var packet = new Packet(SH28Type.LoadQuickBarState))
             {
-                byte[] data = client.Character.Character.QuickBarState;
-                bool hasData = data != null;
+                var data = client.Character.Character.QuickBarState;
+                var hasData = data != null;
                 packet.WriteBool(hasData);
-                packet.WriteBytes(hasData ? data : new byte[] { 0 });
+                packet.WriteBytes(hasData ? data : new byte[] {0});
                 client.SendPacket(packet);
             }
         }

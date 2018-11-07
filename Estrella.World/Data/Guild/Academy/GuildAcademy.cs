@@ -1,37 +1,22 @@
 ﻿/*File for this file Basic Copyright 2012 no0dl */
+
 using System;
+using System.Collections.Generic;
 using System.Data;
-using Estrella.World.Networking;
+using Estrella.Database.DataStore;
 using Estrella.FiestaLib;
 using Estrella.FiestaLib.Networking;
 using Estrella.InterLib.Networking;
-using Estrella.InterLib;
-using MySql.Data.MySqlClient;
-using System.Collections.Generic;
-using Estrella.World.Data;
+using Estrella.World.Handlers;
 using Estrella.World.Managers;
-using Estrella.Database.DataStore;
-using Estrella.Database;
+using Estrella.World.Networking;
+using MySql.Data.MySqlClient;
 
-namespace Estrella.World.Data.Guilds.Academy
+namespace Estrella.World.Data.Guild.Academy
 {
     public sealed class GuildAcademy
     {
-        public Guild Guild { get; private set; }
-
-        public string Message { get; set; }
-        public ushort Points { get; set; }
-
-        public List<GuildAcademyMember> Members { get; private set; }
         public const ushort MaxMembers = 60; // Yes, its up to the server. Max is: 65535
-
-
-        public TimeSpan GuildBuffKeepTime { get; set; }
-
-
-
-
-
 
 
         public GuildAcademy(Guild Guild)
@@ -42,6 +27,17 @@ namespace Estrella.World.Data.Guilds.Academy
 
             Load();
         }
+
+        public Guild Guild { get; private set; }
+
+        public string Message { get; set; }
+        public ushort Points { get; set; }
+
+        public List<GuildAcademyMember> Members { get; private set; }
+
+
+        public TimeSpan GuildBuffKeepTime { get; set; }
+
         public void Dispose()
         {
             Guild = null;
@@ -55,46 +51,45 @@ namespace Estrella.World.Data.Guilds.Academy
 
         private void Load()
         {
-                DataTable AcademyData = null;
-                DataTable MemberData = null;
-           using(DatabaseClient DBClient = Program.DatabaseManager.GetClient())
-           {
-               AcademyData = DBClient.ReadDataTable("SELECT * FROM GuildAcademy WHERE GuildID = "+Guild.ID+"");
-              MemberData = DBClient.ReadDataTable("SELECT * FROM GuildAcademyMembers WHERE GuildID = "+Guild.ID+"");
+            DataTable AcademyData = null;
+            DataTable MemberData = null;
+            using (var DBClient = Program.DatabaseManager.GetClient())
+            {
+                AcademyData = DBClient.ReadDataTable("SELECT * FROM GuildAcademy WHERE GuildID = " + Guild.ID + "");
+                MemberData =
+                    DBClient.ReadDataTable("SELECT * FROM GuildAcademyMembers WHERE GuildID = " + Guild.ID + "");
+            }
 
-           }
+            foreach (DataRow row in AcademyData.Rows)
+            {
+                //load academy info
 
-           foreach (DataRow row in AcademyData.Rows)
-           {
-            //load academy info
-
-               Message = row["Message"].ToString();
-               Points = GetDataTypes.GetUshort(row["Points"]);
+                Message = row["Message"].ToString();
+                Points = GetDataTypes.GetUshort(row["Points"]);
             }
 
             //members
-            foreach(DataRow MemberRow in MemberData.Rows)
+            foreach (DataRow MemberRow in MemberData.Rows)
             {
-
                 WorldCharacter character;
                 if (!CharacterManager.Instance.GetCharacterByID(Convert.ToInt32(MemberRow["CharID"]), out character))
                     continue; // maybe deleted
 
-                var member = new GuildAcademyMember(this, character,MemberRow);
+                var member = new GuildAcademyMember(this, character, MemberRow);
 
                 Members.Add(member);
             }
         }
+
         public void Save(MySqlConnection con = null)
         {
             lock (Guild.ThreadLocker)
             {
-                var conCreated = (con == null);
+                var conCreated = con == null;
                 if (conCreated)
                 {
                     con = Program.DatabaseManager.GetClient().GetConnection();
                 }
-
 
 
                 using (var cmd = con.CreateCommand())
@@ -105,7 +100,7 @@ namespace Estrella.World.Data.Guilds.Academy
 
                     cmd.Parameters.Add(new MySqlParameter("@pGuildID", Guild.ID));
                     cmd.Parameters.Add(new MySqlParameter("@pMessage", Message));
-                    cmd.Parameters.Add(new MySqlParameter("@pPoints", (short)Points));
+                    cmd.Parameters.Add(new MySqlParameter("@pPoints", (short) Points));
 
 
                     cmd.ExecuteNonQuery();
@@ -118,18 +113,12 @@ namespace Estrella.World.Data.Guilds.Academy
                 }
 
 
-
-
                 if (conCreated)
                 {
                     con.Dispose();
                 }
             }
         }
-
-
-
-
 
 
         public void Broadcast(Packet Packet, GuildAcademyMember Exclude = null)
@@ -151,12 +140,12 @@ namespace Estrella.World.Data.Guilds.Academy
                         }
                         catch (Exception)
                         {
-                            continue;
                         }
                     }
                 }
             }
         }
+
         public void BroadcastInfo()
         {
             using (var packet = new Packet(SH4Type.CharacterGuildacademyinfo))
@@ -167,52 +156,47 @@ namespace Estrella.World.Data.Guilds.Academy
                 Broadcast(packet);
             }
         }
+
         public void WriteInfo(Packet Packet)
         {
             Packet.WriteInt(Guild.ID);
-            Packet.WriteByte(1);//unk
+            Packet.WriteByte(1); //unk
             Packet.WriteString(Guild.Master.Character.Character.Name, 16);
-            Packet.WriteUShort((ushort)Members.Count);//membercount
-            Packet.WriteUShort(MaxMembers);//maxmembercount
-            Packet.WriteInt(Guild.ID);//academyid
-            Packet.WriteInt((int)Guild.CreateTime.DayOfWeek);//weeks //Todo Calculate Weeks
-            Packet.WriteInt((int)GuildBuffKeepTime.TotalSeconds);  //time in sek (buff?)
-            Packet.Fill(128, 1);//GuildAcademyBUff
+            Packet.WriteUShort((ushort) Members.Count); //membercount
+            Packet.WriteUShort(MaxMembers); //maxmembercount
+            Packet.WriteInt(Guild.ID); //academyid
+            Packet.WriteInt((int) Guild.CreateTime.DayOfWeek); //weeks //Todo Calculate Weeks
+            Packet.WriteInt((int) GuildBuffKeepTime.TotalSeconds); //time in sek (buff?)
+            Packet.Fill(128, 1); //GuildAcademyBUff
             Packet.WriteString(Message, 512);
         }
+
         public void SendMemberList(WorldClient Client)
         {
-            for (int i = 0; i < Members.Count; i += 20)
+            for (var i = 0; i < Members.Count; i += 20)
             {
-                using (var packet = GetMemberListPacket(i, (i + Math.Min(20, Members.Count - i))))
+                using (var packet = GetMemberListPacket(i, i + Math.Min(20, Members.Count - i)))
                 {
                     Client.SendPacket(packet);
                 }
             }
         }
+
         private Packet GetMemberListPacket(int Start, int End)
         {
             var packet = new Packet(SH38Type.SendAcademyMemberList);
 
-            packet.WriteUShort((ushort)Members.Count);
-            packet.WriteUShort((ushort)(Members.Count - End));
-            packet.WriteUShort((ushort)End);
+            packet.WriteUShort((ushort) Members.Count);
+            packet.WriteUShort((ushort) (Members.Count - End));
+            packet.WriteUShort((ushort) End);
 
-            for (int i = Start; i < End; i++)
+            for (var i = Start; i < End; i++)
             {
                 Members[i].WriteInfo(packet);
             }
 
             return packet;
         }
-
-
-
-
-
-
-
-
 
 
         public void AddMember(WorldCharacter Character, GuildAcademyRank Rank)
@@ -225,7 +209,7 @@ namespace Estrella.World.Data.Guilds.Academy
             if (Character.IsInGuild
                 || Character.IsInGuildAcademy)
             {
-               Handlers.Handler38.SendAcademyResponse(Character.Client, Guild.Name, GuildAcademyResponse.AlreadyInAcademy);
+                Handler38.SendAcademyResponse(Character.Client, Guild.Name, GuildAcademyResponse.AlreadyInAcademy);
                 return;
             }
 
@@ -233,7 +217,7 @@ namespace Estrella.World.Data.Guilds.Academy
             {
                 if (Members.Count >= MaxMembers)
                 {
-                    Handlers.Handler38.SendAcademyResponse(Character.Client, Guild.Name, GuildAcademyResponse.AcademyFull);
+                    Handler38.SendAcademyResponse(Character.Client, Guild.Name, GuildAcademyResponse.AcademyFull);
                     return;
                 }
 
@@ -251,14 +235,13 @@ namespace Estrella.World.Data.Guilds.Academy
                         cmd.Parameters.Add(new MySqlParameter("@pGuildID", Guild.ID));
                         cmd.Parameters.Add(new MySqlParameter("@pCharacterID", Character.ID));
                         cmd.Parameters.Add(new MySqlParameter("@pRegisterDate", registerDate));
-                        cmd.Parameters.Add(new MySqlParameter("@pRank", (byte)Rank));
-
+                        cmd.Parameters.Add(new MySqlParameter("@pRank", (byte) Rank));
 
 
                         switch (Convert.ToInt32(cmd.ExecuteScalar()))
                         {
                             case 0:
-                                
+
                                 var member = new GuildAcademyMember(this, Character, registerDate, Rank);
 
                                 //Add to list
@@ -271,7 +254,8 @@ namespace Estrella.World.Data.Guilds.Academy
 
 
                                 //send packets to client
-                                Handlers.Handler38.SendAcademyResponse(Character.Client, Guild.Name, GuildAcademyResponse.JoinSuccess);
+                                Handler38.SendAcademyResponse(Character.Client, Guild.Name,
+                                    GuildAcademyResponse.JoinSuccess);
                                 using (var packet = new Packet(SH4Type.CharacterGuildacademyinfo))
                                 {
                                     WriteInfo(packet);
@@ -290,32 +274,34 @@ namespace Estrella.World.Data.Guilds.Academy
 
 
                                 //send packet to zones
-                                using (var packet = new InterPacket(InterHeader.ZONE_AcademyMemberJoined))
+                                using (var packet = new InterPacket(InterHeader.ZoneAcademyMemberJoined))
                                 {
                                     packet.WriteInt(Guild.ID);
                                     packet.WriteInt(Character.ID);
                                     packet.WriteDateTime(registerDate);
 
 
-                                    
-                                    ZoneManager.Instance.Broadcast(packet);
+                                    ZoneManager.Broadcast(packet);
                                 }
 
 
                                 break;
 
                             case -1:
-                                Handlers.Handler38.SendAcademyResponse(Character.Client, Guild.Name, GuildAcademyResponse.AlreadyInAcademy);
+                                Handler38.SendAcademyResponse(Character.Client, Guild.Name,
+                                    GuildAcademyResponse.AlreadyInAcademy);
                                 return;
                             case -2:
                             default:
-                                Handlers.Handler38.SendAcademyResponse(Character.Client, Guild.Name, GuildAcademyResponse.DatabaseError);
+                                Handler38.SendAcademyResponse(Character.Client, Guild.Name,
+                                    GuildAcademyResponse.DatabaseError);
                                 return;
                         }
                     }
                 }
             }
         }
+
         public void RemoveMember(GuildAcademyMember Member)
         {
             lock (Guild.ThreadLocker)
@@ -331,12 +317,10 @@ namespace Estrella.World.Data.Guilds.Academy
                         cmd.Parameters.Add(new MySqlParameter("@pGuildID", Guild.ID));
                         cmd.Parameters.Add(new MySqlParameter("@pCharacterID", Member.Character.ID));
 
-                       
+
                         cmd.ExecuteNonQuery();
                     }
                 }
-
-
 
 
                 //remove from list
@@ -348,15 +332,15 @@ namespace Estrella.World.Data.Guilds.Academy
                 Member.Character.GuildAcademyMember = null;
 
 
-
                 //send packets
                 using (var packet = new Packet(SH38Type.LeaveAcademyResponse))
                 {
-                    packet.WriteUShort((ushort)GuildAcademyResponse.LeaveSuccess);
+                    packet.WriteUShort((ushort) GuildAcademyResponse.LeaveSuccess);
 
-                    
+
                     Member.Character.Client.SendPacket(packet);
                 }
+
                 using (var packet = new Packet(SH38Type.AcademyMemberLeft))
                 {
                     packet.WriteString(Member.Character.Character.Name, 16);
@@ -367,14 +351,13 @@ namespace Estrella.World.Data.Guilds.Academy
                 }
 
                 //send packet to zones
-                using (var packet = new InterPacket(InterHeader.ZONE_AcademyMemberLeft))
+                using (var packet = new InterPacket(InterHeader.ZoneAcademyMemberLeft))
                 {
                     packet.WriteInt(Guild.ID);
                     packet.WriteInt(Member.Character.ID);
 
 
-
-                    ZoneManager.Instance.Broadcast(packet);
+                    ZoneManager.Broadcast(packet);
                 }
 
 

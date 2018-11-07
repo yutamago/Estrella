@@ -15,11 +15,13 @@ namespace Estrella.Zone.Handlers
                 character.Client.SendPacket(packet);
             }
         }
+
         [PacketHandler(CH2Type.Pong)]
         public static void HandlePong(ZoneClient character, Packet packet)
         {
             character.HasPong = true;
         }
+
         public static void SendPing(ZoneClient character)
         {
             using (var packet = new Packet(SH2Type.Ping))

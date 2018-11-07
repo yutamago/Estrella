@@ -2,5 +2,5 @@
 
 namespace Estrella.InterLib.NetworkObjects
 {
-	public delegate void OnIncomingConnectionDelegate(Socket session);
+    public delegate void OnIncomingConnectionDelegate(Socket session);
 }

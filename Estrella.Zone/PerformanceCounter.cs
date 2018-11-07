@@ -1,29 +1,33 @@
 ﻿using System;
-using System.Threading;
 using System.Diagnostics;
-using Estrella.Util;
+using System.Threading;
 
 namespace Estrella.Zone
 {
     public class PerformCounter
     {
         protected PerformanceCounter cpuCounter;
-        protected PerformanceCounter ramCounter;
-        protected PerformanceCounter performanceCounterSent;
         protected PerformanceCounter performanceCounterReceived;
+        protected PerformanceCounter performanceCounterSent;
+        protected PerformanceCounter ramCounter;
 
         public PerformCounter()
         {
             SetupCounters();
-            Thread PerfomanceCounter = new Thread(new ThreadStart(SetConsoleTitel));
+            var PerfomanceCounter = new Thread(SetConsoleTitel);
             PerfomanceCounter.Start();
         }
-        public string getAvailableRAM(){
-         return  ramCounter.NextValue().ToString("N2") + " Mb";
+
+        public string getAvailableRAM()
+        {
+            return ramCounter.NextValue().ToString("N2") + " Mb";
         }
-        public string getCurrentCpuUsage() {
+
+        public string getCurrentCpuUsage()
+        {
             return cpuCounter.NextValue().ToString("N2");
         }
+
         public void SetupCounters()
         {
             cpuCounter = new PerformanceCounter();
@@ -32,20 +36,23 @@ namespace Estrella.Zone
             cpuCounter.CounterName = "% Processor Time";
             cpuCounter.InstanceName = "_Total";
             ramCounter = new PerformanceCounter("Memory", "Available MBytes");
-            PerformanceCounterCategory performanceCounterCategory = new PerformanceCounterCategory("Network Interface");
-            string instance = performanceCounterCategory.GetInstanceNames()[0]; // 1st NIC !
+            var performanceCounterCategory = new PerformanceCounterCategory("Network Interface");
+            var instance = performanceCounterCategory.GetInstanceNames()[0]; // 1st NIC !
             performanceCounterSent = new PerformanceCounter("Network Interface", "Bytes Sent/sec", instance);
             performanceCounterReceived = new PerformanceCounter("Network Interface", "Bytes Received/sec", instance);
-
         }
 
         public void SetConsoleTitel()
         {
             while (true)
             {
-               string memory = getAvailableRAM();
-                string cpu = getCurrentCpuUsage();
-                Console.Title = "Zone["+Program.ServiceInfo.ID+"] TickPerSecont : "+Worker.Instance.TicksPerSecond+" Free Memory : " + memory + " CPU: " + cpu + " Network : bytes send: " + (performanceCounterSent.NextValue() / 1024).ToString("N2") + " bytes received: " + (performanceCounterReceived.NextValue() / 1024).ToString("N2") + " ";
+                var memory = getAvailableRAM();
+                var cpu = getCurrentCpuUsage();
+                Console.Title = "Zone[" + Program.ServiceInfo.ID + "] TickPerSecont : " +
+                                Worker.Instance.TicksPerSecond + " Free Memory : " + memory + " CPU: " + cpu +
+                                " Network : bytes send: " + (performanceCounterSent.NextValue() / 1024).ToString("N2") +
+                                " bytes received: " + (performanceCounterReceived.NextValue() / 1024).ToString("N2") +
+                                " ";
                 Thread.Sleep(2000);
             }
         }

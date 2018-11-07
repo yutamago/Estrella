@@ -9,20 +9,29 @@ namespace Estrella.Zone.Game
     public abstract class MapObject
     {
         #region .ctor
+
         public MapObject()
         {
             IsAttackable = true;
             SelectedBy = new List<ZoneCharacter>();
         }
+
         ~MapObject()
         {
             SelectedBy.Clear();
         }
+
         #endregion
+
         #region Properties
+
         public bool IsAdded { get; set; }
         public bool IsAttackable { get; set; }
-        public bool IsDead { get { return HP == 0; } }
+
+        public bool IsDead
+        {
+            get { return HP == 0; }
+        }
 
 
         public Map Map { get; set; }
@@ -37,25 +46,35 @@ namespace Estrella.Zone.Game
         public virtual uint MaxSP { get; set; }
 
         public List<ZoneCharacter> SelectedBy { get; private set; }
-        public ushort UpdateCounter { get { return ++statUpdateCounter; } }
+
+        public ushort UpdateCounter
+        {
+            get { return ++statUpdateCounter; }
+        }
 
         // HP/SP update counter thingy
-        private ushort statUpdateCounter = 0;
+        private ushort statUpdateCounter;
         public static readonly TimeSpan HpSpUpdateInterval = TimeSpan.FromSeconds(3);
-        protected DateTime lastHpSpUpdate = DateTime.Now; 
+        protected DateTime lastHpSpUpdate = DateTime.Now;
+
         #endregion
+
         #region Methods
+
         public virtual void Attack(MapObject victim)
         {
             if (victim != null && !victim.IsAttackable) return;
         }
+
         public virtual void AttackSkill(ushort skillid, MapObject victim)
         {
             if (victim != null && !victim.IsAttackable) return;
         }
+
         public virtual void AttackSkillAoE(ushort skillid, uint x, uint y)
         {
         }
+
         public virtual void Revive(bool totally = false)
         {
             if (totally)
@@ -70,6 +89,7 @@ namespace Estrella.Zone.Game
                 HP = 50;
             }
         }
+
         public virtual void Damage(MapObject bully, uint amount, bool isSP = false)
         {
             if (isSP)
@@ -87,7 +107,7 @@ namespace Estrella.Zone.Game
             {
                 if (this is ZoneCharacter)
                 {
-                    ZoneCharacter character = this as ZoneCharacter;
+                    var character = this as ZoneCharacter;
                     if (isSP)
                         Handler9.SendUpdateSP(character);
                     else
@@ -96,21 +116,24 @@ namespace Estrella.Zone.Game
             }
             else
             {
-                if (this is Mob && ((Mob)this).AttackingSequence == null)
+                if (this is Mob && ((Mob) this).AttackingSequence == null)
                 {
-                    this.Attack(bully);
+                    Attack(bully);
                 }
-                else if (this is ZoneCharacter && !((ZoneCharacter)this).IsAttacking)
+                else if (this is ZoneCharacter && !((ZoneCharacter) this).IsAttacking)
                 {
-                    this.Attack(bully);
+                    Attack(bully);
                 }
             }
         }
 
         public abstract void Update(DateTime date);
         public abstract Packet Spawn();
+
         #endregion
+
         #region Event-Stuff
+
         // Event trigger
         protected virtual void OnHpSpChanged()
         {
@@ -122,6 +145,7 @@ namespace Estrella.Zone.Game
 
         // Event-Variables
         public event EventHandler<EventArgs> HpSpChanged;
+
         #endregion
     }
 }

@@ -1,9 +1,7 @@
 ﻿using Estrella.FiestaLib;
 using Estrella.FiestaLib.Networking;
-using Estrella.Util;
-using Estrella.Zone.Game;
-using Estrella.Zone.Networking;
 using Estrella.Zone.Managers;
+using Estrella.Zone.Networking;
 
 namespace Estrella.Zone.Handlers
 {
@@ -17,11 +15,13 @@ namespace Estrella.Zone.Handlers
                 return;
             TradeManager.Instance.AddTradeRequest(pClient, MapObjectID);
         }
+
         [PacketHandler(CH19Type.TradeReqestDecline)]
         public static void TradeReqestDecline(ZoneClient pClient, Packet pPacket)
         {
             TradeManager.Instance.RemoveReqest(pClient);
         }
+
         [PacketHandler(CH19Type.TradeRemoveItem)]
         public static void TradeRemovitem(ZoneClient pClient, Packet pPacket)
         {
@@ -32,22 +32,25 @@ namespace Estrella.Zone.Handlers
                 return;
             pClient.Character.Trade.RemoveItemToHandel(pClient.Character, pSlot);
         }
+
         [PacketHandler(CH19Type.TradeAccept)]
         public static void TradeAccept(ZoneClient pClient, Packet pPacket)
         {
-            Managers.TradeManager.Instance.AcceptTrade(pClient);
+            TradeManager.Instance.AcceptTrade(pClient);
         }
+
         [PacketHandler(CH19Type.TradeChangeMoney)]
         public static void TradeChangeMoney(ZoneClient pClient, Packet pPacket)
         {
             long money;
-            if(!pPacket.TryReadLong(out money))
+            if (!pPacket.TryReadLong(out money))
                 return;
             if (pClient.Character.Trade != null)
             {
                 pClient.Character.Trade.ChangeMoneyToTrade(pClient.Character, money);
             }
         }
+
         [PacketHandler(CH19Type.TradeLock)]
         public static void TradeLock(ZoneClient pClient, Packet pPacket)
         {
@@ -56,17 +59,19 @@ namespace Estrella.Zone.Handlers
                 pClient.Character.Trade.TradeLock(pClient.Character);
             }
         }
+
         [PacketHandler(CH19Type.TradeAddItem)]
         public static void TradeAddItem(ZoneClient pClient, Packet pPacket)
         {
             byte pSlot;
-            if(!pPacket.TryReadByte(out pSlot))
-            return;
+            if (!pPacket.TryReadByte(out pSlot))
+                return;
 
-            if(pClient.Character.Trade == null)
+            if (pClient.Character.Trade == null)
                 return;
             pClient.Character.Trade.AddItemToHandel(pClient.Character, pSlot);
         }
+
         [PacketHandler(CH19Type.TradeAgree)]
         public static void TradeAgree(ZoneClient pClient, Packet pPacket)
         {
@@ -75,6 +80,7 @@ namespace Estrella.Zone.Handlers
 
             pClient.Character.Trade.AcceptTrade(pClient.Character);
         }
+
         [PacketHandler(CH19Type.TradeBreak)]
         public static void TradeBreak(ZoneClient pClient, Packet pPacket)
         {
@@ -83,7 +89,6 @@ namespace Estrella.Zone.Handlers
 
             pClient.Character.Trade.TradeBreak(pClient.Character);
             pClient.Character.Trade = null;
-
         }
     }
 }

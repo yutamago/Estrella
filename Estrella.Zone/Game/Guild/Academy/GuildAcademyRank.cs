@@ -1,8 +1,9 @@
 ﻿/*File for this file Basic Copyright 2012 no0dl */
-namespace Estrella.Zone.Game.Guilds.Academy
+
+namespace Estrella.Zone.Game.Guild.Academy
 {
     public enum GuildAcademyRank : byte
     {
-        Member         = 0,
+        Member = 0
     }
 }

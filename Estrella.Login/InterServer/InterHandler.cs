@@ -11,7 +11,8 @@ namespace Estrella.Login.InterServer
             byte wid;
             string name, ip;
             ushort port;
-            if (!packet.TryReadByte(out wid) || !packet.TryReadString(out name) || !packet.TryReadString(out ip) || !packet.TryReadUShort(out port))
+            if (!packet.TryReadByte(out wid) || !packet.TryReadString(out name) || !packet.TryReadString(out ip) ||
+                !packet.TryReadUShort(out port))
             {
                 Log.WriteLine(LogLevel.Error, "Could not read World ID in inter server packet.");
                 wc.Disconnect();
@@ -45,12 +46,13 @@ namespace Estrella.Login.InterServer
         [InterPacketHandler(InterHeader.BanAccount)]
         public static void Banaccount(WorldConnection wc, InterPacket packet)
         {
-            int acountid;
-            if (packet.TryReadInt(out acountid))
+            if (packet.TryReadInt(out var accountId))
             {
-                Program.DatabaseManager.GetClient().ExecuteQuery("UPDATE Accounts Set Blocked='1' WHERE ID="+acountid+"");
+                Program.DatabaseManager.GetClient()
+                    .ExecuteQuery("UPDATE Accounts Set Blocked='1' WHERE ID=" + accountId + "");
             }
         }
+
         public static void SendAssigned(WorldConnection wc)
         {
             using (var p = new InterPacket(InterHeader.Assigned))

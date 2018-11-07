@@ -6,31 +6,32 @@ using Estrella.Util;
 
 namespace Estrella.Login.Handlers
 {
-    [ServerModule(Util.InitializationStage.Metadata)]
-    public class HandlerStore
+    [ServerModule(InitializationStage.Metadata)]
+    public static class HandlerStore
     {
-        private static Dictionary<byte, Dictionary<byte, MethodInfo>> handlers;
+        private static Dictionary<byte, Dictionary<byte, MethodInfo>> _handlers;
 
         [InitializerMethod]
         public static bool Load()
         {
-            handlers = new Dictionary<byte, Dictionary<byte, MethodInfo>>();
+            _handlers = new Dictionary<byte, Dictionary<byte, MethodInfo>>();
             foreach (var info in Reflector.FindMethodsByAttribute<PacketHandlerAttribute>())
             {
-                PacketHandlerAttribute attribute = info.First;
-                MethodInfo method = info.Second;
-                if (!handlers.ContainsKey(attribute.Header))
-                    handlers.Add(attribute.Header, new Dictionary<byte, MethodInfo>());
-                if (handlers[attribute.Header].ContainsKey(attribute.Type))
+                var attribute = info.First;
+                var method = info.Second;
+                if (!_handlers.ContainsKey(attribute.Header))
+                    _handlers.Add(attribute.Header, new Dictionary<byte, MethodInfo>());
+                if (_handlers[attribute.Header].ContainsKey(attribute.Type))
                 {
                     Log.WriteLine(LogLevel.Warn, "Duplicate handler found: {0}:{1}", attribute.Header, attribute.Type);
-                    handlers[attribute.Header].Remove(attribute.Type);
+                    _handlers[attribute.Header].Remove(attribute.Type);
                 }
-                handlers[attribute.Header].Add(attribute.Type, method);
+
+                _handlers[attribute.Header].Add(attribute.Type, method);
             }
-            
-            int count = 0;
-            foreach (var dict in handlers.Values)
+
+            var count = 0;
+            foreach (var dict in _handlers.Values)
                 count += dict.Count;
             Log.WriteLine(LogLevel.Info, "{0} Handlers loaded.", count);
             return true;
@@ -38,16 +39,9 @@ namespace Estrella.Login.Handlers
 
         public static MethodInfo GetHandler(byte header, byte type)
         {
-            Dictionary<byte, MethodInfo> dict;
-            MethodInfo meth;
-            if (handlers.TryGetValue(header, out dict))
-            {
-                if (dict.TryGetValue(type, out meth))
-                {
-                    return meth;
-                }
-            }
-            return null;
+            if (!_handlers.TryGetValue(header, out var dict)) return null;
+            
+            return dict.TryGetValue(type, out var methodInfo) ? methodInfo : null;
         }
 
         public static Action GetCallback(MethodInfo method, params object[] parameters)

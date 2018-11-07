@@ -1,46 +1,48 @@
-﻿using System.Data;
-using System.Linq;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Threading;
-using System.Collections.Generic;
-using Estrella.Database;
 
-namespace Estrella.Zone.Game
+namespace Estrella.Zone.Game.Inventory
 {
     public class RewardInventory
     {
-        public  Dictionary<ushort,List<RewardItem>> RewardItems { get; set; }
         private Mutex locker = new Mutex();
-        private ushort MaxPageCount { get; set; }
+
         public RewardInventory()
         {
             RewardItems = new Dictionary<ushort, List<RewardItem>>();
             MaxPageCount = 1;
-            for (byte i = 0; i < this.MaxPageCount; ++i)
+            for (byte i = 0; i < MaxPageCount; ++i)
             {
                 RewardItems[i] = new List<RewardItem>();
             }
         }
+
+        public Dictionary<ushort, List<RewardItem>> RewardItems { get; set; }
+        private ushort MaxPageCount { get; set; }
+
         public void LoadRewardItems(int pCharID)
         {
-        
             try
             {
                 locker.WaitOne();
                 DataTable Rewarddata = null;
-                using (DatabaseClient dbClient = Program.CharDBManager.GetClient())
+                using (var dbClient = Program.CharDBManager.GetClient())
                 {
                     Rewarddata = dbClient.ReadDataTable("SELECT *FROM RewardItems WHERE CharID='" + pCharID + "'");
                 }
+
                 if (Rewarddata != null)
                 {
                     foreach (DataRow row in Rewarddata.Rows)
                     {
-                        RewardItem pItem = RewardItem.LoadFromDatabase(row);
-                        if (!this.RewardItems.ContainsKey(pItem.PageID))
+                        var pItem = RewardItem.LoadFromDatabase(row);
+                        if (!RewardItems.ContainsKey(pItem.PageID))
                         {
-                            this.RewardItems[pItem.PageID] = new List<RewardItem>();
+                            RewardItems[pItem.PageID] = new List<RewardItem>();
                         }
-                        this.RewardItems[pItem.PageID].Add(pItem);
+
+                        RewardItems[pItem.PageID].Add(pItem);
                     }
                 }
             }
@@ -49,38 +51,40 @@ namespace Estrella.Zone.Game
                 locker.ReleaseMutex();
             }
         }
+
         public void RemoveRewardItem(RewardItem pItem)
         {
             try
             {
                 locker.WaitOne();
                 pItem.RemoveFromDatabase();
-                this.RewardItems[pItem.PageID].Remove(pItem);
+                RewardItems[pItem.PageID].Remove(pItem);
             }
             finally
             {
                 locker.ReleaseMutex();
             }
         }
-     
+
         public void AddRewardItem(RewardItem pItem)
         {
             try
             {
                 locker.WaitOne();
-                if (!this.RewardItems.ContainsKey(pItem.PageID))
+                if (!RewardItems.ContainsKey(pItem.PageID))
                 {
-                    this.RewardItems[pItem.PageID] = new List<RewardItem>();
-                
+                    RewardItems[pItem.PageID] = new List<RewardItem>();
                 }
+
                 pItem.AddToDatabase();
-                this.RewardItems[pItem.PageID].Add(pItem);
+                RewardItems[pItem.PageID].Add(pItem);
             }
             finally
             {
                 locker.ReleaseMutex();
             }
         }
+
         public void Enter()
         {
             locker.WaitOne();
@@ -90,29 +94,32 @@ namespace Estrella.Zone.Game
         {
             pSlot = 0;
             PageID = 0;
-            for (byte i = 0; i < this.RewardItems.Count; ++i)
+            for (byte i = 0; i < RewardItems.Count; ++i)
             {
-                    for (byte i2 = 0; i2 < 24; ++i2)
+                for (byte i2 = 0; i2 < 24; ++i2)
+                {
+                    var Item = RewardItems[i].Find(ss => ss.Slot == i2);
+                    if (Item == null)
                     {
-                        RewardItem Item = this.RewardItems[i].Find(ss => ss.Slot == i2);
-                        if (Item == null)
-                        {
-                            pSlot = i2;
-                            PageID = i;
-                            return true;
-                        }
+                        pSlot = i2;
+                        PageID = i;
+                        return true;
                     }
+                }
             }
+
             return false; //no more empty slots found
         }
+
         public void Release()
         {
             try
             {
                 locker.ReleaseMutex();
             }
-            catch { }
+            catch
+            {
+            }
         }
-
     }
 }

@@ -1,5 +1,4 @@
-﻿
-namespace Estrella.FiestaLib
+﻿namespace Estrella.FiestaLib
 {
 /* Error codes
 * 0x42 - Unkown Error
@@ -14,13 +13,13 @@ namespace Estrella.FiestaLib
 * 0x4b - Please accept the agreement. */
     public enum ServerError : ushort
     {
-        InvalidCredentials =    0x45,
-        DatabaseError =         0x46,
-        Exception =             0x42,
-        Blocked =               0x47,
-        ServerMaintenance =     0x48,
-        Timeout =               0x49,
-        AgreementMissing =      0x4b,
-        WrongRegion =           0x44,
+        InvalidCredentials = 0x45,
+        DatabaseError = 0x46,
+        Exception = 0x42,
+        Blocked = 0x47,
+        ServerMaintenance = 0x48,
+        Timeout = 0x49,
+        AgreementMissing = 0x4b,
+        WrongRegion = 0x44
     }
 }

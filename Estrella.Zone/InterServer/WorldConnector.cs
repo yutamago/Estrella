@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Reflection;
+using System.Threading;
 using Estrella.InterLib.Networking;
 using Estrella.InterLib.NetworkObjects;
 using Estrella.Util;
 
 namespace Estrella.Zone.InterServer
 {
-    [ServerModule(Util.InitializationStage.Services)]
+    [ServerModule(InitializationStage.Services)]
     public sealed class WorldConnector : AbstractConnector
     {
-        public static WorldConnector Instance { get; private set; }
-
         public WorldConnector(string ip, int port)
         {
             try
@@ -24,21 +22,24 @@ namespace Estrella.Zone.InterServer
                 Environment.Exit(7);
             }
         }
+
+        public static WorldConnector Instance { get; private set; }
+
         private void ConnectAndAssign(string ip, int port)
         {
             Connect(ip, port);
             Log.WriteLine(LogLevel.Info, "Connected to server @ {0}:{1}", ip, port);
-            this.client.OnPacket += new EventHandler<InterPacketReceivedEventArgs>(ClientOnPacket);
-            this.client.OnDisconnect += new EventHandler<SessionCloseEventArgs>(ClientOnDisconnect);
-            this.client.SendInterPass(Settings.Instance.InterPassword);
+            client.OnPacket += ClientOnPacket;
+            client.OnDisconnect += ClientOnDisconnect;
+            client.SendInterPass(Settings.Instance.InterPassword);
             InterHandler.TryAssiging(this);
         }
 
         void ClientOnDisconnect(object sender, SessionCloseEventArgs e)
         {
             Log.WriteLine(LogLevel.Error, "Disconnected from server.");
-            this.client.OnPacket -= new EventHandler<InterPacketReceivedEventArgs>(ClientOnPacket);
-            this.client.OnDisconnect -= new EventHandler<SessionCloseEventArgs>(ClientOnDisconnect);
+            client.OnPacket -= ClientOnPacket;
+            client.OnDisconnect -= ClientOnDisconnect;
             if (!Program.Shutdown)
             {
                 // Try reconnect
@@ -52,9 +53,10 @@ namespace Estrella.Zone.InterServer
                     catch
                     {
                         Log.WriteLine(LogLevel.Warn, "Trying to reconnect in 5 seconds.");
-                        System.Threading.Thread.Sleep(5000);
+                        Thread.Sleep(5000);
                     }
                 }
+
                 Log.WriteLine(LogLevel.Warn, "We should be up again :)");
             }
         }
@@ -63,10 +65,10 @@ namespace Estrella.Zone.InterServer
         {
             try
             {
-                MethodInfo method = InterHandlerStore.GetHandler(e.Packet.OpCode);
+                var method = InterHandlerStore.GetHandler(e.Packet.OpCode);
                 if (method != null)
                 {
-                    Action action = InterHandlerStore.GetCallback(method, this, e.Packet);
+                    var action = InterHandlerStore.GetCallback(method, this, e.Packet);
                     if (Worker.Instance == null)
                     {
                         action();
@@ -100,19 +102,22 @@ namespace Estrella.Zone.InterServer
                 Instance = new WorldConnector(ip, port);
                 return true;
             }
-            catch { return false; }
+            catch
+            {
+                return false;
+            }
         }
 
         public void SendPacket(InterPacket packet)
         {
-            if (this.client == null) return;
-            this.client.SendPacket(packet);
+            if (client == null) return;
+            client.SendPacket(packet);
         }
 
         public void Disconnect()
         {
-            if (this.client == null) return;
-            this.client.Disconnect();
+            if (client == null) return;
+            client.Disconnect();
         }
     }
 }

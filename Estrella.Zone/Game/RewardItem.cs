@@ -1,29 +1,39 @@
-﻿using Estrella.Database.DataStore;
+﻿using System.Data;
+using Estrella.Database.DataStore;
 using Estrella.FiestaLib;
 using Estrella.FiestaLib.Data;
 using Estrella.FiestaLib.Networking;
 using Estrella.Zone.Data;
-using Estrella.Database.Storage;
 
 namespace Estrella.Zone.Game
 {
     public sealed class RewardItem : Item
     {
-        
         public override ushort ID { get; set; }
         public override sbyte Slot { get; set; }
         public override UpgradeStats UpgradeStats { get; set; }
         public int CharID { get; set; }
         public ushort PageID { get; set; }
-        public override ItemInfo ItemInfo { get { return DataProvider.Instance.GetItemInfo(this.ID); } }
-        public  void AddToDatabase()
+
+        public override ItemInfo ItemInfo
         {
-            Program.CharDBManager.GetClient().ExecuteQuery("INSERT INTO  Rewarditems (CharID,Slot,ItemID,PageID) VALUES ('" + this.CharID + "','" + this.Slot + "','" + this.ID + "','" + this.PageID + "')");
+            get { return DataProvider.Instance.GetItemInfo(ID); }
         }
+
+        public void AddToDatabase()
+        {
+            Program.CharDBManager.GetClient()
+                .ExecuteQuery("INSERT INTO  Rewarditems (CharID,Slot,ItemID,PageID) VALUES ('" + CharID + "','" +
+                              Slot + "','" + ID + "','" + PageID + "')");
+        }
+
         public void RemoveFromDatabase()
         {
-            Program.CharDBManager.GetClient().ExecuteQuery("DELETE FROM Rewarditems WHERE CharID='" + this.CharID + "' AND ItemID='" + this.ID + "'");
+            Program.CharDBManager.GetClient()
+                .ExecuteQuery("DELETE FROM Rewarditems WHERE CharID='" + CharID + "' AND ItemID='" + ID +
+                              "'");
         }
+
         public override void WriteInfo(Packet pPacket, bool WriteStats = true)
         {
             byte length;
@@ -39,10 +49,11 @@ namespace Estrella.Zone.Game
                 length = GetEquipLength(this);
                 statCount = GetInfoStatCount(this);
             }
-            byte lenght = 9;//later
+
+            byte lenght = 9; //later
             pPacket.WriteByte(lenght);
-            pPacket.WriteByte((byte)this.Slot);//itemslot
-            pPacket.WriteByte(0x08);//unk
+            pPacket.WriteByte((byte) Slot); //itemslot
+            pPacket.WriteByte(0x08); //unk
             if (WriteStats)
             {
                 if (ItemInfo.Slot == ItemSlot.None)
@@ -50,19 +61,18 @@ namespace Estrella.Zone.Game
                 else
                     WriteEquipStats(pPacket);
             }
-
         }
 
-        public static  RewardItem LoadFromDatabase(System.Data.DataRow row)
+        public static RewardItem LoadFromDatabase(DataRow row)
         {
-           RewardItem ppItem = new RewardItem
+            var ppItem = new RewardItem
             {
                 Slot = GetDataTypes.GetSByte(row["Slot"]),
                 ID = GetDataTypes.GetUshort(row["ItemID"]),
                 CharID = GetDataTypes.GetInt(row["CharID"]),
                 PageID = GetDataTypes.GetByte(row["PageID"])
             };
-            
+
             return ppItem;
         }
     }

@@ -14,8 +14,8 @@ namespace Estrella.Util
         public static void WriteLine(LogLevel pLogLevel, string pFormat, params object[] pArgs)
         {
             if (pLogLevel == LogLevel.Debug && !IsDebug) return;
-            string header = "[" + DateTime.Now + "] (" + pLogLevel + ") ";
-            string buffer = string.Format(pFormat, pArgs);
+            var header = "[" + DateTime.Now + "] (" + pLogLevel + ") ";
+            var buffer = string.Format(pFormat, pArgs);
 
             if (pLogLevel == LogLevel.Debug)
             {
@@ -43,7 +43,7 @@ namespace Estrella.Util
         public static void SetLogToFile(string filename)
         {
             Directory.CreateDirectory(filename.Replace(Path.GetFileName(filename), ""));
-            StreamWriter sw = new StreamWriter(File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read));
+            var sw = new StreamWriter(File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Read));
             sw.AutoFlush = true;
             Writer = sw;
         }
@@ -67,5 +67,4 @@ namespace Estrella.Util
             }
         }
     }
-
 }

@@ -1,6 +1,4 @@
-﻿using Estrella.Zone.Game;
-
-namespace Estrella.Zone.Game
+﻿namespace Estrella.Zone.Game.Group
 {
     public class GroupMember
     {
@@ -15,14 +13,16 @@ namespace Estrella.Zone.Game
             Character = null;
             IsReadyForUpdates = false;
         }
+
         public GroupMember(string pName, bool pIsMaster, bool pIsOnline)
         {
-            this.Name = pName;
-            this.IsMaster = pIsMaster;
-            this.IsOnline = pIsOnline;
+            Name = pName;
+            IsMaster = pIsMaster;
+            IsOnline = pIsOnline;
         }
 
         #endregion
+
         #region Properties
 
         public bool IsMaster { get; internal set; }

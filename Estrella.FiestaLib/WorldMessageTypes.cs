@@ -1,5 +1,4 @@
-﻿
-namespace Estrella.FiestaLib
+﻿namespace Estrella.FiestaLib
 {
     public enum WorldMessageTypes : byte
     {
@@ -8,6 +7,6 @@ namespace Estrella.FiestaLib
         AquiredTitle = 0x06,
         WorldPlayerMessage = 0x0B,
         ProposalAcceptation = 0x0C,
-        CongratsAndWishes = 0x0D,
+        CongratsAndWishes = 0x0D
     }
 }

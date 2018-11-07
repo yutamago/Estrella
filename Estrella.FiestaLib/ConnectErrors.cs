@@ -1,5 +1,4 @@
-﻿
-namespace Estrella.FiestaLib
+﻿namespace Estrella.FiestaLib
 {
     public enum ConnectErrors : ushort
     {
@@ -29,6 +28,6 @@ namespace Estrella.FiestaLib
         ErrorInKingdomQuest = 1428,
         ErrorInPremiumItem = 1429,
 
-        MapUnderMaintenance = 1430,
+        MapUnderMaintenance = 1430
     }
 }

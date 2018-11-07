@@ -1,96 +1,112 @@
 using System;
-using System.Data;
-using MySql.Data.MySqlClient;
-using Estrella.Util;
 using System.Collections.Generic;
+using System.Data;
 using Estrella.Database.Storage;
+using Estrella.Util;
+using MySql.Data.MySqlClient;
 
 namespace Estrella.Database
 {
-     public sealed class DatabaseClient : IDisposable
-     {
+    public sealed class DatabaseClient : IDisposable
+    {
+        private MySqlCommand Command;
+        public int CommandCacheCount;
+        public PriorityQueue<MySqlCommand> Commands = new PriorityQueue<MySqlCommand>();
+
+        private MySqlConnection Connection;
         private uint Handle;
- 
+        public bool IsBusy;
+
         private DateTime LastActivity;
 
         private DatabaseManager Manager;
 
-        private MySqlConnection Connection;
-        private MySqlCommand Command;
-        public PriorityQueue<MySqlCommand> Commands = new PriorityQueue<MySqlCommand>();
-        public int CommandCacheCount;
-        public bool IsBussy = false;
+        public DatabaseClient(uint mHandle, DatabaseManager pManager)
+        {
+            if (pManager == null)
+                throw new ArgumentNullException("pManager");
+
+            Handle = mHandle;
+            Manager = pManager;
+
+            Connection = new MySqlConnection(Manager.CreateConnectionString());
+            Command = Connection.CreateCommand();
+
+            UpdateLastActivity();
+        }
 
 
         public bool IsAnonymous
         {
-            get
-            {
-                return (Handle == 0);
-            }
+            get { return Handle == 0; }
         }
 
         public int InactiveTime
         {
-            get
-            {
-                return (int)(DateTime.Now - LastActivity).TotalSeconds;
-            }
+            get { return (int) (DateTime.Now - LastActivity).TotalSeconds; }
         }
+
         public uint mHandle
         {
             get { return Handle; }
         }
 
-       public ConnectionState State
+        public ConnectionState State
         {
-            get
+            get { return Connection != null ? Connection.State : ConnectionState.Broken; }
+        }
+
+        public void Dispose()
+        {
+            if (!IsAnonymous) // No disposing for this client yet! Return to the manager!
             {
-                return (Connection != null) ? Connection.State : ConnectionState.Broken;
+                IsBusy = false;
+                // Reset this!
+                // mCommand.CommandText = null;
+                Command.Parameters.Clear();
+
+                Manager.ReleaseClient(Handle);
+            }
+            else // Anonymous client, dispose this right away!
+            {
+                Destroy();
             }
         }
 
-       public DatabaseClient(uint mHandle, DatabaseManager pManager)
-       {
-           if (pManager == null)
-               throw new ArgumentNullException("pManager");
+        public MySqlConnection GetConnection()
+        {
+            return Connection;
+        }
 
-           Handle = mHandle;
-           Manager = pManager;
+        public ConnectionState Connect()
+        {
+            if (Connection == null && Connection.ConnectionString == null)
+            {
+                // Connection.Open();
+                new DatabaseException("Connection instance of database client " + Handle + " holds no value.");
+                return ConnectionState.Broken;
+            }
 
-           Connection = new MySqlConnection(Manager.CreateConnectionString());
-           Command = Connection.CreateCommand();
+            if (Connection.State != ConnectionState.Closed)
+            {
+                new DatabaseException("Connection instance of database client " + Handle +
+                                      " requires to be closed before it can open again.");
+                return ConnectionState.Open;
+            }
 
-           UpdateLastActivity();
-       }
-       public MySqlConnection GetConnection()
-       {
-           return this.Connection;
-       }
-           public ConnectionState Connect()
-           {
-               if (Connection == null && Connection.ConnectionString == null)
-               {
-                  // Connection.Open();
-                   new DatabaseException("Connection instance of database client " + Handle + " holds no value.");
-                   return ConnectionState.Broken;
-               }
-               else if (Connection.State != ConnectionState.Closed)
-               {
-                   new DatabaseException("Connection instance of database client " + Handle + " requires to be closed before it can open again."); 
-                   return ConnectionState.Open;
-               }
             try
             {
                 Connection.Open();
             }
             catch (MySqlException mex)
             {
-               new DatabaseException("Failed to open connection for database client " + Handle + ", exception message: " + mex.Message);
-               return ConnectionState.Closed;
+                new DatabaseException("Failed to open connection for database client " + Handle +
+                                      ", exception message: " + mex.Message);
+                return ConnectionState.Closed;
             }
+
             return ConnectionState.Connecting;
-           }
+        }
 
         public void Disconnect()
         {
@@ -103,24 +119,7 @@ namespace Estrella.Database
             }
         }
 
-        public void Dispose()
-        {
-            if (!this.IsAnonymous) // No disposing for this client yet! Return to the manager!
-            {
-                IsBussy = false;
-                // Reset this!
-               // mCommand.CommandText = null;
-                Command.Parameters.Clear();
-
-                Manager.ReleaseClient(Handle);
-            }
-            else // Anonymous client, dispose this right away!
-            {
-                Destroy();
-            }
-        }
-
-       public void Destroy()
+        public void Destroy()
         {
             Disconnect();
 
@@ -153,40 +152,38 @@ namespace Estrella.Database
                 }
             }
         }
+
         public void ExecuteQuery(string sQuery)
         {
             try
             {
-                
-
-                    if (this.Connection.State == ConnectionState.Closed)
+                if (Connection.State == ConnectionState.Closed)
+                {
+                    Command.CommandText = sQuery;
+                    PushCommand(Command);
+                }
+                else
+                {
+                    IsBusy = true;
+                    Command.CommandText = sQuery;
+                    Command.Connection = Connection;
+                    PushCommand(Command);
+                    for (var i = 0; i < Commands.Count; i++)
                     {
-                        Command.CommandText = sQuery;
-                        this.PushCommand(Command);
+                        var cmd = Commands.Dequeue();
+                        cmd.Connection = Command.Connection;
+                        cmd.ExecuteScalar();
+                        CommandCacheCount--;
+                        Console.WriteLine("Ramm Kacke..");
                     }
-                    else
-                    {
-                        this.IsBussy = true;
-                        Command.CommandText = sQuery;
-                        Command.Connection = this.Connection;
-                        this.PushCommand(Command);
-                        for (int i = 0; i < Commands.Count; i++)
-                        {
-                            MySqlCommand cmd = this.Commands.Dequeue();
-                            cmd.Connection = Command.Connection;
-                            cmd.ExecuteScalar();
-                            this.CommandCacheCount--;
-                            Console.WriteLine("Ramm Kacke..");
-                        }
-                    }
-               
-                
+                }
             }
             catch (Exception e)
             {
-                Log.WriteLine(LogLevel.Error,e + "\n (" + sQuery + ")");
+                Log.WriteLine(LogLevel.Error, e + "\n (" + sQuery + ")");
             }
         }
+
         public void PushCommand(MySqlCommand command)
         {
             lock (command)
@@ -195,52 +192,54 @@ namespace Estrella.Database
                 Commands.Enqueue(command, CommandCacheCount);
             }
         }
-       public void ExecuteQueryWithParameters(MySqlCommand Cmd, params MySqlParameter[] pParams)
+
+        public void ExecuteQueryWithParameters(MySqlCommand query, params MySqlParameter[] pParams)
         {
             try
             {
-                if (this.Connection.State == ConnectionState.Closed)
+                if (Connection.State == ConnectionState.Closed)
                 {
-                    Command = Cmd;
-                    this.PushCommand(Command);
+                    Command = query;
+                    PushCommand(Command);
                 }
                 else
                 {
-                    this.IsBussy = true;
-                    Command = Cmd;
-                    Command.Connection = this.Connection;
-                    this.PushCommand(Command);
-                    for (int i = 0; i < Commands.Count; i++)
+                    IsBusy = true;
+                    Command = query;
+                    Command.Connection = Connection;
+                    PushCommand(Command);
+                    for (var i = 0; i < Commands.Count; i++)
                     {
-                        MySqlCommand cmd = this.Commands.Dequeue();
+                        var cmd = Commands.Dequeue();
                         cmd.Connection = Command.Connection;
                         cmd.ExecuteScalar();
-                        this.CommandCacheCount--;
+                        CommandCacheCount--;
                         Console.WriteLine("Ramm Kacke..");
                     }
                 }
             }
             catch (Exception e)
             {
-               Log.WriteLine(LogLevel.Error,e + "\n (" + Command.CommandText + ")");
+                Log.WriteLine(LogLevel.Error, e + "\n (" + Command.CommandText + ")");
             }
-         }
+        }
 
         public bool FindsResult(string sQuery)
         {
-            bool found = false;
-            this.IsBussy = true;
+            var found = false;
+            IsBusy = true;
             try
             {
                 Command.CommandText = sQuery;
-                MySqlDataReader dReader = Command.ExecuteReader();
+                var dReader = Command.ExecuteReader();
                 found = dReader.HasRows;
                 dReader.Close();
             }
             catch (Exception e)
             {
-                Log.WriteLine(LogLevel.Error,e + "\n (" + sQuery + ")");
+                Log.WriteLine(LogLevel.Error, e + "\n (" + sQuery + ")");
             }
+
             return found;
         }
 
@@ -248,16 +247,16 @@ namespace Estrella.Database
         {
             try
             {
-                this.IsBussy = true;
-                DataSet dataSet = new DataSet();
+                IsBusy = true;
+                var dataSet = new DataSet();
                 Command.CommandText = query;
 
-                using (MySqlDataAdapter adapter = new MySqlDataAdapter(Command))
+                using (var adapter = new MySqlDataAdapter(Command))
                 {
                     adapter.Fill(dataSet);
                 }
 
-               // Command.CommandText = null;
+                // Command.CommandText = null;
                 return dataSet;
             }
             catch (DatabaseException ex)
@@ -271,16 +270,16 @@ namespace Estrella.Database
         {
             try
             {
-                this.IsBussy = true;
-                DataTable dataTable = new DataTable();
+                IsBusy = true;
+                var dataTable = new DataTable();
                 Command.CommandText = query;
 
-                using (MySqlDataAdapter adapter = new MySqlDataAdapter(Command))
+                using (var adapter = new MySqlDataAdapter(Command))
                 {
                     adapter.Fill(dataTable);
                 }
 
-              //  Command.CommandText = null;
+                //  Command.CommandText = null;
                 return dataTable;
             }
             catch (DatabaseException ex)
@@ -294,8 +293,8 @@ namespace Estrella.Database
         {
             try
             {
-                this.IsBussy = true;
-                DataTable dataTable = ReadDataTable(query);
+                IsBusy = true;
+                var dataTable = ReadDataTable(query);
 
                 if (dataTable != null && dataTable.Rows.Count > 0)
                 {
@@ -307,6 +306,7 @@ namespace Estrella.Database
                 Log.WriteLine(LogLevel.Error, ex.ToString());
                 return null;
             }
+
             return null;
         }
 
@@ -314,10 +314,10 @@ namespace Estrella.Database
         {
             try
             {
-                this.IsBussy = true;
+                IsBusy = true;
                 Command.CommandText = query;
-                string result = Command.ExecuteScalar().ToString();
-               // Command.CommandText = null;
+                var result = Command.ExecuteScalar().ToString();
+                // Command.CommandText = null;
                 return result;
             }
             catch (DatabaseException ex)
@@ -329,54 +329,59 @@ namespace Estrella.Database
 
         public uint InsertAndIdentify(string query)
         {
-            this.IsBussy = true;
-            MySqlCommand command = this.Connection.CreateCommand();
+            IsBusy = true;
+            var command = Connection.CreateCommand();
             command.CommandText = query;
-            return InsertAndIdentifypublic(command);
+            return InsertAndIdentifyPublic(command);
         }
 
-        public uint InsertAndIdentifypublic(MySqlCommand pCommand)
+        public uint InsertAndIdentifyPublic(MySqlCommand pCommand)
         {
-            this.IsBussy = true;
+            IsBusy = true;
             pCommand.Prepare();
             pCommand.ExecuteNonQuery();
             pCommand.CommandText = "SELECT LAST_INSERT_ID()";
             pCommand.Parameters.Clear();
-            return (uint)(long)pCommand.ExecuteScalar();
+            return (uint) (long) pCommand.ExecuteScalar();
         }
+
         #region ReadMethods
-       public uint ReadUInt(string query)
+
+        public uint ReadUInt(string query)
         {
-           this.IsBussy = true;
+            IsBusy = true;
             Command.CommandText = query;
-            uint result = uint.Parse(Command.ExecuteScalar().ToString());
-          //  Command.CommandText = null;
+            var result = uint.Parse(Command.ExecuteScalar().ToString());
+            //  Command.CommandText = null;
             return result;
         }
-         public  Int32 ReadInt32(string query)
+
+        public int ReadInt32(string query)
         {
-            this.IsBussy = true;
+            IsBusy = true;
             Command.CommandText = query;
-            Int32 result = Convert.ToInt32(Command.ExecuteScalar());
-           // Command.CommandText = null;
+            var result = Convert.ToInt32(Command.ExecuteScalar());
+            // Command.CommandText = null;
             return result;
         }
 
         public byte[] GetBlob(MySqlCommand pCommand)
         {
-            byte[] retvalue;
+            byte[] ret;
             try
             {
-                this.IsBussy = true;
-                retvalue = (byte[])pCommand.ExecuteScalar();
+                IsBusy = true;
+                ret = (byte[]) pCommand.ExecuteScalar();
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error reading BLOB: {0} && {1}", ex.Message, ex.StackTrace);
                 return null;
             }
-            return retvalue;
+
+            return ret;
         }
+
         #endregion
     }
 }

@@ -12,11 +12,11 @@ namespace Estrella.FiestaLib.Data
 
         public static DropGroupInfo Load(DataRow row)
         {
-            DropGroupInfo info = new DropGroupInfo()
+            var info = new DropGroupInfo
             {
-                GroupID = (string)row["GroupID"],
-                MinCount = (byte)row["MinCount"],
-                MaxCount = (byte)row["MaxCount"],
+                GroupID = (string) row["GroupID"],
+                MinCount = (byte) row["MinCount"],
+                MaxCount = (byte) row["MaxCount"],
                 Items = new List<ItemInfo>()
             };
             return info;

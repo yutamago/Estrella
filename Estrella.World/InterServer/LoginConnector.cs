@@ -1,25 +1,22 @@
 ﻿using System;
-using System.Reflection;
 using Estrella.InterLib.Networking;
 using Estrella.InterLib.NetworkObjects;
 using Estrella.Util;
 
 namespace Estrella.World.InterServer
 {
-    [ServerModule(Util.InitializationStage.Services)]
+    [ServerModule(InitializationStage.Services)]
     public sealed class LoginConnector : AbstractConnector
     {
-        public static LoginConnector Instance { get; private set; }
-
         public LoginConnector(string ip, int port)
         {
             try
             {
                 Connect(ip, port);
                 Log.WriteLine(LogLevel.Info, "Connected to server @ {0}:{1}", ip, port);
-                this.client.OnPacket += new EventHandler<InterPacketReceivedEventArgs>(ClientOnPacket);
-                this.client.OnDisconnect += new EventHandler<SessionCloseEventArgs>(ClientOnDisconnect);
-                this.client.SendInterPass(Settings.Instance.InterPassword);
+                client.OnPacket += ClientOnPacket;
+                client.OnDisconnect += ClientOnDisconnect;
+                client.SendInterPass(Settings.Instance.InterPassword);
                 InterHandler.TryAssiging(this);
             }
             catch
@@ -30,21 +27,23 @@ namespace Estrella.World.InterServer
             }
         }
 
+        public static LoginConnector Instance { get; private set; }
+
         void ClientOnDisconnect(object sender, SessionCloseEventArgs e)
         {
             Log.WriteLine(LogLevel.Error, "Disconnected from server.");
-            this.client.OnPacket -= new EventHandler<InterPacketReceivedEventArgs>(ClientOnPacket);
-            this.client.OnDisconnect -= new EventHandler<SessionCloseEventArgs>(ClientOnDisconnect);
+            client.OnPacket -= ClientOnPacket;
+            client.OnDisconnect -= ClientOnDisconnect;
         }
 
         void ClientOnPacket(object sender, InterPacketReceivedEventArgs e)
         {
             try
             {
-                MethodInfo method = InterHandlerStore.GetHandler(e.Packet.OpCode);
+                var method = InterHandlerStore.GetHandler(e.Packet.OpCode);
                 if (method != null)
                 {
-                    Action action = InterHandlerStore.GetCallback(method, this, e.Packet);
+                    var action = InterHandlerStore.GetCallback(method, this, e.Packet);
                     if (Worker.Instance == null)
                     {
                         action();
@@ -68,7 +67,7 @@ namespace Estrella.World.InterServer
         [InitializerMethod]
         public static bool Load()
         {
-            return Load(Settings.Instance.LoginServerIP, Settings.Instance.LoginServerPort);
+            return Load(Settings.Instance.LoginServerIp, Settings.Instance.LoginServerPort);
         }
 
         public static bool Load(string ip, int port)
@@ -78,13 +77,16 @@ namespace Estrella.World.InterServer
                 Instance = new LoginConnector(ip, port);
                 return true;
             }
-            catch { return false; }
+            catch
+            {
+                return false;
+            }
         }
 
         public void SendPacket(InterPacket packet)
         {
-            if (this.client == null) return;
-            this.client.SendPacket(packet);
+            if (client == null) return;
+            client.SendPacket(packet);
         }
     }
 }

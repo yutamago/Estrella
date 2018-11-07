@@ -33,9 +33,9 @@
         public uint ZoneDBMinPoolSize { get; set; }
         public uint ZoneDBMaxPoolSize { get; set; }
         public int OverloadFlags { get; set; }
-        public int QuerCachePerClient { get; set; }
+        public int QueryCachePerClient { get; set; }
         public int OverloadFlagsZoneWorld { get; set; }
-        public int QuerCachePerClientZoneWorld { get; set; }
+        public int QueryCachePerClientZoneWorld { get; set; }
         public ulong TicksToSleep { get; set; }
         public int SleepTime { get; set; }
 
@@ -43,50 +43,55 @@
         {
             try
             {
-                Settings obj = new Settings()
+                var obj = new Settings
                 {
                     // V.1
-                    WorldServerIP = Estrella.InterLib.Settings.GetString("Zone.WorldServerIP"),
-                    WorldServerPort = (ushort)Estrella.InterLib.Settings.GetInt32("Zone.WorldServerPort"),
-                    IP = Estrella.InterLib.Settings.GetString("Zone.IP"),
-                    Debug = Estrella.InterLib.Settings.GetBool("Zone.Debug"),
+                    WorldServerIP = InterLib.Settings.GetString("Zone.WorldServerIP"),
+                    WorldServerPort = (ushort) InterLib.Settings.GetInt32("Zone.WorldServerPort"),
+                    IP = InterLib.Settings.GetString("Zone.IP"),
+                    Debug = InterLib.Settings.GetBool("Zone.Debug"),
 
-                    WorkInterval = Estrella.InterLib.Settings.GetInt32("Zone.WorkInterval"),
-                    TransferTimeout = Estrella.InterLib.Settings.GetInt32("Zone.TransferTimeout"),
+                    WorkInterval = InterLib.Settings.GetInt32("Zone.WorkInterval"),
+                    TransferTimeout = InterLib.Settings.GetInt32("Zone.TransferTimeout"),
 
-                    WorldServiceUri = Estrella.InterLib.Settings.GetString("Zone.WorldServiceURI"),
-                    InterPassword = Estrella.InterLib.Settings.GetString("Zone.Password"),
-                    zoneMysqlServer = Estrella.InterLib.Settings.GetString("Data.Mysql.Server"),
-                    zoneMysqlPort = Estrella.InterLib.Settings.GetInt32("Data.Mysql.Port"),
-                    zoneMysqlUser = Estrella.InterLib.Settings.GetString("Data.Mysql.User"),
-                    zoneMysqlPassword = Estrella.InterLib.Settings.GetString("Data.Mysql.Password"),
-                    zoneMysqlDatabase = Estrella.InterLib.Settings.GetString("Data.Mysql.Database"),
-                    WorldMysqlServer = Estrella.InterLib.Settings.GetString("World.Mysql.Server"),
-                    ZoneDBMinPoolSize = (uint)Estrella.InterLib.Settings.GetInt32("Data.Mysql.MinPool"),
-                    ZoneDBMaxPoolSize = (uint)Estrella.InterLib.Settings.GetInt32("Data.Mysql.MaxPool"),
-                    WorldMysqlPort = Estrella.InterLib.Settings.GetInt32("World.Mysql.Port"),
-                    WorldMysqlUser = Estrella.InterLib.Settings.GetString("World.Mysql.User"),
-                    WorldMysqlPassword = Estrella.InterLib.Settings.GetString("World.Mysql.Password"),
-                    WorldMysqlDatabase = Estrella.InterLib.Settings.GetString("World.Mysql.Database"),
-                    QuerCachePerClientZoneWorld = Estrella.InterLib.Settings.GetInt32("ZoneWorld.Mysql.QuerCachePerClient"),
-                    OverloadFlagsZoneWorld = Estrella.InterLib.Settings.GetInt32("ZoneWorld.Mysql.OverloadFlags"),
-                    QuerCachePerClient = Estrella.InterLib.Settings.GetInt32("Data.Mysql.QuerCachePerClient"),
-                    OverloadFlags = Estrella.InterLib.Settings.GetInt32("Data.Mysql.OverloadFlags"),
-                    WorldDBMinPoolSizeZoneWorld = (uint)Estrella.InterLib.Settings.GetInt32("ZoneWorld.Mysql.MinPool"),
-                    WorldDBMaxPoolSizeZoneWorld = (uint)Estrella.InterLib.Settings.GetInt32("ZoneWorld.Mysql.MaxPool"),
-                    TicksToSleep = Estrella.InterLib.Settings.GetUInt32("Zone.TicksToSleep"),
-                    SleepTime = Estrella.InterLib.Settings.GetInt32("Zone.SleepTime"),
+                    WorldServiceUri = InterLib.Settings.GetString("Zone.WorldServiceURI"),
+                    InterPassword = InterLib.Settings.GetString("Zone.Password"),
+                    zoneMysqlServer = InterLib.Settings.GetString("Data.Mysql.Server"),
+                    zoneMysqlPort = InterLib.Settings.GetInt32("Data.Mysql.Port"),
+                    zoneMysqlUser = InterLib.Settings.GetString("Data.Mysql.User"),
+                    zoneMysqlPassword = InterLib.Settings.GetString("Data.Mysql.Password"),
+                    zoneMysqlDatabase = InterLib.Settings.GetString("Data.Mysql.Database"),
+                    WorldMysqlServer = InterLib.Settings.GetString("World.Mysql.Server"),
+                    ZoneDBMinPoolSize = (uint) InterLib.Settings.GetInt32("Data.Mysql.MinPool"),
+                    ZoneDBMaxPoolSize = (uint) InterLib.Settings.GetInt32("Data.Mysql.MaxPool"),
+                    WorldMysqlPort = InterLib.Settings.GetInt32("World.Mysql.Port"),
+                    WorldMysqlUser = InterLib.Settings.GetString("World.Mysql.User"),
+                    WorldMysqlPassword = InterLib.Settings.GetString("World.Mysql.Password"),
+                    WorldMysqlDatabase = InterLib.Settings.GetString("World.Mysql.Database"),
+                    QueryCachePerClientZoneWorld = InterLib.Settings.GetInt32("ZoneWorld.Mysql.QueryCachePerClient"),
+                    OverloadFlagsZoneWorld = InterLib.Settings.GetInt32("ZoneWorld.Mysql.OverloadFlags"),
+                    QueryCachePerClient = InterLib.Settings.GetInt32("Data.Mysql.QueryCachePerClient"),
+                    OverloadFlags = InterLib.Settings.GetInt32("Data.Mysql.OverloadFlags"),
+                    WorldDBMinPoolSizeZoneWorld = (uint) InterLib.Settings.GetInt32("ZoneWorld.Mysql.MinPool"),
+                    WorldDBMaxPoolSizeZoneWorld = (uint) InterLib.Settings.GetInt32("ZoneWorld.Mysql.MaxPool"),
+                    TicksToSleep = InterLib.Settings.GetUInt32("Zone.TicksToSleep"),
+                    SleepTime = InterLib.Settings.GetInt32("Zone.SleepTime")
                 };
-                obj.WorldConnString = " User ID=" + obj.WorldMysqlUser + ";Password=" + obj.WorldMysqlPassword + ";Host=" + obj.WorldMysqlServer + ";Port=" + obj.WorldMysqlPort + ";Database=" + obj.WorldMysqlDatabase + ";Protocol=TCP;Compress=false;Pooling=true;Min Pool Size=0;Max Pool Size=2000;Connection Lifetime=0;";
-                obj.ConnString = " User ID=" + obj.zoneMysqlUser + ";Password=" + obj.zoneMysqlPassword + ";Host=" + obj.zoneMysqlServer + ";Port=" + obj.zoneMysqlPort + ";Database=" + obj.zoneMysqlDatabase + ";Protocol=TCP;Compress=false;Pooling=true;Min Pool Size=0;Max Pool Size=2000;Connection Lifetime=0;";
-                Settings.Instance = obj;
+                obj.WorldConnString = " User ID=" + obj.WorldMysqlUser + ";Password=" + obj.WorldMysqlPassword +
+                                      ";Host=" + obj.WorldMysqlServer + ";Port=" + obj.WorldMysqlPort + ";Database=" +
+                                      obj.WorldMysqlDatabase +
+                                      ";Protocol=TCP;Compress=false;Pooling=true;Min Pool Size=0;Max Pool Size=2000;Connection Lifetime=0;";
+                obj.ConnString = " User ID=" + obj.zoneMysqlUser + ";Password=" + obj.zoneMysqlPassword + ";Host=" +
+                                 obj.zoneMysqlServer + ";Port=" + obj.zoneMysqlPort + ";Database=" +
+                                 obj.zoneMysqlDatabase +
+                                 ";Protocol=TCP;Compress=false;Pooling=true;Min Pool Size=0;Max Pool Size=2000;Connection Lifetime=0;";
+                Instance = obj;
                 return true;
             }
             catch
             {
                 return false;
             }
-
         }
     }
 }

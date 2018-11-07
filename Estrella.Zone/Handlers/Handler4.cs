@@ -73,11 +73,12 @@ namespace Estrella.Zone.Handlers
                 var list = character.SkillsActive.Values;
                 packet.WriteByte(0);
                 packet.WriteInt(character.ID);
-                packet.WriteUShort((ushort)list.Count); // Skill count (max 300)
+                packet.WriteUShort((ushort) list.Count); // Skill count (max 300)
                 foreach (var skill in list)
                 {
                     skill.Write(packet);
                 }
+
                 character.Client.SendPacket(packet);
             }
         }
@@ -87,11 +88,12 @@ namespace Estrella.Zone.Handlers
             using (var packet = new Packet(SH4Type.CharacterPassiveSkillList))
             {
                 var list = character.SkillsPassive.Keys;
-                packet.WriteUShort((ushort)list.Count); //count (max 300)
+                packet.WriteUShort((ushort) list.Count); //count (max 300)
                 foreach (var skill in list)
                 {
                     packet.WriteUShort(skill);
                 }
+
                 character.Client.SendPacket(packet);
             }
         }
@@ -100,34 +102,34 @@ namespace Estrella.Zone.Handlers
         {
             using (var packet = new Packet(SH4Type.CharacterItemList))
             {
-                packet.WriteByte((byte)character.Inventory.InventoryItems.Count);
-                packet.WriteByte(0x08);        // Inventory number
+                packet.WriteByte((byte) character.Inventory.InventoryItems.Count);
+                packet.WriteByte(0x08); // Inventory number
 
-                packet.WriteByte(115);         // UNK    (In newest client it exists, in bit older, not) // might be shit from old buffers lol
+                packet.WriteByte(
+                    115); // UNK    (In newest client it exists, in bit older, not) // might be shit from old buffers lol
                 foreach (var eqp in character.Inventory.EquippedItems)
                 {
-                    
                     eqp.WriteInfo(packet);
                 }
+
                 character.Client.SendPacket(packet);
             }
         }
 
         public static void SendInventoryList(ZoneCharacter character)
         {
-
-
             using (var packet = new Packet(SH4Type.CharacterItemList))
             {
-                packet.WriteByte((byte)character.Inventory.InventoryItems.Count);
-                packet.WriteByte(0x09);         // Inventory number
-                packet.WriteByte(115);         // UNK    (In newest client it exists, in bit older, not)
-                 foreach (var item in character.Inventory.InventoryItems.Values)
+                packet.WriteByte((byte) character.Inventory.InventoryItems.Count);
+                packet.WriteByte(0x09); // Inventory number
+                packet.WriteByte(115); // UNK    (In newest client it exists, in bit older, not)
+                foreach (var item in character.Inventory.InventoryItems.Values)
                 {
                     item.WriteInfo(packet);
-                  // 
+                    // 
                 }
-                 character.Client.SendPacket(packet);
+
+                character.Client.SendPacket(packet);
             }
         }
 
@@ -137,17 +139,18 @@ namespace Estrella.Zone.Handlers
             using (var packet = new Packet(SH4Type.CharacterItemList))
             {
                 byte count = 0;
-                packet.WriteByte(count);   // Count
-                packet.WriteByte(0x0C);    // Inventory
-                packet.WriteByte(0x35);    // UNK    (In newest client it exists, in bit older, not)
+                packet.WriteByte(count); // Count
+                packet.WriteByte(0x0C); // Inventory
+                packet.WriteByte(0x35); // UNK    (In newest client it exists, in bit older, not)
                 for (byte i = 0; i < count; i++)
                 {
-                    packet.WriteByte(8);           // Item Data Length
-                    packet.WriteByte(i);           // Slot
-                    packet.WriteByte(0x30);        // UNK
-                    packet.WriteUShort((ushort)(31000 + i * 3));  // Item ID
-                    packet.WriteUInt(1992027391);  // Expiring Time (1992027391 - Permanent)
+                    packet.WriteByte(8); // Item Data Length
+                    packet.WriteByte(i); // Slot
+                    packet.WriteByte(0x30); // UNK
+                    packet.WriteUShort((ushort) (31000 + i * 3)); // Item ID
+                    packet.WriteUInt(1992027391); // Expiring Time (1992027391 - Permanent)
                 }
+
                 character.Client.SendPacket(packet);
             }
         }
@@ -157,17 +160,18 @@ namespace Estrella.Zone.Handlers
             using (var packet = new Packet(SH4Type.CharacterItemList))
             {
                 byte count = 0;
-                packet.WriteByte(count);   // Count
-                packet.WriteByte(0x0F);    // Inventory
-                packet.WriteByte(0xCB);    // UNK    (In newest client it exists, in bit older, not)
+                packet.WriteByte(count); // Count
+                packet.WriteByte(0x0F); // Inventory
+                packet.WriteByte(0xCB); // UNK    (In newest client it exists, in bit older, not)
                 for (byte i = 0; i < count; i++)
                 {
-                    packet.WriteByte(8);           // Item Data Length
-                    packet.WriteByte(i);           // Slot
-                    packet.WriteByte(0x3C);        // Inventory thing
-                    packet.WriteUShort((ushort)(31500 + (16 < i ? 1 : 0) + i * 2));  // Item ID
-                    packet.WriteUInt(1992027391);  // Expiring Time (1992027391 - Permanent)
+                    packet.WriteByte(8); // Item Data Length
+                    packet.WriteByte(i); // Slot
+                    packet.WriteByte(0x3C); // Inventory thing
+                    packet.WriteUShort((ushort) (31500 + (16 < i ? 1 : 0) + i * 2)); // Item ID
+                    packet.WriteUInt(1992027391); // Expiring Time (1992027391 - Permanent)
                 }
+
                 character.Client.SendPacket(packet);
             }
         }
@@ -177,15 +181,16 @@ namespace Estrella.Zone.Handlers
             using (var packet = new Packet(SH4Type.CharacterItemList))
             {
                 ushort count = 0;
-                packet.WriteUShort(count);   // Count
+                packet.WriteUShort(count); // Count
                 for (ushort i = 0; i < count; i++)
                 {
-                    packet.WriteUShort(0x0010);    // Inventory
-                    packet.WriteUShort(0x0000);    // Slot
-                    packet.WriteUShort(0x033B);    // Item Handle      // (Iron Case, to add 4 extra inventories :P)
-                    packet.WriteUInt(1992027391);  // Activation Time (1992027391 - Permanent)
-                    packet.WriteUInt(1992027391);  // Expiring Time (1992027391 - Permanent)
+                    packet.WriteUShort(0x0010); // Inventory
+                    packet.WriteUShort(0x0000); // Slot
+                    packet.WriteUShort(0x033B); // Item Handle      // (Iron Case, to add 4 extra inventories :P)
+                    packet.WriteUInt(1992027391); // Activation Time (1992027391 - Permanent)
+                    packet.WriteUInt(1992027391); // Expiring Time (1992027391 - Permanent)
                 }
+
                 character.Client.SendPacket(packet);
             }
         }
@@ -215,10 +220,11 @@ namespace Estrella.Zone.Handlers
         {
             using (var packet = new Packet(SH4Type.ConnectError))
             {
-                packet.WriteUShort((ushort)error);
+                packet.WriteUShort((ushort) error);
                 client.SendPacket(packet);
             }
         }
+
         public static void SendReviveWindow(ZoneClient client, byte minutesTillExpire)
         {
             using (var packet = new Packet(SH4Type.ReviveWindow))
@@ -267,17 +273,29 @@ namespace Estrella.Zone.Handlers
                 // LETS DO ET
                 switch (stat)
                 {
-                    case 0: client.Character.Str++; break;
-                    case 1: client.Character.Dex++; break;
-                    case 2: client.Character.End++; break;
-                    case 3: client.Character.Int++; break;
-                    case 4: client.Character.Spr++; break;
+                    case 0:
+                        client.Character.Str++;
+                        break;
+                    case 1:
+                        client.Character.Dex++;
+                        break;
+                    case 2:
+                        client.Character.End++;
+                        break;
+                    case 3:
+                        client.Character.Int++;
+                        break;
+                    case 4:
+                        client.Character.Spr++;
+                        break;
                     default:
-                        {
-                            Log.WriteLine(LogLevel.Warn, "User tried to set stat point on unknown stat {0} {1}", stat, client);
-                            return;
-                        }
+                    {
+                        Log.WriteLine(LogLevel.Warn, "User tried to set stat point on unknown stat {0} {1}", stat,
+                            client);
+                        return;
+                    }
                 }
+
                 client.Character.Character.UsablePoints--;
                 //Program.Entity.SaveChanges();
                 SendSetUsablePoint(client, stat);

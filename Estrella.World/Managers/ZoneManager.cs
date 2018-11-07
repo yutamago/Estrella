@@ -1,7 +1,4 @@
-﻿using System;
-using Estrella.InterLib;
-using Estrella.InterLib.Networking;
-using Estrella.FiestaLib.Networking;
+﻿using Estrella.InterLib.Networking;
 using Estrella.Util;
 
 namespace Estrella.World.Managers
@@ -17,7 +14,8 @@ namespace Estrella.World.Managers
             Instance = new ZoneManager();
             return true;
         }
-        public void Broadcast(InterPacket pPacket)
+
+        public static void Broadcast(InterPacket pPacket)
         {
             foreach (var zone in Program.Zones.Values)
             {

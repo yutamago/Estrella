@@ -3,6 +3,7 @@ using Estrella.FiestaLib.Networking;
 using Estrella.Util;
 using Estrella.World.Data;
 using Estrella.World.InterServer;
+using Estrella.World.Managers;
 using Estrella.World.Networking;
 
 namespace Estrella.World.Handlers
@@ -23,20 +24,22 @@ namespace Estrella.World.Handlers
             if (client.Characters.TryGetValue(slot, out character))
             {
                 //generate transfer
-                
-                ZoneConnection zone = Program.GetZoneByMap(character.Character.PositionInfo.Map);
+
+                var zone = Program.GetZoneByMap(character.Character.PositionInfo.Map);
                 if (zone != null)
                 {
                     client.Characters.Clear(); //we clear the other ones from memory
                     client.Character = character; //only keep the one selecte
                     //Database.Storage.Characters.AddChars(character.Character);
-                    zone.SendTransferClientFromZone(client.AccountID, client.Username, client.Character.Character.Name,client.Character.ID, client.RandomID, client.Admin, client.Host);
+                    zone.SendTransferClientFromZone(client.AccountId, client.Username, client.Character.Character.Name,
+                        client.Character.ID, client.RandomId, client.Admin, client.Host);
                     ClientManager.Instance.AddClientByName(client); //so we can look them up fast using charname later.
                     SendZoneServerIP(client, zone);
                 }
                 else
                 {
-                    Log.WriteLine(LogLevel.Warn, "Character tried to join unloaded map: {0}", character.Character.PositionInfo.Map);
+                    Log.WriteLine(LogLevel.Warn, "Character tried to join unloaded map: {0}",
+                        character.Character.PositionInfo.Map);
                     SendConnectError(client, ConnectErrors.MapUnderMaintenance);
                 }
             }
@@ -56,7 +59,7 @@ namespace Estrella.World.Handlers
         {
             using (var packet = new Packet(SH4Type.ConnectError))
             {
-                packet.WriteUShort((ushort)error);
+                packet.WriteUShort((ushort) error);
                 client.SendPacket(packet);
             }
         }

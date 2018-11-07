@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Estrella.Database.DataStore;
 
 namespace Estrella.FiestaLib.Data
@@ -20,10 +17,10 @@ namespace Estrella.FiestaLib.Data
         public ushort Cooldown { get; set; }
         public byte ItemSlot { get; set; }
         public bool permanent { get; set; }
+
         public static Mount LoadMount(DataRow Data)
         {
-            
-            Mount Mouninf = new Mount
+            var Mouninf = new Mount
             {
                 MinLevel = GetDataTypes.GetByte(Data["Level"]),
                 ItemID = GetDataTypes.GetUshort(Data["ItemID"]),
@@ -33,7 +30,7 @@ namespace Estrella.FiestaLib.Data
                 speed = GetDataTypes.GetUshort(Data["Speed"]),
                 CastTime = GetDataTypes.GetInt(Data["CastTime"]),
                 Cooldown = GetDataTypes.GetUshort(Data["Cooldown"]),
-                permanent = GetDataTypes.GetBool(Data["permanent"]),
+                permanent = GetDataTypes.GetBool(Data["permanent"])
             };
             return Mouninf;
         }

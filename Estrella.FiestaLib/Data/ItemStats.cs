@@ -1,9 +1,5 @@
-using System;
-using Estrella.Database.DataStore;
 using System.Data;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Estrella.Database.DataStore;
 
 namespace Estrella.FiestaLib.Data
 {
@@ -17,12 +13,12 @@ namespace Estrella.FiestaLib.Data
 
         public static ItemStats LoadItemStatsFromDatabase(DataRow row)
         {
-            ItemStats Stats = new ItemStats
+            var Stats = new ItemStats
             {
                 Dex = GetDataTypes.GetUshort(row["Dex"]),
                 End = GetDataTypes.GetUshort(row["con"]),
                 Int = GetDataTypes.GetUshort(row["Int"]),
-                Str = GetDataTypes.GetUshort(row["Str"]),
+                Str = GetDataTypes.GetUshort(row["Str"])
             };
             return Stats;
         }

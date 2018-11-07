@@ -87,6 +87,7 @@ namespace Estrella.Zone.Handlers
                 Log.WriteLine(LogLevel.Warn, "Couldn't read useskill packet {0}", client);
                 return;
             }
+
             Skill skill;
             if (!client.Character.SkillsActive.TryGetValue(skillid, out skill))
             {
@@ -98,8 +99,10 @@ namespace Estrella.Zone.Handlers
             MapObject victim;
             if (!client.Character.MapSector.Objects.TryGetValue(victimid, out victim))
             {
-                Log.WriteLine(LogLevel.Warn, "User tried to do something with an unknown victim. {0} {1} {2}", skillid, victimid, client);
+                Log.WriteLine(LogLevel.Warn, "User tried to do something with an unknown victim. {0} {1} {2}", skillid,
+                    victimid, client);
             }
+
             var self = client.Character;
 
             if (skill.Info.DemandType == 6)
@@ -109,7 +112,7 @@ namespace Estrella.Zone.Handlers
 
                 // Only Heal has this
                 // Some heal calculation here
-                uint amount = 12 * (uint)Program.Randomizer.Next(1, 300); //lulz
+                var amount = 12 * (uint) Program.Randomizer.Next(1, 300); //lulz
 
                 if (amount > victim.MaxHP - victim.HP)
                 {
@@ -118,7 +121,7 @@ namespace Estrella.Zone.Handlers
 
                 zc.HP += amount;
 
-                ushort id = self.UpdateCounter;
+                var id = self.UpdateCounter;
                 SendSkillStartSelf(self, skillid, victimid, id);
                 SendSkillStartOthers(self, skillid, victimid, id);
                 SendSkillOK(self);
@@ -129,18 +132,19 @@ namespace Estrella.Zone.Handlers
             else
             {
                 if (!(victim is Mob)) return;
-                uint dmgmin = (uint)self.GetWeaponDamage(true);
-                uint dmgmax = (uint)(self.GetWeaponDamage(true) + (self.GetWeaponDamage(true) % 3));
-                uint amount = (uint)Program.Randomizer.Next((int)dmgmin, (int)dmgmax);
+                var dmgmin = (uint) self.GetWeaponDamage(true);
+                var dmgmax = (uint) (self.GetWeaponDamage(true) + self.GetWeaponDamage(true) % 3);
+                var amount = (uint) Program.Randomizer.Next((int) dmgmin, (int) dmgmax);
                 if (amount > victim.HP)
                 {
                     victim.HP = 0;
                 }
-                else {
+                else
+                {
                     victim.HP -= amount;
                 }
 
-                ushort id = self.UpdateCounter;
+                var id = self.UpdateCounter;
                 SendSkillStartSelf(self, skillid, victimid, id);
                 SendSkillStartOthers(self, skillid, victimid, id);
                 SendSkillOK(self);
@@ -177,14 +181,16 @@ namespace Estrella.Zone.Handlers
 
             if (x == 0 || y == 0 || x > block.Width || y > block.Height)
             {
-                Log.WriteLine(LogLevel.Warn, "User tried to use skill out of map boundaries. {0} {1} {2} {3}", x, y, skillid, client);
+                Log.WriteLine(LogLevel.Warn, "User tried to use skill out of map boundaries. {0} {1} {2} {3}", x, y,
+                    skillid, client);
                 return;
             }
 
             if (skill.Info.MaxTargets <= 1)
             {
                 // No AoE skill :s
-                Log.WriteLine(LogLevel.Warn, "User tried to use skill with no MaxTargets or less than 1. {0} {1}", skillid, client);
+                Log.WriteLine(LogLevel.Warn, "User tried to use skill with no MaxTargets or less than 1. {0} {1}",
+                    skillid, client);
                 return;
             }
 
@@ -208,7 +214,8 @@ namespace Estrella.Zone.Handlers
             }
         }
 
-        public static void SendAttackDamage(MapObject from, ushort objectID, ushort damage, bool crit, uint hpleft, ushort counter)
+        public static void SendAttackDamage(MapObject from, ushort objectID, ushort damage, bool crit, uint hpleft,
+            ushort counter)
         {
             using (var packet = new Packet(SH9Type.AttackDamage))
             {
@@ -279,14 +286,12 @@ namespace Estrella.Zone.Handlers
         }*/
         public static void SendUpdateHP(ZoneCharacter character)
         {
-
             using (var p = new Packet(SH9Type.HealHP))
             {
                 p.WriteUInt(character.HP);
                 p.WriteUShort(character.UpdateCounter);
                 character.Client.SendPacket(p);
             }
-
         }
 
         public static void SendUpdateSP(ZoneCharacter character)
@@ -307,12 +312,13 @@ namespace Estrella.Zone.Handlers
                 packet.WriteUShort(pObject.MapObjectID);
                 if (pObject is ZoneCharacter)
                 {
-                    ((ZoneCharacter)pObject).WriteUpdateStats(packet);
+                    ((ZoneCharacter) pObject).WriteUpdateStats(packet);
                 }
                 else
                 {
-                    ((Mob)pObject).WriteUpdateStats(packet);
+                    ((Mob) pObject).WriteUpdateStats(packet);
                 }
+
                 to.SendPacket(packet);
             }
         }
@@ -364,7 +370,8 @@ namespace Estrella.Zone.Handlers
             }
         }
 
-        public static void SendSkill(MapObject user, ushort animid, ushort victimid, uint damage, uint newhp, ushort counter, byte special1 = (byte) 0x10, byte special2 = (byte) 0x00)
+        public static void SendSkill(MapObject user, ushort animid, ushort victimid, uint damage, uint newhp,
+            ushort counter, byte special1 = (byte) 0x10, byte special2 = (byte) 0x00)
         {
             // 9 82 | [E5 3F] [8A 27] [01] [8A 27] [10 00] [09 00 00 00] [5E 00 00 00] [A7 4C]
             // 9 82 | [9A 35] [8A 27] [01] [C2 05] [10 00] [0A 00 00 00] [1D 01 00 00] [73 37]
@@ -403,7 +410,7 @@ namespace Estrella.Zone.Handlers
             {
                 packet.WriteUShort(animid);
                 packet.WriteUShort(user.MapObjectID);
-                packet.WriteByte((byte)(victims.Count > 255 ? 255 : victims.Count));
+                packet.WriteByte((byte) (victims.Count > 255 ? 255 : victims.Count));
                 for (byte i = 0; i < victims.Count && i != 255; i++)
                 {
                     var victim = victims[i];
@@ -414,6 +421,7 @@ namespace Estrella.Zone.Handlers
                     packet.WriteUInt(victim.HPLeft);
                     packet.WriteUShort(victim.HPCounter);
                 }
+
                 user.MapSector.Broadcast(packet);
             }
         }

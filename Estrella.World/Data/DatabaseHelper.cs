@@ -1,38 +1,41 @@
-﻿namespace Estrella.World.Data
+﻿using Estrella.World.Data.Group;
+
+namespace Estrella.World.Data
 {
-	public static class DatabaseHelper
-	{
-		#region Queries
+    public static class DatabaseHelper
+    {
+        #region Queries
 
-		public const string RemoveCharacterGroupQuery = "UPDATE `characters` SET GroupID = NULL WHERE Name = \'{0}\'";
-		public const string UpdateCharacterGroupQuery =
-			"UPDATE `characters` SET GroupID = '{0}' , IsGroupMaster = '{1}' WHERE Name = \'{2}\'";
+        public const string RemoveCharacterGroupQuery = "UPDATE `characters` SET GroupID = NULL WHERE Name = \'{0}\'";
 
-		#endregion
+        public const string UpdateCharacterGroupQuery =
+            "UPDATE `characters` SET GroupID = '{0}' , IsGroupMaster = '{1}' WHERE Name = \'{2}\'";
 
-		#region Methods
+        #endregion
 
-		public static void RemoveCharacterGroup(string pName)
-		{
-			using (var con = Program.DatabaseManager.GetClient())
-			{
-				string q = string.Format(RemoveCharacterGroupQuery, pName);
-				con.ExecuteQuery(q);
-			}
-		}
-		public static void UpdateCharacterGroup(GroupMember pMember)
-		{
-			using (var client = Program.DatabaseManager.GetClient())
-			{
-				string q = string.Format(UpdateCharacterGroupQuery,
-							pMember.Group.Id,
-							pMember.Role == GroupRole.Master,
-							pMember.Character.ID);
-				client.ExecuteQuery(q);
-			}
-		}
+        #region Methods
 
+        public static void RemoveCharacterGroup(string pName)
+        {
+            using (var con = Program.DatabaseManager.GetClient())
+            {
+                var q = string.Format(RemoveCharacterGroupQuery, pName);
+                con.ExecuteQuery(q);
+            }
+        }
 
-		#endregion
-	}
+        public static void UpdateCharacterGroup(GroupMember pMember)
+        {
+            using (var client = Program.DatabaseManager.GetClient())
+            {
+                var q = string.Format(UpdateCharacterGroupQuery,
+                    pMember.Group.Id,
+                    pMember.Role == GroupRole.Master,
+                    pMember.Character.ID);
+                client.ExecuteQuery(q);
+            }
+        }
+
+        #endregion
+    }
 }

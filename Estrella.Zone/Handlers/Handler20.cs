@@ -1,5 +1,4 @@
-﻿
-using Estrella.FiestaLib;
+﻿using Estrella.FiestaLib;
 using Estrella.FiestaLib.Networking;
 using Estrella.Zone.Networking;
 
@@ -13,8 +12,9 @@ namespace Estrella.Zone.Handlers
             short Amount;
             if (packet.TryReadShort(out Amount))
             {
-                client.Character.ChangeMoney(client.Character.Character.Money -= client.Character.BaseStats.PriceHPStone);
-                short am = Amount += client.Character.StonesSP;
+                client.Character.ChangeMoney(
+                    client.Character.Character.Money -= client.Character.BaseStats.PriceHPStone);
+                var am = Amount += client.Character.StonesSP;
                 client.Character.StonesSP = am;
                 using (var p = new Packet(SH20Type.ChangeHPStones))
                 {
@@ -30,8 +30,9 @@ namespace Estrella.Zone.Handlers
             short Amount;
             if (packet.TryReadShort(out Amount))
             {
-                client.Character.ChangeMoney(client.Character.Character.Money -= client.Character.BaseStats.PriceSPStone);
-                short Am = Amount += client.Character.StonesSP;
+                client.Character.ChangeMoney(
+                    client.Character.Character.Money -= client.Character.BaseStats.PriceSPStone);
+                var Am = Amount += client.Character.StonesSP;
                 client.Character.StonesHP = Am;
                 using (var p = new Packet(SH20Type.ChangeSPStones))
                 {
@@ -40,6 +41,7 @@ namespace Estrella.Zone.Handlers
                 }
             }
         }
+
         [PacketHandler(CH20Type.UseHPStone)]
         public static void UseHPStoneHandler(ZoneClient client, Packet packet)
         {
@@ -52,7 +54,7 @@ namespace Estrella.Zone.Handlers
             }
             else
             {
-                client.Character.HealHP((uint)client.Character.BaseStats.SoulHP);
+                client.Character.HealHP((uint) client.Character.BaseStats.SoulHP);
 
                 using (var p = new Packet(SH20Type.StartHPStoneCooldown))
                 {
@@ -60,6 +62,7 @@ namespace Estrella.Zone.Handlers
                 }
             }
         }
+
         [PacketHandler(CH20Type.UseSPStone)]
         public static void UseSPStoneHandler(ZoneClient client, Packet packet)
         {
@@ -72,7 +75,7 @@ namespace Estrella.Zone.Handlers
             }
             else
             {
-                client.Character.HealSP((uint)client.Character.BaseStats.SoulSP);
+                client.Character.HealSP((uint) client.Character.BaseStats.SoulSP);
 
                 using (var p = new Packet(SH20Type.StartSPStoneCooldown))
                 {

@@ -5,109 +5,106 @@ using System.Data;
 namespace Estrella.Util
 {
     /// <summary>
-    /// Class to read a DataTable by ColumnName, as .NET one doesn't support this.
+    ///     Class to read a DataTable by ColumnName, as .NET one doesn't support this.
     /// </summary>
     public sealed class DataTableReaderEx : IDisposable
     {
+        private readonly DataTableReader reader;
+        private Dictionary<string, int> columns = new Dictionary<string, int>();
         private bool isDisposed;
-		private readonly DataTableReader reader;
-		private Dictionary<string, int> columns = new Dictionary<string, int>();
 
         public DataTableReaderEx(DataTable pTable)
         {
-            this.isDisposed = false;
+            isDisposed = false;
             //Thank you MicroSoft, for making it a sealed class...
-            this.reader = new DataTableReader(pTable);
-            for (int i = 0; i < pTable.Columns.Count; ++i)
+            reader = new DataTableReader(pTable);
+            for (var i = 0; i < pTable.Columns.Count; ++i)
             {
-                this.columns.Add(pTable.Columns[i].Caption.ToLower(), i);
+                columns.Add(pTable.Columns[i].Caption.ToLower(), i);
+            }
+        }
+
+        public void Dispose()
+        {
+            if (!isDisposed)
+            {
+                reader.Dispose();
+                columns.Clear();
+                columns = null;
+                isDisposed = true;
             }
         }
 
         public bool Read()
         {
-            return this.reader.Read();
+            return reader.Read();
         }
 
         public string GetString(string pColumnName)
         {
-            return this.reader.GetString(GetIndex(pColumnName));
+            return reader.GetString(GetIndex(pColumnName));
         }
 
         public int GetInt32(string pColumnName)
         {
-            return this.reader.GetInt32(GetIndex(pColumnName));
+            return reader.GetInt32(GetIndex(pColumnName));
         }
 
         public uint GetUInt32(string pColumnName)
         {
-            return Convert.ToUInt32(this.reader.GetValue(GetIndex(pColumnName)));
+            return Convert.ToUInt32(reader.GetValue(GetIndex(pColumnName)));
         }
 
         public ulong GetUInt64(string pColumnName)
         {
-            return Convert.ToUInt64(this.reader.GetValue(GetIndex(pColumnName)));
+            return Convert.ToUInt64(reader.GetValue(GetIndex(pColumnName)));
         }
 
         public ushort GetUInt16(string pColumnName)
         {
             //weird that this wasn't implemented at all
-            return Convert.ToUInt16(this.reader.GetValue(GetIndex(pColumnName)));
+            return Convert.ToUInt16(reader.GetValue(GetIndex(pColumnName)));
         }
 
         public short GetInt16(string pColumnName)
         {
-            return Convert.ToInt16(this.reader.GetValue(GetIndex(pColumnName)));
+            return Convert.ToInt16(reader.GetValue(GetIndex(pColumnName)));
         }
 
         public byte GetByte(string pColumnName)
         {
-            return Convert.ToByte(this.reader.GetValue(GetIndex(pColumnName)));
+            return Convert.ToByte(reader.GetValue(GetIndex(pColumnName)));
         }
 
         public float GetFloat(string pColumnName)
         {
-            return Convert.ToSingle(this.reader.GetValue(GetIndex(pColumnName)));
+            return Convert.ToSingle(reader.GetValue(GetIndex(pColumnName)));
         }
 
         public bool GetBoolean(string pColumnName)
         {
-            return Convert.ToBoolean(this.reader.GetValue(GetIndex(pColumnName)));
+            return Convert.ToBoolean(reader.GetValue(GetIndex(pColumnName)));
         }
 
         public int GetIndex(string pName)
         {
             int offset;
-            if (this.columns.TryGetValue(pName.ToLower(), out offset))
+            if (columns.TryGetValue(pName.ToLower(), out offset))
             {
                 return offset;
             }
-            else
-            {
-                throw new Exception("Column name not found: " + pName);
-            }
+
+            throw new Exception("Column name not found: " + pName);
         }
 
         public Type GetType(string pName)
         {
-            return this.reader.GetValue(GetIndex(pName)).GetType();
+            return reader.GetValue(GetIndex(pName)).GetType();
         }
 
         ~DataTableReaderEx()
         {
             Dispose();
         }
-
-        public void Dispose()
-        {
-            if (!this.isDisposed)
-            {
-                this.reader.Dispose();
-                this.columns.Clear();
-                this.columns = null;
-                this.isDisposed = true;
-            }
-        }
-
     }
 }

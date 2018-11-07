@@ -1,35 +1,22 @@
-﻿using Estrella.Database;
-using System.Data;
-
-namespace Estrella.World.Security
+﻿namespace Estrella.World.Security
 {
-    public sealed class DatabaseChecks
+    public static class DatabaseChecks
     {
         public static bool IsCharNameUsed(string name)
         {
-            DataTable data = null;
-            using (DatabaseClient dbClient = Program.DatabaseManager.GetClient())
+            using (var dbClient = Program.DatabaseManager.GetClient())
             {
-                data = dbClient.ReadDataTable("Select CharID from characters  WHERE binary Name='" + name + "'");
-            }
-            if (data != null)
-            {
-                if (data.Rows.Count == 1)
+                var data = dbClient.ReadDataTable("Select CharID from characters  WHERE binary Name='" + name + "'");
+                if (data == null) return true;
+
+                switch (data.Rows.Count)
                 {
-                    return true;
-                }
-                else
-                {
-                    if (data.Rows.Count == 0)
+                    case 0:
                         return false;
+                    default:
+                        return true;
                 }
-                return true;
-            }
-            else
-            {
-                return true;
             }
         }
     }
 }
-

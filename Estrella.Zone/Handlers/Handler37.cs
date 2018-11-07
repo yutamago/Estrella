@@ -1,6 +1,6 @@
 ﻿using Estrella.FiestaLib;
-using Estrella.InterLib.Networking;
 using Estrella.FiestaLib.Networking;
+using Estrella.Zone.InterServer;
 using Estrella.Zone.Networking;
 
 namespace Estrella.Zone.Handlers
@@ -15,24 +15,23 @@ namespace Estrella.Zone.Handlers
                 return;
             using (var packet = new Packet(SH37Type.SendRecivveCopper))
             {
-                packet.WriteUShort(7264);//unk
+                packet.WriteUShort(7264); //unk
                 packet.WriteLong(client.Character.Character.ReviveCoper);
                 client.SendPacket(packet);
             }
         }
-          [PacketHandler(CH37Type.SendReciveCoperAccept)]
+
+        [PacketHandler(CH37Type.SendReciveCoperAccept)]
         public static void MasterRequestAcceptCoper(ZoneClient client, Packet pPacket)
         {
             client.Character.Character.ReviveCoper = 0;
-             InterServer.InterHandler.SendReciveCoper(client.Character.Character.Name, client.Character.Character.ReviveCoper,true);
-             using(var packet = new Packet(37,65))
-             {
- 
-                packet.WriteUShort(7272);//unk
+            InterHandler.SendReciveCoper(client.Character.Character.Name, client.Character.Character.ReviveCoper, true);
+            using (var packet = new Packet(37, 65))
+            {
+                packet.WriteUShort(7272); //unk
                 packet.WriteLong(client.Character.RecviveCoper);
                 client.SendPacket(packet);
-             }
-          
+            }
         }
     }
 }

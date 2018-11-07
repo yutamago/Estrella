@@ -12,7 +12,7 @@ namespace Estrella.InterLib.Networking
 
         public SessionCloseEventArgs(string reason)
         {
-            this.Reason = reason;
+            Reason = reason;
         }
 
         public string Reason { get; private set; }

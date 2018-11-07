@@ -1,26 +1,25 @@
 ﻿using System.Net.Sockets;
-
 using Estrella.InterLib.NetworkObjects;
 using Estrella.Util;
 
 namespace Estrella.World.InterServer
 {
-    [ServerModule(Util.InitializationStage.Services)]
+    [ServerModule(InitializationStage.Services)]
     public sealed class ZoneAcceptor : AbstractAcceptor
     {
-        public static ZoneAcceptor Instance { get; private set; }
-
         public ZoneAcceptor(int port) : base(port)
         {
-            this.OnIncommingConnection += new OnIncomingConnectionDelegate(WorldAcceptor_OnIncommingConnection);
+            OnIncommingConnection += WorldAcceptor_OnIncommingConnection;
             Log.WriteLine(LogLevel.Info, "Listening on port {0} for zones.", port);
         }
+
+        public static ZoneAcceptor Instance { get; private set; }
 
         private void WorldAcceptor_OnIncommingConnection(Socket session)
         {
             // So something with it X:
             Log.WriteLine(LogLevel.Info, "Incoming connection from {0}", session.RemoteEndPoint);
-            ZoneConnection wc = new ZoneConnection(session);
+            var wc = new ZoneConnection(session);
         }
 
         [InitializerMethod]
@@ -36,8 +35,10 @@ namespace Estrella.World.InterServer
                 Instance = new ZoneAcceptor(port);
                 return true;
             }
-            catch { return false; }
+            catch
+            {
+                return false;
+            }
         }
-
     }
 }

@@ -4,9 +4,9 @@ namespace Estrella.Util
 {
     public class TimedTask
     {
-		readonly Action action;
-		private readonly TimeSpan? repeat; // Nullable.
-		private DateTime when;
+        readonly Action action;
+        private readonly TimeSpan? repeat; // Nullable.
+        private DateTime when;
 
         public TimedTask(Action pAction, DateTime pWhen)
         {
@@ -23,11 +23,10 @@ namespace Estrella.Util
         }
 
         /// <summary>
-        /// This function tries to run _action on a specific time.
+        ///     This function tries to run _action on a specific time.
         /// </summary>
         /// <param name="pCurrentTime"></param>
         /// <returns>False when the task still needs to be ran, else True</returns>
-
         public bool RunTask(DateTime pCurrentTime)
         {
             if (when <= pCurrentTime)
@@ -45,8 +44,10 @@ namespace Estrella.Util
                     when = pCurrentTime.Add(repeat ?? new TimeSpan(0, 0, 0));
                     return false;
                 }
+
                 return true;
             }
+
             return false;
         }
     }

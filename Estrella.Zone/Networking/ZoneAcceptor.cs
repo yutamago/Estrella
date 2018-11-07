@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Sockets;
-
 using Estrella.FiestaLib.Networking;
 using Estrella.Util;
 
@@ -8,8 +7,6 @@ namespace Estrella.Zone.Networking
 {
     public sealed class ZoneAcceptor : Listener
     {
-        public static ZoneAcceptor Instance { get; private set; }
-
         public ZoneAcceptor(int port)
             : base(port)
         {
@@ -17,13 +14,15 @@ namespace Estrella.Zone.Networking
             Log.WriteLine(LogLevel.Info, "Listening at port {0} for incoming clients.", port);
         }
 
+        public static ZoneAcceptor Instance { get; private set; }
+
         public override void OnClientConnect(Socket socket)
         {
-            ZoneClient client = new ZoneClient(socket);
-   
-         //  ClientManager.Instance.AddClient(client); //They register once authenticated now
+            var client = new ZoneClient(socket);
+
+            //  ClientManager.Instance.AddClient(client); //They register once authenticated now
             Log.WriteLine(LogLevel.Debug, "Client connected from {0}", client.Host);
-           // ClientManager.Instance.AddClient(client); //They register once authenticated now
+            // ClientManager.Instance.AddClient(client); //They register once authenticated now
         }
 
         public static bool Load()

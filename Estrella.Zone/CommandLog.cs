@@ -1,21 +1,21 @@
 ﻿using System;
 using System.IO;
-
 using Estrella.Util;
 
 namespace Estrella.Zone
 {
-    [ServerModule(Util.InitializationStage.DataStore)]
+    [ServerModule(InitializationStage.DataStore)]
     public sealed class CommandLog
     {
-		private readonly StreamWriter writer;
-		public static CommandLog Instance { get; private set; }
+        private readonly StreamWriter writer;
 
         public CommandLog(string filename)
         {
             writer = new StreamWriter(File.Open(filename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
             writer.AutoFlush = true;
         }
+
+        public static CommandLog Instance { get; private set; }
 
         [InitializerMethod]
         public static bool Load()
@@ -34,7 +34,8 @@ namespace Estrella.Zone
 
         public void LogCommand(string username, string command)
         {
-            writer.WriteLine("[{0}] {1} : {2}", Program.CurrentTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss"), username, command);
+            writer.WriteLine("[{0}] {1} : {2}", Program.CurrentTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss"), username,
+                command);
         }
     }
 }

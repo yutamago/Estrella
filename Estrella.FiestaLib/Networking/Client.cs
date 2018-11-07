@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-
 using Estrella.FiestaLib.Encryption;
 using Estrella.Util;
 
@@ -12,30 +11,30 @@ namespace Estrella.FiestaLib.Networking
     public class Client
     {
         private const int MaxReceiveBuffer = 16384; //16kb
+        private readonly byte[] receiveBuffer;
+        private readonly ConcurrentQueue<ByteArraySegment> sendSegments;
+        private NetCrypto crypto;
+        private byte headerLength;
 
         private int mDisconnected;
-		private readonly byte[] receiveBuffer;
-		private int mReceiveStart;
         private int mReceiveLength;
-		private readonly ConcurrentQueue<ByteArraySegment> sendSegments;
-		private int mSending;
-        private NetCrypto crypto;
+        private int mReceiveStart;
         private ushort mReceivingPacketLength;
-        private byte headerLength = 0;
+        private int mSending;
+
+        public Client(Socket socket)
+        {
+            sendSegments = new ConcurrentQueue<ByteArraySegment>();
+            Socket = socket;
+            Host = ((IPEndPoint) Socket.RemoteEndPoint).Address.ToString();
+            receiveBuffer = new byte[MaxReceiveBuffer];
+            Start();
+        }
 
         public Socket Socket { get; private set; }
         public string Host { get; private set; }
         public event EventHandler<PacketReceivedEventArgs> OnPacket;
         public event EventHandler<SessionCloseEventArgs> OnDisconnect;
-
-        public Client(Socket socket)
-        {
-            sendSegments = new ConcurrentQueue<ByteArraySegment>();
-            this.Socket = socket;
-            Host =  ((IPEndPoint)Socket.RemoteEndPoint).Address.ToString();
-            receiveBuffer = new byte[MaxReceiveBuffer];
-            Start();
-        }
 
         public void Start()
         {
@@ -52,10 +51,13 @@ namespace Estrella.FiestaLib.Networking
                 {
                     Socket.Shutdown(SocketShutdown.Both);
                 }
-                catch { }
+                catch
+                {
+                }
+
                 if (OnDisconnect != null)
                 {
-                    this.OnDisconnect(this, SessionCloseEventArgs.ConnectionTerminated); //TODO: split
+                    OnDisconnect(this, SessionCloseEventArgs.ConnectionTerminated); //TODO: split
                 }
             }
         }
@@ -63,19 +65,19 @@ namespace Estrella.FiestaLib.Networking
         private void BeginReceive()
         {
             if (mDisconnected != 0) return;
-            SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+            var args = new SocketAsyncEventArgs();
             args.Completed += EndReceive;
             args.SetBuffer(receiveBuffer, mReceiveStart, receiveBuffer.Length - (mReceiveStart + mReceiveLength));
             try
             {
-                if (!this.Socket.ReceiveAsync(args))
+                if (!Socket.ReceiveAsync(args))
                 {
                     EndReceive(this, args);
                 }
             }
             catch (ObjectDisposedException ex)
             {
-                Log.WriteLine(LogLevel.Exception,"Error at BeginReceive: {0}",  ex.ToString());
+                Log.WriteLine(LogLevel.Exception, "Error at BeginReceive: {0}", ex.ToString());
                 Disconnect();
             }
         }
@@ -88,6 +90,7 @@ namespace Estrella.FiestaLib.Networking
                 Disconnect();
                 return;
             }
+
             mReceiveLength += pArguments.BytesTransferred;
 
             while (mReceiveLength > 1)
@@ -118,20 +121,22 @@ namespace Estrella.FiestaLib.Networking
                 //parse packets
                 if (mReceivingPacketLength > 0 && mReceiveLength >= mReceivingPacketLength + headerLength)
                 {
-                    byte[] packetData = new byte[mReceivingPacketLength];
-                    Buffer.BlockCopy(receiveBuffer, mReceiveStart + headerLength, packetData, 0, mReceivingPacketLength);
+                    var packetData = new byte[mReceivingPacketLength];
+                    Buffer.BlockCopy(receiveBuffer, mReceiveStart + headerLength, packetData, 0,
+                        mReceivingPacketLength);
                     crypto.Crypt(packetData, 0, mReceivingPacketLength);
                     if (OnPacket != null)
                     {
-                        Packet packet = new Packet(packetData);
+                        var packet = new Packet(packetData);
                         if (packet.Header > 49)
                         {
-                            Log.WriteLine(LogLevel.Warn, "Header out of range from {0} ({1}|{2})", Host, packet.Header, packet.Type);
+                            Log.WriteLine(LogLevel.Warn, "Header out of range from {0} ({1}|{2})", Host, packet.Header,
+                                packet.Type);
                             Disconnect();
                         }
                         else
                         {
-                            this.OnPacket(this, new PacketReceivedEventArgs(packet));
+                            OnPacket(this, new PacketReceivedEventArgs(packet));
                         }
                     }
 
@@ -144,22 +149,24 @@ namespace Estrella.FiestaLib.Networking
             }
 
             if (mReceiveLength == 0) mReceiveStart = 0;
-            else if (mReceiveStart > 0 && (mReceiveStart + mReceiveLength) >= receiveBuffer.Length)
+            else if (mReceiveStart > 0 && mReceiveStart + mReceiveLength >= receiveBuffer.Length)
             {
                 Buffer.BlockCopy(receiveBuffer, mReceiveStart, receiveBuffer, 0, mReceiveLength);
                 mReceiveStart = 0;
             }
+
             if (mReceiveLength == receiveBuffer.Length)
             {
                 Disconnect();
             }
             else BeginReceive();
+
             pArguments.Dispose();
         }
 
         private void SendHandshake(short pXorPos)
         {
-            Packet packet = new Packet(SH2Type.SetXorKeyPosition);
+            var packet = new Packet(SH2Type.SetXorKeyPosition);
             packet.WriteShort(pXorPos);
             SendPacket(packet);
         }
@@ -168,19 +175,19 @@ namespace Estrella.FiestaLib.Networking
         {
             if (mDisconnected != 0) return;
             // Everything we send is from the main thread, so no async sending.
-         /*   int len = pBuffer.Length, offset = 0;
-            while (true)
-            {
-                int send = Socket.Send(pBuffer, offset, len, SocketFlags.None);
-                if (send == 0)
-                {
-                    Disconnect();
-                    return;
-                }
-                offset += send;
-                if (offset == len) break;
-            } */
-            
+            /*   int len = pBuffer.Length, offset = 0;
+               while (true)
+               {
+                   int send = Socket.Send(pBuffer, offset, len, SocketFlags.None);
+                   if (send == 0)
+                   {
+                       Disconnect();
+                       return;
+                   }
+                   offset += send;
+                   if (offset == len) break;
+               } */
+
             sendSegments.Enqueue(new ByteArraySegment(pBuffer));
             if (Interlocked.CompareExchange(ref mSending, 1, 0) == 0)
             {
@@ -190,12 +197,12 @@ namespace Estrella.FiestaLib.Networking
 
         public void SendPacket(Packet pPacket)
         {
-           Send(pPacket.ToPacketArray());
+            Send(pPacket.ToPacketArray());
         }
 
         private void BeginSend()
         {
-            SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+            var args = new SocketAsyncEventArgs();
             ByteArraySegment segment;
             if (sendSegments.TryPeek(out segment))
             {
@@ -204,9 +211,9 @@ namespace Estrella.FiestaLib.Networking
                 // args.SetBuffer(segment.Buffer, segment.Start, Math.Min(segment.Length, 1360));
                 try
                 {
-                    if (!this.Socket.SendAsync(args))
+                    if (!Socket.SendAsync(args))
                     {
-                            EndSend(this, args);
+                        EndSend(this, args);
                     }
                 }
                 catch (ObjectDisposedException ex)
@@ -238,13 +245,14 @@ namespace Estrella.FiestaLib.Networking
 
                 if (sendSegments.Count > 0)
                 {
-                    this.BeginSend();
+                    BeginSend();
                 }
                 else
                 {
                     mSending = 0;
                 }
             }
+
             pArguments.Dispose(); //clears out the whole async buffer
         }
     }

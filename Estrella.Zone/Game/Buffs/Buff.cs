@@ -1,14 +1,10 @@
-﻿﻿/*File for this file Basic Copyright 2012 no0dl */
-using System;
-using System.Collections.Generic;
-using Estrella.FiestaLib.Data;
-using System.Collections;
+﻿/*File for this file Basic Copyright 2012 no0dl */
 
 namespace Estrella.Zone.Game.Buffs
 {
     public class Buff
     {
-       /* /// <summary>
+        /* /// <summary>
         /// The ID of this buff. Only used if its saved in database.
         /// </summary>
         public long ID { get; set; }

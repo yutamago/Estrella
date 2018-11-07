@@ -1,10 +1,10 @@
 namespace Estrella.Zone
 {
-	public enum CommandStatus : byte
-	{
-		Done,
-		GMLevelTooLow,
-		NotFound,
-		Error
-	}
+    public enum CommandStatus : byte
+    {
+        Done,
+        GMLevelTooLow,
+        NotFound,
+        Error
+    }
 }

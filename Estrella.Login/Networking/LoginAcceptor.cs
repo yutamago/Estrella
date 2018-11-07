@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Net.Sockets;
-
 using Estrella.FiestaLib.Networking;
 using Estrella.Util;
 
 namespace Estrella.Login.Networking
 {
-    [ServerModule(Util.InitializationStage.Networking)]
+    [ServerModule(InitializationStage.Networking)]
     public sealed class LoginAcceptor : Listener
     {
-        public static LoginAcceptor Instance { get; private set; }
         public LoginAcceptor(int port)
             : base(port)
         {
@@ -17,9 +15,11 @@ namespace Estrella.Login.Networking
             Log.WriteLine(LogLevel.Info, "Accepting clients on port {0}", port);
         }
 
+        public static LoginAcceptor Instance { get; private set; }
+
         public override void OnClientConnect(Socket socket)
         {
-            LoginClient client = new LoginClient(socket);
+            var client = new LoginClient(socket);
             ClientManager.Instance.AddClient(client);
             Log.WriteLine(LogLevel.Debug, "Client connected from {0}", client.Host);
         }

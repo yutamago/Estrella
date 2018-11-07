@@ -1,7 +1,4 @@
-﻿using System;
-using System.Net.Sockets;
-using System.Reflection;
-
+﻿using System.Net.Sockets;
 using Estrella.FiestaLib;
 using Estrella.InterLib.Networking;
 using Estrella.Util;
@@ -10,6 +7,14 @@ namespace Estrella.Login.InterServer
 {
     public sealed class WorldConnection : InterClient
     {
+        public WorldConnection(Socket sock) : base(sock)
+        {
+            Status = WorldStatus.Maintenance;
+            IsAWorld = false;
+            OnPacket += WorldConnection_OnPacket;
+            OnDisconnect += WorldConnection_OnDisconnect;
+        }
+
         public bool IsAWorld { get; set; }
         public WorldStatus Status { get; set; }
         public string Name { get; set; }
@@ -18,20 +23,12 @@ namespace Estrella.Login.InterServer
         public ushort Port { get; set; }
         public int Load { get; private set; }
 
-        public WorldConnection(Socket sock) : base(sock)
-        {
-            Status = WorldStatus.Maintenance;
-            IsAWorld = false;
-            this.OnPacket += new EventHandler<InterPacketReceivedEventArgs>(WorldConnection_OnPacket);
-            this.OnDisconnect += new EventHandler<InterLib.Networking.SessionCloseEventArgs>(WorldConnection_OnDisconnect);
-        }
-
-        void WorldConnection_OnDisconnect(object sender, InterLib.Networking.SessionCloseEventArgs e)
+        void WorldConnection_OnDisconnect(object sender, SessionCloseEventArgs e)
         {
             if (IsAWorld)
             {
-                this.OnPacket -= new EventHandler<InterPacketReceivedEventArgs>(WorldConnection_OnPacket);
-                this.OnDisconnect -= new EventHandler<InterLib.Networking.SessionCloseEventArgs>(WorldConnection_OnDisconnect);
+                OnPacket -= WorldConnection_OnPacket;
+                OnDisconnect -= WorldConnection_OnDisconnect;
                 WorldConnection derp;
                 if (WorldManager.Instance.Worlds.TryRemove(ID, out derp))
                 {
@@ -62,7 +59,6 @@ namespace Estrella.Login.InterServer
                     {
                         Log.WriteLine(LogLevel.Error, "Inter password incorrect");
                         e.Client.Disconnect();
-                        return;
                     }
                     else
                     {
@@ -73,15 +69,14 @@ namespace Estrella.Login.InterServer
                 {
                     Log.WriteLine(LogLevel.Info, "Not authenticated and no auth packet first.");
                     e.Client.Disconnect();
-                    return;
                 }
             }
             else
             {
-                MethodInfo method = InterHandlerStore.GetHandler(e.Packet.OpCode);
+                var method = InterHandlerStore.GetHandler(e.Packet.OpCode);
                 if (method != null)
                 {
-                    Action action = InterHandlerStore.GetCallback(method, this, e.Packet);
+                    var action = InterHandlerStore.GetCallback(method, this, e.Packet);
                     if (Worker.Instance == null)
                     {
                         action();
@@ -108,11 +103,12 @@ namespace Estrella.Login.InterServer
                 packet.WriteStringLen(hash);
                 packet.WriteByte(admin);
                 packet.WriteStringLen(hostIP);
-                this.SendPacket(packet);
+                SendPacket(packet);
             }
         }
 
-        public void SendTransferClientFromZone(int accountID, string userName, string charName,int CharID, ushort randid, byte admin, string hostIP)
+        public void SendTransferClientFromZone(int accountID, string userName, string charName, int CharID,
+            ushort randid, byte admin, string hostIP)
         {
             using (var packet = new InterPacket(InterHeader.Clienttransfer))
             {
@@ -124,7 +120,7 @@ namespace Estrella.Login.InterServer
                 packet.WriteUShort(randid);
                 packet.WriteByte(admin);
                 packet.WriteStringLen(hostIP);
-                this.SendPacket(packet);
+                SendPacket(packet);
             }
         }
     }

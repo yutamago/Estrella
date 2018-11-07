@@ -1,13 +1,6 @@
-﻿﻿/*File for this file Basic Copyright 2012 no0dl */
-using System;
-using System.Data;
-using System.Collections;
-using System.Data.SqlClient;
-using System.Collections.Generic;
-using Estrella.FiestaLib.Data;
+﻿/*File for this file Basic Copyright 2012 no0dl */
 
-
-namespace Fiesta.Zone.Game.Buffs
+namespace Estrella.World.Game
 {
     /*public sealed class MapObjectBuffCollection : IEnumerable<Buff>
     {

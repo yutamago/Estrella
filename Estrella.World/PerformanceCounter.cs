@@ -1,59 +1,63 @@
 ﻿using System;
-using System.Threading;
 using System.Diagnostics;
-using Estrella.Util;
+using System.Threading;
 
 namespace Estrella.World
 {
     public class PerformCounter
     {
-        protected PerformanceCounter cpuCounter;
-        protected PerformanceCounter ramCounter;
-        protected PerformanceCounter performanceCounterSent;
-        protected PerformanceCounter performanceCounterReceived;
+        private PerformanceCounter _cpuCounter;
+        private PerformanceCounter _performanceCounterReceived;
+        private PerformanceCounter _performanceCounterSent;
+        private PerformanceCounter _ramCounter;
 
         public PerformCounter()
         {
             SetupConsole();
             SetupCounters();
-            Thread PerfomanceCounter = new Thread(new ThreadStart(SetConsoleTitel));
-            PerfomanceCounter.Start();
+            var performanceCounter = new Thread(SetConsoleTitle);
+            performanceCounter.Start();
         }
-        public string getAvailableRAM(){
-         return  ramCounter.NextValue().ToString("N2") + " Mb";
-        }
-        public string getCurrentCpuUsage() {
-            return cpuCounter.NextValue().ToString("N2");
-        }
-        public void SetupCounters()
+
+        private string AvailableRam => _ramCounter.NextValue().ToString("N2") + " Mb";
+        private string CurrentCpuUsage => _cpuCounter.NextValue().ToString("N2");
+
+
+        private void SetupCounters()
         {
-            cpuCounter = new PerformanceCounter();
+            _cpuCounter = new PerformanceCounter
+            {
+                CategoryName = "Processor",
+                CounterName = "% Processor Time",
+                InstanceName = "_Total"
+            };
 
-            cpuCounter.CategoryName = "Processor";
-            cpuCounter.CounterName = "% Processor Time";
-            cpuCounter.InstanceName = "_Total";
-            ramCounter = new PerformanceCounter("Memory", "Available MBytes");
-            PerformanceCounterCategory performanceCounterCategory = new PerformanceCounterCategory("Network Interface");
-            string instance = performanceCounterCategory.GetInstanceNames()[0]; // 1st NIC !
-            performanceCounterSent = new PerformanceCounter("Network Interface", "Bytes Sent/sec", instance);
-            performanceCounterReceived = new PerformanceCounter("Network Interface", "Bytes Received/sec", instance);
-
+            _ramCounter = new PerformanceCounter("Memory", "Available MBytes");
+            var performanceCounterCategory = new PerformanceCounterCategory("Network Interface");
+            var instance = performanceCounterCategory.GetInstanceNames()[0]; // 1st NIC !
+            _performanceCounterSent = new PerformanceCounter("Network Interface", "Bytes Sent/sec", instance);
+            _performanceCounterReceived = new PerformanceCounter("Network Interface", "Bytes Received/sec", instance);
         }
-        public void SetupConsole()
+
+        private static void SetupConsole()
         {
             Console.WindowWidth = 90;
         }
-        public void SetConsoleTitel()
+
+        private void SetConsoleTitle()
         {
             Thread.Sleep(2000);
             while (true)
             {
                 try
                 {
-                    string memory = getAvailableRAM();
-                    string cpu = getCurrentCpuUsage();
-                    Console.Title = "World[" + Settings.Instance.ID + "] TickPerSecont : " + Worker.Instance.TicksPerSecond + " Free Memory : " + memory + " CPU: " + cpu + " Network : bytes send: " + (performanceCounterSent.NextValue() / 1024).ToString("N2") + " bytes received: " + (performanceCounterReceived.NextValue() / 1024).ToString("N2") + " ";
-                 
+                    var memory = AvailableRam;
+                    var cpu = CurrentCpuUsage;
+                    Console.Title = "World[" + Settings.Instance.Id + "] TickPerSecond : " +
+                                    Worker.Instance.TicksPerSecond + " Free Memory : " + memory + " CPU: " + cpu +
+                                    " Network : bytes send: " +
+                                    (_performanceCounterSent.NextValue() / 1024).ToString("N2") + " bytes received: " +
+                                    (_performanceCounterReceived.NextValue() / 1024).ToString("N2") + " ";
                 }
                 finally
                 {

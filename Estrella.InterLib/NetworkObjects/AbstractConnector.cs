@@ -1,16 +1,13 @@
-﻿using System;
-using System.Net.Sockets;
-
+﻿using System.Net.Sockets;
 using Estrella.InterLib.Networking;
 
 namespace Estrella.InterLib.NetworkObjects
 {
     public class AbstractConnector
     {
+        protected InterClient client;
         public string IpAddress { get; private set; }
         public int Port { get; private set; }
-
-        protected InterClient client;
         public bool Pong { get; private set; }
         public bool ForcedClose { get; private set; }
 
@@ -24,10 +21,10 @@ namespace Estrella.InterLib.NetworkObjects
 
         public void Connect()
         {
-            TcpClient tcpClient = new TcpClient();
+            var tcpClient = new TcpClient();
             tcpClient.Connect(IpAddress, Port);
             client = new InterClient(tcpClient.Client);
-            client.OnPacket += new EventHandler<InterPacketReceivedEventArgs>(ClientOnPacket);
+            client.OnPacket += ClientOnPacket;
         }
 
         void ClientOnPacket(object sender, InterPacketReceivedEventArgs e)
@@ -40,7 +37,6 @@ namespace Estrella.InterLib.NetworkObjects
             {
                 Pong = true;
             }
-
         }
 
         public void SendPing()

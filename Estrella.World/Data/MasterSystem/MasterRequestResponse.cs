@@ -1,126 +1,143 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using Estrella.FiestaLib;
 using Estrella.FiestaLib.Networking;
-using Estrella.InterLib.Networking;
-using Estrella.Util;
-using Estrella.World.Data;
 using Estrella.World.Networking;
-using System;
 
-namespace Estrella.World.Data
+namespace Estrella.World.Data.MasterSystem
 {
     public class MasterRequestResponse
     {
-        #region Properties
-        public  MasterRequest  pRequest { get; private set; }
-        public bool responseAnswer { get; private set; }
-        #endregion
         public MasterRequestResponse(MasterRequest pRequest)
         {
-            this.pRequest = pRequest;
-            this.responseAnswer = this.CheckRequestBeforSendRequest(pRequest);
+            PRequest = pRequest;
+            ResponseAnswer = CheckRequestBeforSendRequest(pRequest);
         }
-        public MasterRequestResponse(WorldClient Target,WorldClient Reqeuster)
+
+        public MasterRequestResponse(WorldClient target, WorldClient reqeuster)
         {
-            this.responseAnswer = this.CheckRequest(Target, Reqeuster);
+            ResponseAnswer = CheckRequest(target, reqeuster);
         }
+
+        #region Properties
+
+        public MasterRequest PRequest { get; private set; }
+        public bool ResponseAnswer { get; private set; }
+
+        #endregion
+
         #region Methods
+
         private bool CheckRequestBeforSendRequest(MasterRequest pRequest)
         {
-            if (pRequest.InvitedClient.Character.MasterList.Find(m => m.pMemberName == pRequest.InviterClient.Character.Character.Name) != null)
+            if (pRequest.InvitedClient.Character.MasterList.Find(m =>
+                    m.pMemberName == pRequest.InviterClient.Character.Character.Name) != null)
             {
                 RequestResponse(pRequest.InviterClient, 0x174E, pRequest.InviterClient.Character.Character.MasterJoin);
                 return false;
             }
-            if (pRequest.InvitedClient.Character.MasterList.Find(d => d.IsMaster == true) != null)
+
+            if (pRequest.InvitedClient.Character.MasterList.Find(d => d.IsMaster) != null)
             {
                 RequestResponse(pRequest.InviterClient, 0x1749, pRequest.InviterClient.Character.Character.MasterJoin);
                 return false;
             }
-            if (pRequest.InviterClient.Character.Character.CharLevel + 5 >= pRequest.InvitedClient.Character.Character.CharLevel)
+
+            if (pRequest.InviterClient.Character.Character.CharLevel + 5 >=
+                pRequest.InvitedClient.Character.Character.CharLevel)
             {
                 RequestResponse(pRequest.InviterClient, 0x174C, pRequest.InviterClient.Character.Character.MasterJoin);
                 return false;
             }
-           
+
             if (DateTime.Now.Subtract(pRequest.InviterClient.Character.Character.MasterJoin).TotalHours < 24)
             {
- 
-                RequestResponse(pRequest.InviterClient, 0x174A, pRequest.InviterClient.Character.Character.MasterJoin);//24 hours must pass before a master can receive a new apprentice.
+                RequestResponse(pRequest.InviterClient, 0x174A,
+                    pRequest.InviterClient.Character.Character
+                        .MasterJoin); //24 hours must pass before a master can receive a new apprentice.
                 return false;
             }
+
             if (pRequest.InviterClient.Character.MasterList.Count >= 20)
             {
                 RequestResponse(pRequest.InviterClient, 0x174D, pRequest.InviterClient.Character.Character.MasterJoin);
                 return false;
             }
+
             return true;
         }
-           private bool CheckRequest(WorldClient Target,WorldClient Reqeuster)
+
+        private bool CheckRequest(WorldClient target, WorldClient reqeuster)
+        {
+            if (reqeuster.Character.MasterList.Count >= 20)
             {
-            if (Reqeuster.Character.MasterList.Count >= 20)
-            {
-                SendMasterApprentice(0x0174D, Reqeuster, Target);//The master is unable to accept additional apprentices.
+                SendMasterApprentice(0x0174D, reqeuster,
+                    target); //The master is unable to accept additional apprentices.
                 return false;
             }
-            this.SendMasterApprentice(0x1740,Reqeuster,Target);//${Target} has been registered as your apprentice.
-            this.InvideResponse(Reqeuster, Target.Character.Character.Name,Reqeuster.Character.Character.CharLevel);
+
+            SendMasterApprentice(0x1740, reqeuster, target); //${Target} has been registered as your apprentice.
+            InvideResponse(reqeuster, target.Character.Character.Name, reqeuster.Character.Character.CharLevel);
             return true;
         }
+
         #endregion
+
         #region Packets
-          public void SendMasterRequest()
-           {
-               using (var packet = new Packet(SH37Type.SendMasterRequest))
-               {
-                   packet.WriteString(pRequest.InviterClient.Character.Character.Name, 16);
-                   packet.WriteString(pRequest.InvitedClient.Character.Character.Name, 16);
-                  this.pRequest.InvitedClient.SendPacket(packet);
-               }
-           }
-        private void SendMasterApprentice(ushort pCode,WorldClient Target,WorldClient Requester)
+
+        public void SendMasterRequest()
         {
-            DateTime now = DateTime.Now;
-            int year = (now.Year - 1920 << 1) | 1;
-            int month = (now.Month << 4) | 0x0F;
+            using (var packet = new Packet(SH37Type.SendMasterRequest))
+            {
+                packet.WriteString(PRequest.InviterClient.Character.Character.Name, 16);
+                packet.WriteString(PRequest.InvitedClient.Character.Character.Name, 16);
+                PRequest.InvitedClient.SendPacket(packet);
+            }
+        }
+
+        private void SendMasterApprentice(ushort pCode, WorldClient target, WorldClient requester)
+        {
+            var now = DateTime.Now;
+            var year = (now.Year - 1920 << 1) | 1;
+            var month = (now.Month << 4) | 0x0F;
 
             using (var packet = new Packet(SH37Type.SendRegisterApprentice))
             {
                 packet.WriteUShort(pCode);
-                packet.WriteString(Target.Character.Character.Name,16);
-                packet.WriteByte((byte)year);
-                packet.WriteByte((byte)month);
-                packet.WriteByte((byte)now.Day);
+                packet.WriteString(target.Character.Character.Name, 16);
+                packet.WriteByte((byte) year);
+                packet.WriteByte((byte) month);
+                packet.WriteByte((byte) now.Day);
                 packet.WriteByte(0);
-                packet.WriteByte(Target.Character.Character.CharLevel);
+                packet.WriteByte(target.Character.Character.CharLevel);
                 packet.WriteByte(0);
-                Requester.SendPacket(packet);
+                requester.SendPacket(packet);
             }
         }
-        private void InvideResponse(WorldClient pClient,string name,byte level)
+
+        private void InvideResponse(WorldClient pClient, string name, byte level)
         {
             using (var packet = new Packet(SH37Type.SendMasterRequestReponse))
             {
-                DateTime now = DateTime.Now;
-                packet.WriteUShort(0x1740);//pcode
+                var now = DateTime.Now;
+                packet.WriteUShort(0x1740); //pcode
                 packet.WriteString(name, 16);
-                packet.WriteByte(0x01);//IsOnline (now.Year - 1900 << 1) | isonline
-                packet.WriteByte((byte)(now.Month << 4));
-                packet.WriteByte((byte)now.Day);//day
-                packet.WriteByte(0);//year
-                packet.WriteByte(level);//level
-                packet.WriteByte(0);//unk
-                packet.WriteByte(2);//unk
-                packet.WriteString("KüssMirDieFüße",14);//WTF?
+                packet.WriteByte(0x01); //IsOnline (now.Year - 1900 << 1) | isonline
+                packet.WriteByte((byte) (now.Month << 4));
+                packet.WriteByte((byte) now.Day); //day
+                packet.WriteByte(0); //year
+                packet.WriteByte(level); //level
+                packet.WriteByte(0); //unk
+                packet.WriteByte(2); //unk
+                packet.WriteString("KüssMirDieFüße", 14); //WTF?
                 packet.Fill(22, 0x00);
-                packet.WriteByte(112);//unk
-                packet.WriteByte(112);//unk
-                packet.WriteByte(0);//unk
+                packet.WriteByte(112); //unk
+                packet.WriteByte(112); //unk
+                packet.WriteByte(0); //unk
                 pClient.SendPacket(packet);
-
             }
         }
-        private void RequestResponse(WorldClient pclient,ushort pCode,DateTime pTime)
+
+        private void RequestResponse(WorldClient pclient, ushort pCode, DateTime pTime)
         {
             using (var packet = new Packet(SH37Type.SendMasterRequestReponse))
             {
@@ -138,8 +155,8 @@ namespace Estrella.World.Data
                 packet.WriteInt(1);
                 pclient.SendPacket(packet);
             }
-          
         }
-       #endregion
+
+        #endregion
     }
 }

@@ -20,12 +20,13 @@ namespace Estrella.World.Handlers
             using (var pack = new Packet(SH5Type.SendCharacterChangeNewName))
             {
                 pack.WriteByte(Character_slot);
-                pack.WriteString(charname,16);
-                pack.WriteUShort(208);//Responsecode?
+                pack.WriteString(charname, 16);
+                pack.WriteUShort(208); //Responsecode?
             }
-            //Todo ChangeinDatabase
 
+            //Todo ChangeinDatabase
         }
+
         [PacketHandler(CH5Type.CreateCharacter)]
         public static void CreateCharHandler(WorldClient client, Packet packet)
         {
@@ -44,15 +45,16 @@ namespace Estrella.World.Handlers
                 SendCharCreationError(client, CreateCharError.NameTaken);
                 return;
             }
-            else if (DataProvider.Instance.IsBadName(name))
+
+            if (DataProvider.Instance.IsBadName(name))
             {
                 SendCharCreationError(client, CreateCharError.NameInUse);
                 return;
             }
 
-            byte isMaleByte = (byte)((jobGender >> 7) & 0x01);
-            byte classIDByte = (byte)((jobGender >> 2) & 0x1F);
-            Job job = (Job)classIDByte;
+            var isMaleByte = (byte) ((jobGender >> 7) & 0x01);
+            var classIDByte = (byte) ((jobGender >> 2) & 0x1F);
+            var job = (Job) classIDByte;
             switch (job)
             {
                 case Job.Archer:
@@ -60,18 +62,20 @@ namespace Estrella.World.Handlers
                 case Job.Fighter:
                 case Job.Mage:
                 case Job.Trickster:
-                   //create character here
+                    //create character here
                     try
                     {
-                        WorldCharacter wchar = client.CreateCharacter(name, slot, hair, color, style, job, Convert.ToBoolean(isMaleByte));
+                        var wchar = client.CreateCharacter(name, slot, hair, color, style, job,
+                            Convert.ToBoolean(isMaleByte));
                         SendCharOKResponse(client, wchar);
                     }
                     catch (Exception ex)
                     {
-                        Log.WriteLine(LogLevel.Exception, "Error creating character for {0}: {1}", client.Username, ex.InnerException.ToString());
+                        Log.WriteLine(LogLevel.Exception, "Error creating character for {0}: {1}", client.Username,
+                            ex.InnerException.ToString());
                         SendCharCreationError(client, CreateCharError.FailedToCreate);
-                        return;
                     }
+
                     break;
                 default:
                     SendCharCreationError(client, CreateCharError.WrongClass);
@@ -79,7 +83,7 @@ namespace Estrella.World.Handlers
                     break;
             }
         }
-       
+
         [PacketHandler(CH5Type.DeleteCharacter)]
         public static void DeleteCharacterHandler(WorldClient client, Packet packet)
         {
@@ -89,7 +93,8 @@ namespace Estrella.World.Handlers
                 Log.WriteLine(LogLevel.Warn, "{0} tried to delete character out of range.", client.Username);
                 return;
             }
-            WorldCharacter todelete = client.Characters[slot];
+
+            var todelete = client.Characters[slot];
 
             if (todelete.Delete())
             {
@@ -123,9 +128,9 @@ namespace Estrella.World.Handlers
 
         private static void SendCharCreationError(WorldClient client, CreateCharError error)
         {
-            using (Packet packet = new Packet(SH5Type.CharCreationError))
+            using (var packet = new Packet(SH5Type.CharCreationError))
             {
-                packet.WriteUShort((ushort)error);
+                packet.WriteUShort((ushort) error);
                 client.SendPacket(packet);
             }
         }

@@ -1,15 +1,25 @@
 ﻿using System;
 using System.Net.Sockets;
-using System.Reflection;
 using Estrella.FiestaLib.Networking;
 using Estrella.Util;
 using Estrella.Zone.Game;
 using Estrella.Zone.Handlers;
+using Estrella.Zone.Managers;
 
 namespace Estrella.Zone.Networking
 {
     public sealed class ZoneClient : Client
     {
+        public ZoneClient(Socket socket)
+            : base(socket)
+        {
+            OnDisconnect += ZoneClient_OnDisconnect;
+            OnPacket += ZoneClient_OnPacket;
+
+            HasPong = true;
+            Authenticated = false;
+        }
+
         public bool Authenticated { get; set; }
         public string Username { get; set; }
         public int AccountID { get; set; }
@@ -18,24 +28,15 @@ namespace Estrella.Zone.Networking
         public bool HasPong { get; set; }
 
         public ZoneCharacter Character { get; set; }
-        
-        public ZoneClient(Socket socket)
-            : base(socket)
-        {
-            base.OnDisconnect += new EventHandler<SessionCloseEventArgs>(ZoneClient_OnDisconnect);
-            base.OnPacket += new EventHandler<PacketReceivedEventArgs>(ZoneClient_OnPacket);
-
-            HasPong = true;
-            Authenticated = false;
-        }
 
         void ZoneClient_OnPacket(object sender, PacketReceivedEventArgs e)
         {
-            if (!Authenticated && !(e.Packet.Header == 6 && e.Packet.Type == 1)) return; //do not handle packets if not authenticated!
-            MethodInfo method = HandlerStore.GetHandler(e.Packet.Header, e.Packet.Type);
+            if (!Authenticated && !(e.Packet.Header == 6 && e.Packet.Type == 1))
+                return; //do not handle packets if not authenticated!
+            var method = HandlerStore.GetHandler(e.Packet.Header, e.Packet.Type);
             if (method != null)
             {
-                Action action = HandlerStore.GetCallback(method, this, e.Packet);
+                var action = HandlerStore.GetCallback(method, this, e.Packet);
                 Worker.Instance.AddCallback(action);
             }
             else
@@ -52,8 +53,9 @@ namespace Estrella.Zone.Networking
             {
                 Character.Save();
                 Character.RemoveFromMap();
-                Character.IsInParty = false;//stop thread
+                Character.IsInParty = false; //stop thread
             }
+
             Log.WriteLine(LogLevel.Debug, "Client disconnected.");
         }
 
@@ -61,12 +63,10 @@ namespace Estrella.Zone.Networking
         {
             if (Character != null)
             {
-                return "ZoneClient|Character:" + Character.ToString();
+                return "ZoneClient|Character:" + Character;
             }
-            else
-            {
-                return "ZoneClient|NoChar";
-            }
+
+            return "ZoneClient|NoChar";
         }
     }
 }

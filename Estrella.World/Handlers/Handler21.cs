@@ -1,8 +1,8 @@
 ﻿using Estrella.FiestaLib;
 using Estrella.FiestaLib.Networking;
 using Estrella.Util;
+using Estrella.World.Managers;
 using Estrella.World.Networking;
-using Estrella.World.Data;
 
 namespace Estrella.World.Handlers
 {
@@ -21,7 +21,7 @@ namespace Estrella.World.Handlers
 
             if (pClient.Character.DeleteFriend(target))
             {
-                WorldClient client = ClientManager.Instance.GetClientByCharname(target);
+                var client = ClientManager.Instance.GetClientByCharname(target);
                 if (client != null)
                 {
                     using (var pack = new Packet(SH21Type.FriendDeleteSend))
@@ -29,9 +29,10 @@ namespace Estrella.World.Handlers
                         pack.WriteString(sender, 16);
                         client.SendPacket(pack);
                     }
-                    Friend friend = pClient.Character.Friends.Find(f => f.Name == target);
-                    if(friend != null)
-                    pClient.Character.Friends.Remove(friend);
+
+                    var friend = pClient.Character.Friends.Find(f => f.Name == target);
+                    if (friend != null)
+                        pClient.Character.Friends.Remove(friend);
                 }
 
                 using (var pack = new Packet(SH21Type.FriendDeleteSend))
@@ -39,9 +40,8 @@ namespace Estrella.World.Handlers
                     pack.WriteString(sender, 16);
                     pack.WriteString(target, 16);
                     pack.WriteShort(0x0951);
-                   pClient.SendPacket(pack);
+                    pClient.SendPacket(pack);
                 }
-
             }
             else
             {
@@ -49,11 +49,12 @@ namespace Estrella.World.Handlers
                 {
                     pack.WriteString(target, 16);
                     pack.WriteString(sender, 16);
-                    pack.WriteUShort(0x0946);	// Cannot find ${Target}
+                    pack.WriteUShort(0x0946); // Cannot find ${Target}
                     pClient.SendPacket(pack);
                 }
             }
         }
+
         [PacketHandler(CH21Type.FriendInviteResponse)]
         public static void FriendInviteResponse(WorldClient pClient, Packet pPacket)
         {
@@ -66,15 +67,17 @@ namespace Estrella.World.Handlers
                 Log.WriteLine(LogLevel.Warn, "Could not reat friend invite response.");
                 return;
             }
-            WorldClient sendchar = ClientManager.Instance.GetClientByCharname(sender);
+
+            var sendchar = ClientManager.Instance.GetClientByCharname(sender);
             if (sendchar == null)
             {
                 Log.WriteLine(LogLevel.Warn, "Invalid friend reject received.");
                 return;
             }
+
             if (response)
             {
-                Friend sendfriend = sendchar.Character.AddFriend(pClient.Character);
+                var sendfriend = sendchar.Character.AddFriend(pClient.Character);
                 if (sendfriend != null)
                 {
                     using (var packet = new Packet(SH21Type.FriendInviteResponse))
@@ -100,8 +103,8 @@ namespace Estrella.World.Handlers
                     sendchar.SendPacket(packet);
                 }
             }
-
         }
+
         [PacketHandler(CH21Type.FriendInvite)]
         public static void FriendInvite(WorldClient pClient, Packet pPacket)
         {
@@ -113,8 +116,8 @@ namespace Estrella.World.Handlers
                 return;
             }
 
-            WorldCharacter inviter = pClient.Character;
-            WorldClient invitee = ClientManager.Instance.GetClientByCharname(receiver);
+            var inviter = pClient.Character;
+            var invitee = ClientManager.Instance.GetClientByCharname(receiver);
             if (invitee == null)
             {
                 //character not found
@@ -122,7 +125,7 @@ namespace Estrella.World.Handlers
                 {
                     pack.WriteString(sender, 16);
                     pack.WriteString(receiver, 16);
-                    pack.WriteUShort(0x0946);	// Cannot find ${Target}
+                    pack.WriteUShort(0x0946); // Cannot find ${Target}
 
                     pClient.SendPacket(pack);
                 }
@@ -133,7 +136,7 @@ namespace Estrella.World.Handlers
                 {
                     pack.WriteString(sender, 16);
                     pack.WriteString(receiver, 16);
-                    pack.WriteUShort(0x0942);	// You cannot add yourself to your Buddy List.
+                    pack.WriteUShort(0x0942); // You cannot add yourself to your Buddy List.
 
                     pClient.SendPacket(pack);
                 }
@@ -144,7 +147,7 @@ namespace Estrella.World.Handlers
                 {
                     pack.WriteString(sender, 16);
                     pack.WriteString(receiver, 16);
-                    pack.WriteUShort(0x0945);	// {Target} is already registered in the friends list.
+                    pack.WriteUShort(0x0945); // {Target} is already registered in the friends list.
                     pClient.SendPacket(pack);
                 }
             }

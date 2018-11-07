@@ -10,31 +10,18 @@ namespace Estrella.Zone.Game
 {
     class Mob : MapObject
     {
-        public ushort ID { get; set; }
-        public byte Level { get; set; }
-        public bool Moving { get; set; }
-
-        public MapObject Target { get; set; }
         public const int MinMovement = 60;
         public const int MaxMovement = 180;
-        private MobBreedLocation spawnplace;
-        private bool deathTriggered;
-        private bool DropState { get; set; }
-        public MobInfo Info { get; private set; }
-
-        public MobInfoServer InfoServer { get; private set; }
-        public override uint MaxSP { get { if (InfoServer == null) return 100; return InfoServer.MaxSP; } set { return; } }
-        public override uint MaxHP { get { if (Info == null) return 100; return Info.MaxHP; } set { return; } }
-        private DateTime nextUpdate;
         private Vector2 boundryLT;
         private Vector2 boundryRB;
-
-        public AttackSequence AttackingSequence { get; private set; }
+        private bool deathTriggered;
+        private DateTime nextUpdate;
+        private MobBreedLocation spawnplace;
 
         public Mob(MobBreedLocation mbl)
         {
             ID = mbl.MobID;
-        
+
             Init();
 
             // Make random location
@@ -43,9 +30,10 @@ namespace Estrella.Zone.Game
                 Log.WriteLine(LogLevel.Warn, "Couldn't spawn mob, out of ID's");
                 return;
             }
+
             Map = mbl.Map;
             spawnplace = mbl;
-           
+
             while (true)
             {
                 Position = Vector2.GetRandomSpotAround(Program.Randomizer, mbl.Position, 30);
@@ -55,16 +43,16 @@ namespace Estrella.Zone.Game
                     {
                         break;
                     }
-                    
                 }
                 else
                 {
                     Map = mbl.Map;
-                 // Map.Block =
+                    // Map.Block =
                     spawnplace = mbl;
                     break;
                 }
             }
+
             SetBoundriesFromPointAndRange(Position, 100);
 
             spawnplace.CurrentMobs++;
@@ -75,13 +63,44 @@ namespace Estrella.Zone.Game
             ID = pID;
             Position = pos;
             Init();
-      
+
             SetBoundriesFromPointAndRange(pos, 700);
         }
 
+        public ushort ID { get; set; }
+        public byte Level { get; set; }
+        public bool Moving { get; set; }
+
+        public MapObject Target { get; set; }
+        private bool DropState { get; set; }
+        public MobInfo Info { get; private set; }
+
+        public MobInfoServer InfoServer { get; private set; }
+
+        public override uint MaxSP
+        {
+            get
+            {
+                if (InfoServer == null) return 100;
+                return InfoServer.MaxSP;
+            }
+            set { }
+        }
+
+        public override uint MaxHP
+        {
+            get
+            {
+                if (Info == null) return 100;
+                return Info.MaxHP;
+            }
+            set { }
+        }
+
+        public AttackSequence AttackingSequence { get; private set; }
+
         private void Init()
         {
-
             Info = DataProvider.Instance.GetMobInfo(ID);
             MobInfoServer temp;
             DataProvider.Instance.MobData.TryGetValue(Info.Name, out temp);
@@ -89,14 +108,13 @@ namespace Estrella.Zone.Game
             Moving = false;
             Target = null;
             spawnplace = null;
-           
+
             nextUpdate = Program.CurrentTime;
             deathTriggered = false;
 
             HP = MaxHP;
             SP = MaxSP;
             Level = Info.Level;
-
         }
 
         private bool PositionIsInBoundries(Vector2 pos)
@@ -109,13 +127,12 @@ namespace Estrella.Zone.Game
             boundryLT = new Vector2(startpos.X - range, startpos.Y - range);
             boundryRB = new Vector2(startpos.X + range, startpos.Y + range);
         }
+
         public void DropItem(Item Item)
         {
+            var mDrop = new Drop(Item, this, Position.X, Position.Y, 300);
 
-            Drop mDrop = new Drop(Item, this, this.Position.X, this.Position.Y, 300);
-
-            this.Map.AddDrop(mDrop);
-
+            Map.AddDrop(mDrop);
         }
 
         public void Die()
@@ -128,6 +145,7 @@ namespace Estrella.Zone.Game
                 new RandomDrop(this);
                 //:TODO mindroplevel && maxdroplevel
             }
+
             Moving = false;
             boundryLT = null;
             boundryRB = null;
@@ -139,6 +157,7 @@ namespace Estrella.Zone.Game
             {
                 spawnplace.CurrentMobs--;
             }
+
             nextUpdate = Program.CurrentTime.AddSeconds(3);
         }
 
@@ -171,19 +190,19 @@ namespace Estrella.Zone.Game
 
         public override Packet Spawn()
         {
-            Packet packet = new Packet(SH7Type.SpawnSingleObject);
+            var packet = new Packet(SH7Type.SpawnSingleObject);
             Write(packet);
             return packet;
         }
 
         public void Write(Packet packet)
         {
-            packet.WriteUShort(this.MapObjectID);
+            packet.WriteUShort(MapObjectID);
             packet.WriteByte(2);
             packet.WriteUShort(ID);
-            packet.WriteInt(this.Position.X);
-            packet.WriteInt(this.Position.Y);
-            packet.WriteByte(this.Rotation);
+            packet.WriteInt(Position.X);
+            packet.WriteInt(Position.Y);
+            packet.WriteByte(Rotation);
             packet.Fill(55, 0);
         }
 
@@ -194,7 +213,7 @@ namespace Estrella.Zone.Game
             packet.WriteUInt(SP);
             packet.WriteUInt(MaxSP); // Max SP
             packet.WriteByte(Level);
-            packet.WriteUShort(this.UpdateCounter);
+            packet.WriteUShort(UpdateCounter);
         }
 
         public override void Update(DateTime date)
@@ -211,12 +230,14 @@ namespace Estrella.Zone.Game
                     Die();
                     return; // Wait till 3 seconds are over, then remove
                 }
-                else if (nextUpdate <= date)
+
+                if (nextUpdate <= date)
                 {
-                    Map.RemoveObject(this.MapObjectID);
+                    Map.RemoveObject(MapObjectID);
                     Position = null;
                     return;
                 }
+
                 return;
             }
 
@@ -229,7 +250,6 @@ namespace Estrella.Zone.Game
                     {
                         AttackingSequence = null;
                         Target = null;
-
                     }
                 }
                 else
@@ -265,26 +285,28 @@ namespace Estrella.Zone.Game
                         Target = null; // Stop aggro-ing >:(
                     }
                 }
-                return;
             }
             else
             {
-                nextUpdate = Program.CurrentTime.AddSeconds(Program.Randomizer.Next(10, 60)); // Around 10 seconds to 1 minute before new movement is made
+                nextUpdate =
+                    Program.CurrentTime.AddSeconds(Program.Randomizer.Next(10,
+                        60)); // Around 10 seconds to 1 minute before new movement is made
 
                 // Move to random spot.
-                Vector2 newpos = new Vector2(Position);
-                bool ok = false;
-                for (int i = 1; i <= 20; i++)
+                var newpos = new Vector2(Position);
+                var ok = false;
+                for (var i = 1; i <= 20; i++)
                 {
                     // Generate new position, and check if it's in valid bounds, else recheck
-                    
-                        newpos = Vector2.GetRandomSpotAround(Program.Randomizer, newpos, 60);
-                        if (newpos.X > 0 && newpos.Y > 0 && Map.Block.CanWalk(newpos.X, newpos.Y) && PositionIsInBoundries(newpos))
-                        {
-                            ok = true;
-                            break;
-                        }
-                    
+
+                    newpos = Vector2.GetRandomSpotAround(Program.Randomizer, newpos, 60);
+                    if (newpos.X > 0 && newpos.Y > 0 && Map.Block.CanWalk(newpos.X, newpos.Y) &&
+                        PositionIsInBoundries(newpos))
+                    {
+                        ok = true;
+                        break;
+                    }
+
                     /*
                     int t = Program.Randomizer.Next() % 11;
 
@@ -330,7 +352,7 @@ namespace Estrella.Zone.Game
         {
             Position.X = newx;
             Position.Y = newy;
-            Sector movedin = Map.GetSectorByPos(Position);
+            var movedin = Map.GetSectorByPos(Position);
             if (movedin != MapSector)
             {
                 MapSector.Transfer(this, movedin);

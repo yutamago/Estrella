@@ -1,5 +1,4 @@
-﻿
-namespace Estrella.FiestaLib
+﻿namespace Estrella.FiestaLib
 {
     public enum ItemSlot : byte
     {
@@ -21,9 +20,9 @@ namespace Estrella.FiestaLib
         CostumePants = 20,
         Boots = 21,
         CostumeBoots = 22,
-        Earings = 23,
+        Earrings = 23,
         Glasses = 26,
-        Pet = 28,
+        Pet = 28
         //Hat: 1, Armor: 7, Weapon: 10, Pants: 19, boots: 21
     }
 }

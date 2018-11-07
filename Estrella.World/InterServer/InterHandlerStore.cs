@@ -6,7 +6,7 @@ using Estrella.Util;
 
 namespace Estrella.World.InterServer
 {
-    [ServerModule(Util.InitializationStage.Metadata)]
+    [ServerModule(InitializationStage.Metadata)]
     public class InterHandlerStore
     {
         private static Dictionary<InterHeader, MethodInfo> Handlers;
@@ -14,15 +14,17 @@ namespace Estrella.World.InterServer
         [InitializerMethod]
         public static bool Load()
         {
-            Handlers = new Dictionary<InterHeader,MethodInfo>();
+            Handlers = new Dictionary<InterHeader, MethodInfo>();
             foreach (var info in Reflector.FindMethodsByAttribute<InterPacketHandlerAttribute>())
             {
-                InterPacketHandlerAttribute attribute = info.First;
-                MethodInfo method = info.Second;
-                if (!Handlers.ContainsKey(attribute.Header)) {
+                var attribute = info.First;
+                var method = info.Second;
+                if (!Handlers.ContainsKey(attribute.Header))
+                {
                     Handlers[attribute.Header] = method;
                 }
-                else {
+                else
+                {
                     Log.WriteLine(LogLevel.Warn, "Duplicate interhandler found: {0}", attribute.Header.ToString());
                 }
             }
@@ -38,6 +40,7 @@ namespace Estrella.World.InterServer
             {
                 return meth;
             }
+
             return null;
         }
 

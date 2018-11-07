@@ -1,5 +1,4 @@
-﻿
-using Estrella.FiestaLib;
+﻿using Estrella.FiestaLib;
 using Estrella.FiestaLib.Networking;
 using Estrella.Util;
 using Estrella.Zone.Game;
@@ -14,16 +13,18 @@ namespace Estrella.Zone.Handlers
             using (var packet = new Packet(SH15Type.Question))
             {
                 packet.WriteString(question.Text, 129);
-                packet.WriteUShort(character.MapObjectID);     // Obj id
+                packet.WriteUShort(character.MapObjectID); // Obj id
                 packet.WriteInt(character.Position.X);
                 packet.WriteInt(character.Position.Y);
-                packet.WriteUShort(range);        // Distance how far your allowed to run when the question window is closed by Client
-                packet.WriteByte((byte)question.Answers.Count);
+                packet.WriteUShort(
+                    range); // Distance how far your allowed to run when the question window is closed by Client
+                packet.WriteByte((byte) question.Answers.Count);
                 for (byte i = 0; i < question.Answers.Count; ++i)
                 {
                     packet.WriteByte(i);
                     packet.WriteString(question.Answers[i], 32);
                 }
+
                 character.Client.SendPacket(packet);
             }
         }
@@ -38,10 +39,10 @@ namespace Estrella.Zone.Handlers
                 return;
             }
 
-            ZoneCharacter character = client.Character;
+            var character = client.Character;
             if (character.Question == null)
                 return;
-            else if (character.Question.Answers.Count <= answer)
+            if (character.Question.Answers.Count <= answer)
                 return;
 
             character.Question.Function(character, answer);

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Estrella.Zone.Data
+﻿namespace Estrella.Zone.Data
 {
     public enum NpcFlags : ushort
     {
@@ -11,15 +6,17 @@ namespace Estrella.Zone.Data
         Vendor = 1,
         Teleporter = 2
     }
+
     public enum ItemFlags : byte
     {
         Normal = 0,
-        GuildItem = 1,
+        GuildItem = 1
     }
+
     public enum GuildStoreAddFlags : byte
     {
         Equip = 0,
         Item = 1,
-        Gold = 2,
+        Gold = 2
     }
 }

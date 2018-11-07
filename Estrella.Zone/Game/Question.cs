@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-
 using Estrella.Zone.Handlers;
 
 namespace Estrella.Zone.Game
@@ -8,18 +7,18 @@ namespace Estrella.Zone.Game
 
     public sealed class Question
     {
-        public string Text { get; private set; }
-        public QuestionCallback Function { get; private set; }
-        public List<string> Answers { get; private set; }
-        public object Object { get; set; }
-
         public Question(string pText, QuestionCallback pFunction, object obj = null)
         {
-            this.Text = pText;
+            Text = pText;
             Function = pFunction;
             Answers = new List<string>();
             Object = obj;
         }
+
+        public string Text { get; private set; }
+        public QuestionCallback Function { get; private set; }
+        public List<string> Answers { get; private set; }
+        public object Object { get; set; }
 
         public void Add(params string[] text)
         {

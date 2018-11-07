@@ -1,8 +1,7 @@
 ﻿using System;
-using Estrella.InterLib;
+using Estrella.FiestaLib.Data;
 using Estrella.InterLib.Networking;
 using Estrella.World.Data;
-using Estrella.FiestaLib.Data;
 
 namespace Estrella.World.Managers
 {
@@ -10,7 +9,7 @@ namespace Estrella.World.Managers
     {
         public static void SetBuff(AbStateInfo AbState, uint Strength, uint KeepTime, params WorldCharacter[] Receiver)
         {
-            using (var packet = new InterPacket(InterHeader.ZONE_CharacterSetBuff))
+            using (var packet = new InterPacket(InterHeader.ZoneCharacterSetBuff))
             {
                 packet.WriteUShort(AbState.ID);
                 packet.WriteUInt(Strength);
@@ -20,13 +19,13 @@ namespace Estrella.World.Managers
                 Array.ForEach(Receiver, ch => packet.WriteInt(ch.ID));
 
 
-
-                ZoneManager.Instance.Broadcast(packet);
+                ZoneManager.Broadcast(packet);
             }
         }
+
         public static void RemoveBuff(AbStateInfo AbState, params WorldCharacter[] Receiver)
         {
-            using (var packet = new InterPacket(InterHeader.ZONE_CharacterRemoveBuff))
+            using (var packet = new InterPacket(InterHeader.ZoneCharacterRemoveBuff))
             {
                 packet.WriteUShort(AbState.ID);
 
@@ -34,7 +33,7 @@ namespace Estrella.World.Managers
                 Array.ForEach(Receiver, ch => packet.WriteInt(ch.ID));
 
 
-                ZoneManager.Instance.Broadcast(packet);
+                ZoneManager.Broadcast(packet);
             }
         }
     }

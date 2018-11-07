@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 
-namespace Estrella.FiestaLib.Shn
+namespace Estrella.FiestaLib.SHN
 {
     public class ShnColumn : DataColumn
     {
@@ -10,33 +10,35 @@ namespace Estrella.FiestaLib.Shn
 
         public void Load(SHNReader reader, ref int unkcount)
         {
-            string caption = reader.ReadPaddedString(48);
+            var caption = reader.ReadPaddedString(48);
             if (caption.Trim().Length < 2)
             {
-                base.ColumnName = "Undefined " + unkcount.ToString();
+                ColumnName = "Undefined " + unkcount;
                 ++unkcount;
             }
             else
             {
-                base.ColumnName = caption;
+                ColumnName = caption;
             }
-            this.TypeByte = (byte)reader.ReadUInt32();
-            this.DataType = GetType(this.TypeByte);
-            this.Length = reader.ReadInt32();
+
+            TypeByte = (byte) reader.ReadUInt32();
+            DataType = GetType(TypeByte);
+            Length = reader.ReadInt32();
         }
 
         public void Write(SHNWriter writer)
         {
-            if (this.ColumnName.StartsWith("Undefined"))
+            if (ColumnName.StartsWith("Undefined"))
             {
                 writer.WritePaddedString(" ", 48);
             }
             else
             {
-                writer.WritePaddedString(this.ColumnName, 48);
+                writer.WritePaddedString(ColumnName, 48);
             }
-            writer.Write((uint)this.TypeByte);
-            writer.Write((uint)this.Length);
+
+            writer.Write((uint) TypeByte);
+            writer.Write((uint) Length);
         }
 
         public static Type GetType(uint pCode)
@@ -47,24 +49,24 @@ namespace Estrella.FiestaLib.Shn
                 case 12:
                     return typeof(byte);
                 case 2:
-                    return typeof(UInt16);
+                    return typeof(ushort);
                 case 3:
                 case 11:
-                    return typeof(UInt32);
+                    return typeof(uint);
                 case 5:
-                    return typeof(Single);
+                    return typeof(float);
                 case 0x15:
                 case 13:
-                    return typeof(Int16);
+                    return typeof(short);
                 case 0x10:
                     return typeof(byte);
                 case 0x12:
                 case 0x1b:
-                    return typeof(UInt32);
+                    return typeof(uint);
                 case 20:
-                    return typeof(SByte);
+                    return typeof(sbyte);
                 case 0x16:
-                    return typeof(Int32);
+                    return typeof(int);
                 case 0x18:
                 case 0x1a:
                 case 9:

@@ -1,7 +1,9 @@
-﻿using Estrella.FiestaLib.Data;
+﻿using System;
 using Estrella.FiestaLib;
+using Estrella.FiestaLib.Data;
 using Estrella.FiestaLib.Networking;
 using Estrella.Util;
+using Estrella.Zone.Data;
 using Estrella.Zone.Game;
 using Estrella.Zone.Networking;
 
@@ -18,6 +20,7 @@ namespace Estrella.Zone.Handlers
 
             pClient.Character.WritePremiumList(PageID);
         }
+
         [PacketHandler(CH12Type.GetRewardItemList)]
         public static void GetRewardItemList(ZoneClient pClient, Packet pPacket)
         {
@@ -27,6 +30,7 @@ namespace Estrella.Zone.Handlers
 
             pClient.Character.WriteRewardList(PageID);
         }
+
         [PacketHandler(CH12Type.Unequip)]
         public static void ClientUnequippedItem(ZoneClient pClient, Packet pPacket)
         {
@@ -38,11 +42,13 @@ namespace Estrella.Zone.Handlers
                 return;
             }
 
-            Item sourceEquip = pClient.Character.Inventory.EquippedItems.Find(e => (byte)e.ItemInfo.Slot == sourceSlot);
+            var sourceEquip =
+                pClient.Character.Inventory.EquippedItems.Find(e => (byte) e.ItemInfo.Slot == sourceSlot);
             //Item destinationItem = pClient.Character.Inventory.EquippedItems.Find(i => i.Slot == destinationSlot);// Item was searched from wrong place
             Item destinationItem;
-            pClient.Character.Inventory.InventoryItems.TryGetValue(destinationSlot, out destinationItem);       // check if something there
-            if (destinationItem != null && (destinationItem.ItemInfo.Slot == ItemSlot.None))
+            pClient.Character.Inventory.InventoryItems.TryGetValue(destinationSlot,
+                out destinationItem); // check if something there
+            if (destinationItem != null && destinationItem.ItemInfo.Slot == ItemSlot.None)
             {
                 Log.WriteLine(LogLevel.Warn, "Equipping an item, not possible.");
                 // Failed to unequip message here, no need to log it
@@ -61,19 +67,21 @@ namespace Estrella.Zone.Handlers
 
             if (destinationItem != null)
             {
-                Item destinationEquip = (Item)destinationItem;
+                var destinationEquip = destinationItem;
                 pClient.Character.SwapEquips(sourceEquip, destinationEquip);
             }
             else
             {
                 if (sourceEquip == null)
                 {
-                    Handler12.UpdateEquipSlot(pClient.Character, destinationSlot, 0x24, 0, null);
+                    UpdateEquipSlot(pClient.Character, destinationSlot, 0x24, 0, null);
                     return;
                 }
+
                 pClient.Character.UnequipItem(sourceEquip, destinationSlot);
             }
         }
+
         public static void SendMoveIteminContaInComplet(ZoneClient pClient)
         {
             using (var packet = new Packet(SH12Type.MoveIteminContaInComplet))
@@ -82,6 +90,7 @@ namespace Estrella.Zone.Handlers
                 pClient.SendPacket(packet);
             }
         }
+
         [PacketHandler(CH12Type.TakeGuildMoney)]
         public static void TakeGuildMoney(ZoneClient client, Packet packet)
         {
@@ -91,8 +100,10 @@ namespace Estrella.Zone.Handlers
             if (client.Character.Guild == null)
                 return;
             client.Character.Guild.GuildMoney -= TakeMoney;
-            client.Character.Guild.GuildStore.SendRemoveFromGuildStore(Data.GuildStoreAddFlags.Gold, client.Character.Character.Name, TakeMoney, client.Character.Guild.GuildMoney);
+            client.Character.Guild.GuildStore.SendRemoveFromGuildStore(GuildStoreAddFlags.Gold,
+                client.Character.Character.Name, TakeMoney, client.Character.Guild.GuildMoney);
         }
+
         [PacketHandler(CH12Type.GiveGuildMoney)]
         public static void GiveGuildMoney(ZoneClient client, Packet packet)
         {
@@ -106,26 +117,29 @@ namespace Estrella.Zone.Handlers
                 //todo response you have money to low
                 return;
             }
+
             client.Character.Character.Money -= GiveMoney;
             client.Character.ChangeMoney(client.Character.Character.Money);
 
             client.Character.Guild.GuildMoney += GiveMoney;
             client.Character.Guild.GuildMoneySave();
-            client.Character.Guild.GuildStore.SendAddGuildStore(Data.GuildStoreAddFlags.Gold, client.Character.Character.Name, GiveMoney, client.Character.Guild.GuildMoney);
+            client.Character.Guild.GuildStore.SendAddGuildStore(GuildStoreAddFlags.Gold,
+                client.Character.Character.Name, GiveMoney, client.Character.Guild.GuildMoney);
         }
+
         [PacketHandler(CH12Type.BuyItem)]
         public static void BuyItem(ZoneClient client, Packet packet)
         {
-            ZoneCharacter character = client.Character;
+            var character = client.Character;
             ushort buyItemID;
             int amount;
             if (packet.TryReadUShort(out buyItemID) && packet.TryReadInt(out amount))
             {
-                FiestaLib.Data.ItemInfo buyItem;
-                Data.DataProvider.Instance.ItemsByID.TryGetValue(buyItemID, out buyItem);
+                ItemInfo buyItem;
+                DataProvider.Instance.ItemsByID.TryGetValue(buyItemID, out buyItem);
                 if (amount < 255)
                 {
-                    if (character.GiveItem(buyItemID, (byte)amount) != InventoryStatus.Full)
+                    if (character.GiveItem(buyItemID, (byte) amount) != InventoryStatus.Full)
                     {
                         character.Inventory.Money -= amount * buyItem.BuyPrice;
                         character.ChangeMoney(character.Inventory.Money);
@@ -141,41 +155,43 @@ namespace Estrella.Zone.Handlers
                             character.ChangeMoney(character.Inventory.Money);
                             character.CalculateMasterCopper(buyItem.BuyPrice);
                         }
+
                         if (amount < 255)
                         {
-                            if (character.GiveItem(buyItemID, (byte)amount) != InventoryStatus.Full)
+                            if (character.GiveItem(buyItemID, (byte) amount) != InventoryStatus.Full)
                             {
                                 character.Inventory.Money -= amount * buyItem.BuyPrice;
                                 character.ChangeMoney(character.Inventory.Money);
                                 character.CalculateMasterCopper(buyItem.BuyPrice);
                             }
+
                             break;
                         }
+
                         amount -= 255;
                     }
                 }
             }
         }
+
         [PacketHandler(CH12Type.SellItem)]
         public static void SellItem(ZoneClient client, Packet packet)
         {
             byte slot;
             int sellcount;
-            ZoneCharacter character = client.Character;
+            var character = client.Character;
             if (packet.TryReadByte(out slot) && packet.TryReadInt(out sellcount))
             {
-
                 Item item;
                 character.Inventory.InventoryItems.TryGetValue(slot, out item);
                 if (item != null)
                 {
-
-                    long fullSellPrice = sellcount * item.ItemInfo.SellPrice;
+                    var fullSellPrice = sellcount * item.ItemInfo.SellPrice;
                     if (item.Ammount > 1)
                     {
-                        item.Ammount -= (ushort)sellcount;
-                        byte Slot = (byte)item.Slot;
-                        Handler12.ModifyInventorySlot(character, 0x24, Slot, Slot, item);
+                        item.Ammount -= (ushort) sellcount;
+                        var Slot = (byte) item.Slot;
+                        ModifyInventorySlot(character, 0x24, Slot, Slot, item);
                         character.Inventory.Money += fullSellPrice;
                         character.ChangeMoney(character.Inventory.Money);
                     }
@@ -186,10 +202,12 @@ namespace Estrella.Zone.Handlers
                         character.Inventory.InventoryItems.Remove(slot);
                         ResetInventorySlot(character, slot);
                     }
-                    System.Console.WriteLine(item.ItemInfo.Type);
+
+                    Console.WriteLine(item.ItemInfo.Type);
                 }
             }
         }
+
         [PacketHandler(CH12Type.LootItem)]
         public static void LootHandler(ZoneClient client, Packet packet)
         {
@@ -199,6 +217,7 @@ namespace Estrella.Zone.Handlers
                 Log.WriteLine(LogLevel.Warn, "Invalid loot request.");
                 return;
             }
+
             client.Character.LootItem(id);
         }
 
@@ -211,6 +230,7 @@ namespace Estrella.Zone.Handlers
                 Log.WriteLine(LogLevel.Warn, "Error reading used item slot.");
                 return;
             }
+
             client.Character.UseItem(slot);
         }
 
@@ -244,17 +264,18 @@ namespace Estrella.Zone.Handlers
             {
                 packet.WriteUShort(item.ItemID);
                 packet.WriteInt(item.Amount);
-                packet.WriteUShort((ushort)status);
+                packet.WriteUShort((ushort) status);
                 packet.WriteUShort(0xffff);
                 character.Client.SendPacket(packet);
             }
         }
+
         public static Packet InventoryMessage(ushort pMessage, ushort pID = ushort.MaxValue, ushort pCount = (ushort) 1)
         {
             /*  0x0341 	Item Obtained
                 0x0342 	Failed to obtain
                 0x0346 	Inventory Full  */
-            Packet pack = new Packet();
+            var pack = new Packet();
             pack.WriteUShort(0x300a);
             pack.WriteUShort(pID);
             pack.WriteInt(pCount);
@@ -262,11 +283,12 @@ namespace Estrella.Zone.Handlers
             pack.Fill(2, 0xff);
             return pack;
         }
+
         public static Packet EquipUnEquipMessage(ushort pMessage)
         {
             /*  0x0285 	Item cannot be equipped
                 0x0281  Item (un)equipped */
-            Packet pack = new Packet();
+            var pack = new Packet();
             pack.WriteUShort(3011);
             pack.WriteUShort(pMessage);
             return pack;
@@ -294,12 +316,14 @@ namespace Estrella.Zone.Handlers
                 Log.WriteLine(LogLevel.Warn, "Client tries to equip an ITEM, not EQUIP!");
                 return;
             }
-            byte toSlot = (byte)fromItem.Slot;
-            Item toEquip = pClient.Character.Inventory.EquippedItems.Find(e => e.ItemInfo.Slot == fromItem.ItemInfo.Slot);
+
+            var toSlot = (byte) fromItem.Slot;
+            var toEquip =
+                pClient.Character.Inventory.EquippedItems.Find(e => e.ItemInfo.Slot == fromItem.ItemInfo.Slot);
 
             // TODO: Check, does user equip item to correct slot. Right now client only does it.
 
-            ZoneClient client = pClient;
+            var client = pClient;
             if (fromItem.ItemInfo.Level > pClient.Character.Level)
             {
                 FailedEquip(client.Character, 645); // 85 02
@@ -316,6 +340,7 @@ namespace Estrella.Zone.Handlers
                 }
             }
         }
+
         [PacketHandler(CH12Type.MoveItem)]
         public static void MoveItemHandler(ZoneClient pClient, Packet pPacket)
         {
@@ -336,18 +361,19 @@ namespace Estrella.Zone.Handlers
             }
 
             Item source;
-            if (!pClient.Character.Inventory.InventoryItems.TryGetValue(oldslot, out source) && newstate != 0x00 && oldstate != 0x00 || newstate == 0x00)
+            if (!pClient.Character.Inventory.InventoryItems.TryGetValue(oldslot, out source) && newstate != 0x00 &&
+                oldstate != 0x00 || newstate == 0x00)
             {
                 if (pClient.Character.Guild != null)
                 {
-                   if(newstate == 0x00 && oldstate == 0x24)
+                    if (newstate == 0x00 && oldstate == 0x24)
                     {
-                        source.Flags = Data.ItemFlags.GuildItem;
+                        source.Flags = ItemFlags.GuildItem;
                     }
-                   else if(newstate == 0x24 && oldstate == 0x00)
-                   {
-                       source.Flags = Data.ItemFlags.Normal;
-                   }
+                    else if (newstate == 0x24 && oldstate == 0x00)
+                    {
+                        source.Flags = ItemFlags.Normal;
+                    }
                     else if (source == null || newstate != 0x24)
                     {
                         if (!pClient.Character.Guild.GuildStore.GuildStorageItems.TryGetValue(oldslot, out source))
@@ -356,46 +382,51 @@ namespace Estrella.Zone.Handlers
                         }
                     }
                 }
+
                 if (source == null)
                 {
                     Log.WriteLine(LogLevel.Warn, "Client tried to move empty slot.");
                     return;
                 }
             }
+
             if (newslot == 0xff || newstate == 0xff)
             {
                 pClient.Character.Inventory.InventoryItems.Remove(oldslot);
                 source.Delete(); //TODO: make a drop
-                Handler12.ModifyInventorySlot(pClient.Character, oldslot, oldstate, (byte)source.Slot, null);
+                ModifyInventorySlot(pClient.Character, oldslot, oldstate, (byte) source.Slot, null);
             }
-            else if(newstate == 0x00 && oldstate == 0x24 && pClient.Character.Guild != null)
+            else if (newstate == 0x00 && oldstate == 0x24 && pClient.Character.Guild != null)
             {
-
                 if (!pClient.Character.Guild.GuildStore.GetHasFreeGuildStoreSlot())
                     //todo GuildStorefuell
                     return;
                 pClient.Character.Inventory.RemoveInventory(source);
                 pClient.Character.Guild.GuildStore.GuildStorageItems.Add(newslot, source);
-                pClient.Character.Guild.GuildStore.SendAddGuildStore(Data.GuildStoreAddFlags.Item, pClient.Character.Character.Name, source.Ammount, 0, source.ItemInfo.ItemID);
-                pClient.Character.Guild.GuildStore.SaveStoreItem(pClient.Character.Guild.ID, source.ItemInfo.ItemID, newslot);
-                Handler12.ModifyInventorySlot(pClient.Character, oldstate, newstate, oldslot, null);
-                Handler12.ModifyInventorySlot(pClient.Character, oldstate, newstate, oldslot, newslot, source);
+                pClient.Character.Guild.GuildStore.SendAddGuildStore(GuildStoreAddFlags.Item,
+                    pClient.Character.Character.Name, source.Ammount, 0, source.ItemInfo.ItemID);
+                pClient.Character.Guild.GuildStore.SaveStoreItem(pClient.Character.Guild.ID, source.ItemInfo.ItemID,
+                    newslot);
+                ModifyInventorySlot(pClient.Character, oldstate, newstate, oldslot, null);
+                ModifyInventorySlot(pClient.Character, oldstate, newstate, oldslot, newslot, source);
                 return;
             }
-            else if(oldstate == 0x00 && newstate == 0x24 && pClient.Character.Guild != null)
+            else if (oldstate == 0x00 && newstate == 0x24 && pClient.Character.Guild != null)
             {
                 if (!pClient.Character.Guild.GuildStore.GuildStorageItems.TryGetValue(oldslot, out source))
                     return;
-                source.Slot = (sbyte)newslot;
+                source.Slot = (sbyte) newslot;
                 pClient.Character.Guild.GuildStore.GuildStorageItems.Remove(oldslot);
                 pClient.Character.Inventory.AddToInventory(source);
-                pClient.Character.Guild.GuildStore.SendRemoveFromGuildStore (Data.GuildStoreAddFlags.Item, pClient.Character.Character.Name, source.Ammount, 0, source.ItemInfo.ItemID);
+                pClient.Character.Guild.GuildStore.SendRemoveFromGuildStore(GuildStoreAddFlags.Item,
+                    pClient.Character.Character.Name, source.Ammount, 0, source.ItemInfo.ItemID);
                 pClient.Character.Guild.GuildStore.RemoveStoreItem(pClient.Character.Guild.ID, source.ItemInfo.ItemID);
-                Handler12.ModifyInventorySlot(pClient.Character, newstate,oldstate, newslot, oldslot, null);
-                Handler12.ModifyInventorySlot(pClient.Character, newstate, newstate, newstate, newslot, source);
+                ModifyInventorySlot(pClient.Character, newstate, oldstate, newslot, oldslot, null);
+                ModifyInventorySlot(pClient.Character, newstate, newstate, newstate, newslot, source);
                 return;
             }
-            if (source.Flags == Data.ItemFlags.Normal)
+
+            if (source.Flags == ItemFlags.Normal)
             {
                 Item destination;
                 if (pClient.Character.Inventory.InventoryItems.TryGetValue(newslot, out destination))
@@ -403,27 +434,27 @@ namespace Estrella.Zone.Handlers
                     //item swap
                     pClient.Character.Inventory.InventoryItems.Remove(oldslot);
                     pClient.Character.Inventory.InventoryItems.Remove(newslot);
-                    source.Slot = (sbyte)newslot;
-                    destination.Slot = (sbyte)oldslot;
+                    source.Slot = (sbyte) newslot;
+                    destination.Slot = (sbyte) oldslot;
                     pClient.Character.Inventory.InventoryItems.Add(newslot, source);
                     pClient.Character.Inventory.InventoryItems.Add(oldslot, destination);
                     source.Save();
                     destination.Save();
-                    Handler12.ModifyInventorySlot(pClient.Character, newslot, 0x24, oldslot, destination);
-                    Handler12.ModifyInventorySlot(pClient.Character, oldslot, 0x24, newslot, source);
+                    ModifyInventorySlot(pClient.Character, newslot, 0x24, oldslot, destination);
+                    ModifyInventorySlot(pClient.Character, oldslot, 0x24, newslot, source);
                 }
                 else
                 {
                     //item moved to empty slot
                     pClient.Character.Inventory.InventoryItems.Remove(oldslot);
                     pClient.Character.Inventory.InventoryItems.Add(newslot, source);
-                    source.Slot = (sbyte)newslot;
+                    source.Slot = (sbyte) newslot;
                     source.Save();
-                    Handler12.ModifyInventorySlot(pClient.Character, newslot, 0x24, oldslot, null);
-                    Handler12.ModifyInventorySlot(pClient.Character, oldslot, 0x24, newslot, source);
+                    ModifyInventorySlot(pClient.Character, newslot, 0x24, oldslot, null);
+                    ModifyInventorySlot(pClient.Character, oldslot, 0x24, newslot, source);
                 }
             }
-            else if (source.Flags == Data.ItemFlags.GuildItem)
+            else if (source.Flags == ItemFlags.GuildItem)
             {
                 Item destination;
                 if (pClient.Character.Guild.GuildStore.GuildStorageItems.TryGetValue(newslot, out destination))
@@ -431,25 +462,26 @@ namespace Estrella.Zone.Handlers
                     //item swap
                     pClient.Character.Guild.GuildStore.GuildStorageItems.Remove(oldslot);
                     pClient.Character.Guild.GuildStore.GuildStorageItems.Remove(newslot);
-                    source.Slot = (sbyte)newslot;
-                    destination.Slot = (sbyte)oldslot;
+                    source.Slot = (sbyte) newslot;
+                    destination.Slot = (sbyte) oldslot;
                     pClient.Character.Guild.GuildStore.GuildStorageItems.Add(newslot, source);
                     pClient.Character.Guild.GuildStore.GuildStorageItems.Add(oldslot, destination);
-                    Handler12.ModifyInventorySlot(pClient.Character, oldstate, newstate, newslot, oldslot, destination);
-                    Handler12.ModifyInventorySlot(pClient.Character, oldstate, oldstate, newstate, newslot, source);
+                    ModifyInventorySlot(pClient.Character, oldstate, newstate, newslot, oldslot, destination);
+                    ModifyInventorySlot(pClient.Character, oldstate, oldstate, newstate, newslot, source);
                 }
                 else
                 {
                     //item moved to empty slot
                     pClient.Character.Guild.GuildStore.GuildStorageItems.Remove(oldslot);
                     pClient.Character.Guild.GuildStore.GuildStorageItems.Add(newslot, source);
-                    source.Slot = (sbyte)newslot;
+                    source.Slot = (sbyte) newslot;
 
-                    Handler12.ModifyInventorySlot(pClient.Character, oldstate, newstate, newslot, oldslot,null);
-                    Handler12.ModifyInventorySlot(pClient.Character, newstate, oldstate, newstate, newslot, source);
+                    ModifyInventorySlot(pClient.Character, oldstate, newstate, newslot, oldslot, null);
+                    ModifyInventorySlot(pClient.Character, newstate, oldstate, newstate, newslot, source);
                 }
             }
         }
+
         [PacketHandler(CH12Type.DropItem)]
         public static void DropItemHandler(ZoneClient client, Packet packet)
         {
@@ -459,6 +491,7 @@ namespace Estrella.Zone.Handlers
                 Log.WriteLine(LogLevel.Warn, "Invalid drop request.");
                 return;
             }
+
             client.Character.DropItemRequest(slot);
         }
 
@@ -472,6 +505,7 @@ namespace Estrella.Zone.Handlers
                 Log.WriteLine(LogLevel.Warn, "Invalid item enhance request.");
                 return;
             }
+
             client.Character.UpgradeItem(weapslot, stoneslot);
         }
 
@@ -479,7 +513,7 @@ namespace Estrella.Zone.Handlers
         {
             using (var packet = new Packet(SH12Type.ItemUpgrade))
             {
-                packet.WriteUShort(success ? (ushort)2243 : (ushort)2245);
+                packet.WriteUShort(success ? (ushort) 2243 : (ushort) 2245);
                 character.Client.SendPacket(packet);
             }
         }
@@ -511,14 +545,15 @@ namespace Estrella.Zone.Handlers
             }
         }
 
-        public static void UpdateInventorySlot(ZoneCharacter pChar, byte pFromSlot, byte pFromInv, byte pToSlot, Item pItem)
+        public static void UpdateInventorySlot(ZoneCharacter pChar, byte pFromSlot, byte pFromInv, byte pToSlot,
+            Item pItem)
         {
             using (var packet = new Packet(SH12Type.ModifyItemSlot))
             {
                 packet.WriteByte(pFromSlot);
                 packet.WriteByte(pFromInv);
                 packet.WriteByte(pToSlot);
-                packet.WriteByte(0x24);         // pToInv
+                packet.WriteByte(0x24); // pToInv
                 if (pItem == null)
                 {
                     packet.WriteUShort(0xffff);
@@ -534,11 +569,13 @@ namespace Estrella.Zone.Handlers
                         pItem.WriteEquipStats(packet);
                     }
                 }
+
                 pChar.Client.SendPacket(packet);
             }
         }
 
-        public static void UpdateEquipSlot(ZoneCharacter pClient, byte pFromSlot, byte pFromInv, byte pToSlot, Item pItem)
+        public static void UpdateEquipSlot(ZoneCharacter pClient, byte pFromSlot, byte pFromInv, byte pToSlot,
+            Item pItem)
         {
             using (var packet = new Packet(SH12Type.ModifyEquipSlot))
             {
@@ -556,15 +593,19 @@ namespace Estrella.Zone.Handlers
                     else
                         pItem.WriteEquipStats(packet);
                 }
+
                 pClient.Client.SendPacket(packet);
             }
         }
-        public static void ModifyInventorySlot(ZoneCharacter character, byte inventory, byte oldslot, byte newslot, Item item)
+
+        public static void ModifyInventorySlot(ZoneCharacter character, byte inventory, byte oldslot, byte newslot,
+            Item item)
         {
-            ModifyInventorySlot(character, inventory, (byte)0x24, oldslot, newslot, item);
+            ModifyInventorySlot(character, inventory, 0x24, oldslot, newslot, item);
         }
 
-        public static void ModifyInventorySlot(ZoneCharacter character, byte sourcestate, byte deststate, byte oldslot, byte newslot, Item item)
+        public static void ModifyInventorySlot(ZoneCharacter character, byte sourcestate, byte deststate, byte oldslot,
+            byte newslot, Item item)
         {
             using (var packet = new Packet(SH12Type.ModifyItemSlot))
             {
@@ -587,14 +628,13 @@ namespace Estrella.Zone.Handlers
                         item.WriteEquipStats(packet);
                     }
                 }
+
                 character.Client.SendPacket(packet);
             }
         }
 
         public static void ResetInventorySlot(ZoneCharacter character, byte slot)
         {
-
-
             using (var packet = new Packet(SH12Type.ModifyItemSlot))
             {
                 packet.WriteByte(0);
@@ -604,6 +644,7 @@ namespace Estrella.Zone.Handlers
                 packet.WriteUShort(0xffff);
                 character.Client.SendPacket(packet);
             }
+
             character.Inventory.InventoryItems.Remove(slot);
         }
     }

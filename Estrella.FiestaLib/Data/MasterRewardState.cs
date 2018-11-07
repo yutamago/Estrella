@@ -1,12 +1,24 @@
-﻿using System;
+﻿using System.Data;
 using Estrella.Database.DataStore;
-using System.Collections.Generic;
-using System.Data;
 
 namespace Estrella.FiestaLib.Data
 {
     public class MasterRewardState
     {
+        public MasterRewardState()
+        {
+        }
+
+        public MasterRewardState(DataRow row)
+        {
+            Str = GetDataTypes.GetUshort(row["Str"]);
+            End = GetDataTypes.GetUshort(row["End"]);
+            Dex = GetDataTypes.GetUshort(row["Dex"]);
+            Int = GetDataTypes.GetUshort(row["Int"]);
+            Spr = GetDataTypes.GetUshort(row["Spr"]);
+            ItemID = GetDataTypes.GetUshort(row["ItemID"]);
+        }
+
         public ushort ItemID { get; set; }
         public byte Upgrades { get; set; }
         public byte Count { get; set; }
@@ -16,18 +28,5 @@ namespace Estrella.FiestaLib.Data
         public ushort Dex { get; private set; }
         public ushort Int { get; private set; }
         public ushort Spr { get; private set; }
-        
-        public MasterRewardState()
-        {
-        }
-        public MasterRewardState(DataRow row)
-        {
-            this.Str = GetDataTypes.GetUshort(row["Str"]);
-            this.End = GetDataTypes.GetUshort(row["End"]);
-            this.Dex = GetDataTypes.GetUshort(row["Dex"]);
-            this.Int = GetDataTypes.GetUshort(row["Int"]);
-            this.Spr = GetDataTypes.GetUshort(row["Spr"]);
-            this.ItemID = GetDataTypes.GetUshort(row["ItemID"]);
-        }
     }
 }

@@ -5,46 +5,49 @@ using Estrella.FiestaLib.Networking;
 using Estrella.Util;
 using Estrella.Zone.Data;
 using Estrella.Zone.Game;
+using Estrella.Zone.Managers;
 using Estrella.Zone.Networking;
 
 namespace Estrella.Zone.Handlers
 {
     public sealed class Handler6
     {
-         [PacketHandler(CH6Type.Teleporter)]
+        [PacketHandler(CH6Type.Teleporter)]
         public static void UseTeleporter(ZoneClient client, Packet packet)
         {
             byte anwser;
             if (packet.TryReadByte(out anwser))
             {
-                using (Packet Packet = new Packet(SH6Type.TelePorter))
+                using (var Packet = new Packet(SH6Type.TelePorter))
                 {
-                    Packet.WriteShort(6593);//code for normal teleport
+                    Packet.WriteShort(6593); //code for normal teleport
                     client.SendPacket(Packet);
                 }
+
                 switch (anwser)
                 {
                     case 0:
-                        client.Character.ChangeMap(0, 4199, 4769);//Roumen
+                        client.Character.ChangeMap(0, 4199, 4769); //Roumen
 
                         break;
                     case 1:
-                        client.Character.ChangeMap(9, 11802, 10466);//Eldrine
+                        client.Character.ChangeMap(9, 11802, 10466); //Eldrine
 
                         break;
                     case 2:
-                        client.Character.ChangeMap(75, 9069, 9312);//EldGbl02
+                        client.Character.ChangeMap(75, 9069, 9312); //EldGbl02
                         break;
                     case 3:
-                        client.Character.ChangeMap(5,13658,7812);//RouVal01
+                        client.Character.ChangeMap(5, 13658, 7812); //RouVal01
 
                         break;
                     default:
-                        Log.WriteLine(LogLevel.Warn,"Unkown Teleport Answer {1}",anwser);
+                        Log.WriteLine(LogLevel.Warn, "Unkown Teleport Answer {1}", anwser);
                         break;
                 }
             }
         }
+
         [PacketHandler(CH6Type.TransferKey)]
         public static void TransferKeyHandler(ZoneClient client, Packet packet)
         {
@@ -56,7 +59,8 @@ namespace Estrella.Zone.Handlers
                 Log.WriteLine(LogLevel.Warn, "Invalid game transfer.");
                 return;
             }
-            ClientTransfer transfer = ClientManager.Instance.GetTransfer(characterName);
+
+            var transfer = ClientManager.Instance.GetTransfer(characterName);
             if (transfer == null || transfer.HostIP != client.Host || transfer.RandID != randomID)
             {
                 Log.WriteLine(LogLevel.Warn, "{0} tried to login without a valid client transfer.", client.Host);
@@ -67,9 +71,9 @@ namespace Estrella.Zone.Handlers
 
             try
             {
-               ClientManager.Instance.RemoveTransfer(characterName);
- 
-                 ZoneCharacter zonecharacter = new ZoneCharacter(transfer.CharID);
+                ClientManager.Instance.RemoveTransfer(characterName);
+
+                var zonecharacter = new ZoneCharacter(transfer.CharID);
                 if (zonecharacter.Character.AccountID != transfer.AccountID)
                 {
                     Log.WriteLine(LogLevel.Warn, "Character is logging in with wrong account ID.");
@@ -85,8 +89,8 @@ namespace Estrella.Zone.Handlers
                 client.Character = zonecharacter;
                 zonecharacter.Client = client;
                 //Zonecharacter.Client. = ;
-           
-               
+
+
                 if (ClientManager.Instance.AddClient(client))
                 {
                     zonecharacter.SendGetIngameChunk(); //TODO: interserver packet?
@@ -95,16 +99,19 @@ namespace Estrella.Zone.Handlers
             }
             catch (Exception ex)
             {
-                Log.WriteLine(LogLevel.Exception, "Error loading character {0}: {1} - {2}", characterName, ex.ToString(), ex.StackTrace);
+                Log.WriteLine(LogLevel.Exception, "Error loading character {0}: {1} - {2}", characterName,
+                    ex.ToString(), ex.StackTrace);
                 Handler4.SendConnectError(client, ConnectErrors.ErrorInCharacterInfo);
             }
         }
+
         [PacketHandler(CH6Type.ClientReady)]
         public static void ClientReadyHandler(ZoneClient client, Packet packet)
         {
             if (client.Admin > 0)
             {
-                client.Character.DropMessage("AdminLevel = {0}; ClientLoad = {1};", client.Admin, ClientManager.Instance.ZoneLoad);
+                client.Character.DropMessage("AdminLevel = {0}; ClientLoad = {1};", client.Admin,
+                    ClientManager.Instance.ZoneLoad);
             }
 
             Handler4.SendUsablePoints(client);
@@ -126,13 +133,14 @@ namespace Estrella.Zone.Handlers
                     client.Character.Position.Y = mi.RegenY;
                     client.Character.Map.SendCharacterEnteredMap(client.Character);
                 }
+
                 client.Character.SetHP(client.Character.MaxHP / 4);
             }
         }
 
         public static Packet RemoveDrop(Drop drop)
         {
-            Packet packet = new Packet(SH6Type.RemoveDrop);
+            var packet = new Packet(SH6Type.RemoveDrop);
             packet.WriteUShort(drop.ID);
             return packet;
         }
@@ -157,7 +165,8 @@ namespace Estrella.Zone.Handlers
             }
         }
 
-        public static void SendChangeZone(ZoneCharacter character, ushort mapid, int x, int y, string ip, ushort port, ushort randomid)
+        public static void SendChangeZone(ZoneCharacter character, ushort mapid, int x, int y, string ip, ushort port,
+            ushort randomid)
         {
             using (var packet = new Packet(SH6Type.ChangeZone))
             {
@@ -175,7 +184,6 @@ namespace Estrella.Zone.Handlers
         {
             using (var packet = new Packet(SH6Type.Error))
             {
-
                 character.Client.SendPacket(packet);
             }
         }

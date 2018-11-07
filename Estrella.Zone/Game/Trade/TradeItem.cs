@@ -1,21 +1,18 @@
-﻿using System;
-using Estrella.Zone.Game;
-
-namespace Estrella.Zone.Data
+﻿namespace Estrella.Zone.Game.Trade
 {
-   public class TradeItem
+    public class TradeItem
     {
-       public ZoneCharacter Owner { get; set; }
-       public byte InventorySlot { get; set; }
-       public byte TradeSlot { get; set; }
-       public Item Item { get; set; }
-      public  TradeItem(ZoneCharacter owner,byte InventorySlot,byte Tradeslot,Item pItem)
-      {
-          this.Owner = owner;
-          this.Item = pItem;
-          this.InventorySlot = InventorySlot;
-          this.TradeSlot = Tradeslot;
-      }
-    }
+        public TradeItem(ZoneCharacter owner, byte InventorySlot, byte Tradeslot, Item pItem)
+        {
+            Owner = owner;
+            Item = pItem;
+            this.InventorySlot = InventorySlot;
+            TradeSlot = Tradeslot;
+        }
 
+        public ZoneCharacter Owner { get; set; }
+        public byte InventorySlot { get; set; }
+        public byte TradeSlot { get; set; }
+        public Item Item { get; set; }
+    }
 }

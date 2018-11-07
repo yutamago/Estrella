@@ -6,26 +6,26 @@ namespace Estrella.FiestaLib.Networking
 {
     public abstract class Listener
     {
-        public bool IsRunning { get; private set; }
-        public Socket Socket { get; private set; }
-
         public Listener(int port)
         {
             Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Socket.Bind(new IPEndPoint(IPAddress.Any, port));
         }
 
+        public bool IsRunning { get; private set; }
+        public Socket Socket { get; private set; }
+
         private void EndAccept(IAsyncResult ar)
         {
             if (!IsRunning) return;
             try
             {
-              Socket newclient = Socket.EndAccept(ar);
-              OnClientConnect(newclient);
+                var newclient = Socket.EndAccept(ar);
+                OnClientConnect(newclient);
             }
             finally
             {
-                Socket.BeginAccept(new AsyncCallback(EndAccept), null);
+                Socket.BeginAccept(EndAccept, null);
             }
         }
 
@@ -39,7 +39,7 @@ namespace Estrella.FiestaLib.Networking
         {
             Socket.Listen(10);
             IsRunning = true;
-            Socket.BeginAccept(new AsyncCallback(EndAccept), null);
+            Socket.BeginAccept(EndAccept, null);
         }
 
         public abstract void OnClientConnect(Socket socket);

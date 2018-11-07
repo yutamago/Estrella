@@ -1,29 +1,18 @@
 ﻿/*File for this file Basic Copyright 2012 no0dl */
-using System;
+
 using System.Data;
-using MySql.Data.MySqlClient;
 using Estrella.FiestaLib;
-using Estrella.InterLib;
 using Estrella.FiestaLib.Networking;
 using Estrella.World.Managers;
+using MySql.Data.MySqlClient;
 
-namespace Estrella.World.Data.Guilds
+namespace Estrella.World.Data.Guild
 {
     public sealed class GuildMember
     {
-        public Guild Guild { get; private set; }
-        public WorldCharacter Character { get; private set; }
-
-
-        public GuildRank Rank { get; set; }
-        public ushort Corp { get; set; }
-
-
-
         private object ThreadLocker;
 
 
-        
         public GuildMember(Guild Guild, WorldCharacter Character, GuildRank Rank, ushort Corp)
         {
             this.Guild = Guild;
@@ -35,6 +24,14 @@ namespace Estrella.World.Data.Guilds
 
             ThreadLocker = new object();
         }
+
+        public Guild Guild { get; private set; }
+        public WorldCharacter Character { get; private set; }
+
+
+        public GuildRank Rank { get; set; }
+        public ushort Corp { get; set; }
+
         public void Dispose()
         {
             Guild = null;
@@ -42,17 +39,15 @@ namespace Estrella.World.Data.Guilds
         }
 
 
-
         public void Save(MySqlConnection con = null)
         {
             lock (ThreadLocker)
             {
-                var conCreated = (con == null);
+                var conCreated = con == null;
                 if (conCreated)
                 {
                     con = Program.DatabaseManager.GetClient().GetConnection();
                 }
-
 
 
                 using (var cmd = con.CreateCommand())
@@ -63,14 +58,12 @@ namespace Estrella.World.Data.Guilds
                     cmd.Parameters.Add(new MySqlParameter("@pGuildID", Guild.ID));
                     cmd.Parameters.Add(new MySqlParameter("@pCharacterID", Character.ID));
 
-                    cmd.Parameters.Add(new MySqlParameter("@pRank", (byte)Rank));
-                    cmd.Parameters.Add(new MySqlParameter("@pCorp", (short)Corp));
-
+                    cmd.Parameters.Add(new MySqlParameter("@pRank", (byte) Rank));
+                    cmd.Parameters.Add(new MySqlParameter("@pCorp", (short) Corp));
 
 
                     cmd.ExecuteNonQuery();
                 }
-
 
 
                 if (conCreated)
@@ -81,14 +74,10 @@ namespace Estrella.World.Data.Guilds
         }
 
 
-
-
-
-
         public void WriteInfo(Packet Packet)
         {
             Packet.WriteString(Character.Character.Name, 16);
-            Packet.WriteByte((byte)Rank);
+            Packet.WriteByte((byte) Rank);
             Packet.WriteInt(0); //unk ?
 
             Packet.WriteUShort(Corp);
@@ -99,13 +88,14 @@ namespace Estrella.World.Data.Guilds
             Packet.WriteInt(32);
             Packet.WriteInt(32);
             Packet.Fill(50, 0x00); // unk
-            Packet.WriteByte((byte)(Character.IsOnline ? 0xB9 : 0x00));
+            Packet.WriteByte((byte) (Character.IsOnline ? 0xB9 : 0x00));
             Packet.Fill(3, 0x00); // unk
             Packet.WriteByte(Character.Character.Job);
             Packet.WriteByte(Character.Character.CharLevel);
             Packet.WriteByte(0);
-            Packet.WriteString(Data.DataProvider.GetMapname(Character.Character.PositionInfo.Map), 12);
+            Packet.WriteString(DataProvider.GetMapname(Character.Character.PositionInfo.Map), 12);
         }
+
         public void BroadcastGuildName()
         {
             var packet = new Packet(SH29Type.GuildNameResult);

@@ -1,31 +1,19 @@
 ﻿using System;
 using System.Xml.Serialization;
-
 using Estrella.Util;
 using Estrella.Zone.Game;
+using Estrella.Zone.Managers;
 
 namespace Estrella.Zone.Data
 {
     public class MobBreedLocation
     {
-        public ushort MobID { get; set; }
-        public ushort MapID { get; set; }
-        public short InstanceID { get; set; }
-        public Vector2 Position { get; set; }
         public const byte MaxMobs = 10;
         public const byte MinMobs = 3;
 
-        [XmlIgnore]
-        public byte CurrentMobs { get; set; }
-        
-        [XmlIgnore]
-        private Map map;
+        [XmlIgnore] private Map map;
 
-        [XmlIgnore]
-        public Map Map { get { return map ?? (map = MapManager.Instance.GetMap(DataProvider.Instance.MapsByID[MapID], InstanceID)); } }
-
-        [XmlIgnore]
-        private DateTime nextUpdate;
+        [XmlIgnore] private DateTime nextUpdate;
 
         public MobBreedLocation()
         {
@@ -37,9 +25,22 @@ namespace Estrella.Zone.Data
             nextUpdate = Program.CurrentTime;
         }
 
+        public ushort MobID { get; set; }
+        public ushort MapID { get; set; }
+        public short InstanceID { get; set; }
+        public Vector2 Position { get; set; }
+
+        [XmlIgnore] public byte CurrentMobs { get; set; }
+
+        [XmlIgnore]
+        public Map Map
+        {
+            get { return map ?? (map = MapManager.Instance.GetMap(DataProvider.Instance.MapsByID[MapID], InstanceID)); }
+        }
+
         public static MobBreedLocation CreateLocationFromPlayer(ZoneCharacter pCharacter, ushort mobID)
         {
-            MobBreedLocation mbl = new MobBreedLocation();
+            var mbl = new MobBreedLocation();
             mbl.MobID = mobID;
             mbl.MapID = pCharacter.MapID;
             mbl.InstanceID = pCharacter.Map.InstanceID;
@@ -50,15 +51,15 @@ namespace Estrella.Zone.Data
         public void SpawnMob()
         {
             if (CurrentMobs == MaxMobs) return; // ...
-            Mob mob = new Mob(this);
-           
+            var mob = new Mob(this);
+
             Map.FinalizeAdd(mob);
         }
 
         public void Update(DateTime date)
         {
             if (Position == null) return;
-            if (this.nextUpdate > date) return;
+            if (nextUpdate > date) return;
 
             if (CurrentMobs < MinMobs)
             {
@@ -69,7 +70,8 @@ namespace Estrella.Zone.Data
                 SpawnMob();
             }
 
-            this.nextUpdate = date.AddSeconds(Program.Randomizer.Next(30, 120)); // Around 30 seconds to 2 minutes for next check.
+            nextUpdate =
+                date.AddSeconds(Program.Randomizer.Next(30, 120)); // Around 30 seconds to 2 minutes for next check.
         }
     }
 }

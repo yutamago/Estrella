@@ -1,16 +1,32 @@
 ﻿/*File for this file Basic Copyright 2012 no0dl */
+
 using System;
 using System.Data;
-using MySql.Data.MySqlClient;
-using Estrella.InterLib.Networking;
-using Estrella.FiestaLib.Networking;
 using Estrella.FiestaLib;
-using Estrella.World.Data;
+using Estrella.FiestaLib.Networking;
+using MySql.Data.MySqlClient;
 
-namespace Estrella.World.Data.Guilds.Academy
+namespace Estrella.World.Data.Guild.Academy
 {
     public sealed class GuildAcademyMember
     {
+        public GuildAcademyMember(GuildAcademy Academy, WorldCharacter Character, DataRow Row)
+        {
+            this.Academy = Academy;
+            this.Character = Character;
+
+            Load(Row);
+        }
+
+        public GuildAcademyMember(GuildAcademy Academy, WorldCharacter Character, DateTime RegisterDate,
+            GuildAcademyRank Rank)
+        {
+            this.Academy = Academy;
+            this.Character = Character;
+            this.RegisterDate = RegisterDate;
+            this.Rank = Rank;
+        }
+
         public GuildAcademy Academy { get; private set; }
 
         public WorldCharacter Character { get; private set; }
@@ -19,23 +35,6 @@ namespace Estrella.World.Data.Guilds.Academy
         public DateTime RegisterDate { get; private set; }
         public bool IsChatBlocked { get; set; }
 
-
-
-
-        public GuildAcademyMember(GuildAcademy Academy, WorldCharacter Character, DataRow Row)
-        {
-            this.Academy = Academy;
-            this.Character = Character;
-
-            Load(Row);
-        }
-        public GuildAcademyMember(GuildAcademy Academy, WorldCharacter Character, DateTime RegisterDate, GuildAcademyRank Rank)
-        {
-            this.Academy = Academy;
-            this.Character = Character;
-            this.RegisterDate = RegisterDate;
-            this.Rank = Rank;
-        }
         public void Dispose()
         {
             Academy = null;
@@ -43,16 +42,16 @@ namespace Estrella.World.Data.Guilds.Academy
         }
 
 
-
         private void Load(DataRow Row)
         {
             RegisterDate = Convert.ToDateTime(Row["RegisterDate"]);
             IsChatBlocked = Convert.ToBoolean(Row["IsChatBlocked"]);
-            Rank = (GuildAcademyRank)Convert.ToByte(Row["Rank"]);
+            Rank = (GuildAcademyRank) Convert.ToByte(Row["Rank"]);
         }
+
         public void Save(MySqlConnection con)
         {
-            var conCreated = (con == null);
+            var conCreated = con == null;
             if (conCreated)
             {
                 con = Program.DatabaseManager.GetClient().GetConnection();
@@ -68,10 +67,9 @@ namespace Estrella.World.Data.Guilds.Academy
                 cmd.Parameters.Add(new MySqlParameter("@pGuildID", Academy.Guild.ID));
                 cmd.Parameters.Add(new MySqlParameter("@pCharacterID", Character.ID));
                 cmd.Parameters.Add(new MySqlParameter("@pIsChatBlocked", IsChatBlocked));
-                cmd.Parameters.Add(new MySqlParameter("@pRank", (byte)Rank));
+                cmd.Parameters.Add(new MySqlParameter("@pRank", (byte) Rank));
 
 
-                
                 cmd.ExecuteNonQuery();
             }
 
@@ -83,29 +81,23 @@ namespace Estrella.World.Data.Guilds.Academy
         }
 
 
-
-
-
-
-
-
-
         public void WriteInfo(Packet packet)
-        { 
+        {
             packet.WriteString(Character.Character.Name, 16);
-            packet.Fill(65, 0x00);//unk
+            packet.Fill(65, 0x00); //unk
             packet.WriteBool(Character.IsIngame);
-            packet.Fill(3, 0x00);//unk
-            packet.WriteByte(Character.Character.Job);//job 
-            packet.WriteByte(Character.Character.CharLevel);//level
-            packet.WriteByte(0);// unk
-            packet.WriteString(DataProvider.GetMapname(Character.Character.PositionInfo.Map), 12);//mapName
-            packet.WriteByte((byte)RegisterDate.Month);//month
-            packet.WriteByte(184);//year fortmat unkown
-            packet.WriteByte((byte)RegisterDate.Day);//day
-            packet.WriteByte(0);//unk
-            packet.WriteByte(0);  //unk
+            packet.Fill(3, 0x00); //unk
+            packet.WriteByte(Character.Character.Job); //job 
+            packet.WriteByte(Character.Character.CharLevel); //level
+            packet.WriteByte(0); // unk
+            packet.WriteString(DataProvider.GetMapname(Character.Character.PositionInfo.Map), 12); //mapName
+            packet.WriteByte((byte) RegisterDate.Month); //month
+            packet.WriteByte(184); //year fortmat unkown
+            packet.WriteByte((byte) RegisterDate.Day); //day
+            packet.WriteByte(0); //unk
+            packet.WriteByte(0); //unk
         }
+
         public void BroadcastGuildName()
         {
             var packet = new Packet(SH29Type.GuildNameResult);

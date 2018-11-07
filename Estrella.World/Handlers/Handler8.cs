@@ -1,5 +1,6 @@
 ﻿using Estrella.FiestaLib;
 using Estrella.FiestaLib.Networking;
+using Estrella.World.Managers;
 using Estrella.World.Networking;
 
 namespace Estrella.World.Handlers
@@ -13,14 +14,14 @@ namespace Estrella.World.Handlers
                 return;
 
             byte msgLen;
-            string msg = string.Empty;
+            var msg = string.Empty;
 
             if (!packet.TryReadByte(out msgLen) || !packet.TryReadString(out msg, msgLen))
                 return;
 
             client.Character.Group.Chat(client, msg);
-
         }
+
         [PacketHandler(CH8Type.WisperTo)]
         public static void Wisper(WorldClient client, Packet packet)
         {
@@ -33,7 +34,8 @@ namespace Estrella.World.Handlers
                 {
                     return;
                 }
-                WorldClient toChar = ClientManager.Instance.GetClientByCharname(toname);
+
+                var toChar = ClientManager.Instance.GetClientByCharname(toname);
                 if (toChar != null)
                 {
                     using (var frompacket = new Packet(SH8Type.WisperFrom))
@@ -45,12 +47,14 @@ namespace Estrella.World.Handlers
                         }
                         else
                         {
-                            frompacket.WriteByte(12);//blocket notdisplay message
+                            frompacket.WriteByte(12); //blocket notdisplay message
                         }
+
                         frompacket.WriteByte(messagelenght);
                         frompacket.WriteString(message, messagelenght);
                         toChar.SendPacket(frompacket);
                     }
+
                     using (var pack = new Packet(SH8Type.WisperTo))
                     {
                         pack.WriteString(toname, 16);
@@ -64,13 +68,12 @@ namespace Estrella.World.Handlers
                     //target not found
                     using (var pp = new Packet(SH8Type.WisperTargetNotfound))
                     {
-                        pp.WriteUShort(3945);//unk
+                        pp.WriteUShort(3945); //unk
                         pp.WriteString(toname, 16);
                         client.SendPacket(pp);
                     }
                 }
             }
         }
-
     }
 }

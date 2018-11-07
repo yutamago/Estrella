@@ -1,7 +1,7 @@
 namespace Estrella.FiestaLib.Data
 {
-	public enum ItemClass : byte
-	{
+    public enum ItemClass : byte
+    {
         NonUse = 0,
         Cen = 2,
         QuestItem = 3,
@@ -28,6 +28,6 @@ namespace Estrella.FiestaLib.Data
         EnhanceGoldNine = 25,
         ItemSkins = 26,
         PremiumEmotion = 27,
-        CollectCard = 31,
-	}
+        CollectCard = 31
+    }
 }

@@ -1,83 +1,88 @@
-﻿using System.Data;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Threading;
-using Estrella.Database;
 
-namespace Estrella.Zone.Game
+namespace Estrella.Zone.Game.Inventory
 {
     public class PremiumInventory
     {
-        public Dictionary<ushort,List<PremiumItem>> PremiumItems { get; private set; }
-        public ushort Count { get; private set; }
         private Mutex locker = new Mutex();
+
+        public PremiumInventory()
+        {
+            PremiumItems = new Dictionary<ushort, List<PremiumItem>>();
+            MaxPageCount = 1;
+            for (byte i = 0; i < MaxPageCount; ++i)
+            {
+                PremiumItems[i] = new List<PremiumItem>();
+            }
+        }
+
+        public Dictionary<ushort, List<PremiumItem>> PremiumItems { get; private set; }
+        public ushort Count { get; private set; }
         private ushort MaxPageCount { get; set; }
+
         public void LoadPremiumItems(int pChar)
         {
             try
             {
-                this.locker.WaitOne();
+                locker.WaitOne();
                 DataTable Premiumdata = null;
-                using (DatabaseClient dbClient = Program.CharDBManager.GetClient())
+                using (var dbClient = Program.CharDBManager.GetClient())
                 {
                     Premiumdata = dbClient.ReadDataTable("SELECT *FROM PremiumItem WHERE CharID='" + pChar + "'");
                 }
+
                 if (Premiumdata != null)
                 {
                     foreach (DataRow row in Premiumdata.Rows)
                     {
-                        PremiumItem pItem = PremiumItem.LoadFromDatabase(row);
-                        this.PremiumItems[pItem.PageID].Add(pItem);
+                        var pItem = PremiumItem.LoadFromDatabase(row);
+                        PremiumItems[pItem.PageID].Add(pItem);
                     }
                 }
-            }
-            finally
-            {
-                this.locker.ReleaseMutex();
-            }
-       }
-        public PremiumInventory()
-        {
-            this.PremiumItems = new Dictionary<ushort, List<PremiumItem>>();
-            this.MaxPageCount = 1;
-            for (byte i = 0; i < this.MaxPageCount; ++i)
-            {
-               PremiumItems[i] = new List<PremiumItem>();
-            }
-        }
-        public void RemovePremiumItem(PremiumItem pItem)
-        {
-
-            try
-            {
-                locker.WaitOne();
-                this.PremiumItems[pItem.PageID].Remove(pItem);
             }
             finally
             {
                 locker.ReleaseMutex();
             }
         }
+
+        public void RemovePremiumItem(PremiumItem pItem)
+        {
+            try
+            {
+                locker.WaitOne();
+                PremiumItems[pItem.PageID].Remove(pItem);
+            }
+            finally
+            {
+                locker.ReleaseMutex();
+            }
+        }
+
         public void AddPremiumItem(PremiumItem pItem)
         {
             pItem.AddToDatabase();
-            this.PremiumItems[pItem.PageID].Add(pItem);
-        }
-        public void Enter()
-        {
-            this.locker.WaitOne();
+            PremiumItems[pItem.PageID].Add(pItem);
         }
 
-        public bool GetEmptySlot(out byte pSlot,out ushort PageID) //cpu intensive?
+        public void Enter()
+        {
+            locker.WaitOne();
+        }
+
+        public bool GetEmptySlot(out byte pSlot, out ushort PageID) //cpu intensive?
         {
             pSlot = 0;
             PageID = 0;
-            for (byte i = 0; i < this.Count; ++i)
+            for (byte i = 0; i < Count; ++i)
             {
-                if (!this.PremiumItems.ContainsKey(i))
+                if (!PremiumItems.ContainsKey(i))
                 {
-                    for (byte i2 = 0; i2 < (this.PremiumItems[i].Count * 24); ++i2)
+                    for (byte i2 = 0; i2 < PremiumItems[i].Count * 24; ++i2)
                     {
-                        PremiumItem Item = this.PremiumItems[i].Find(ss => ss.Slot == i2);
+                        var Item = PremiumItems[i].Find(ss => ss.Slot == i2);
                         if (Item == null)
                         {
                             pSlot = i2;
@@ -87,15 +92,19 @@ namespace Estrella.Zone.Game
                     }
                 }
             }
+
             return false; //no more empty slots found
         }
+
         public void Release()
         {
             try
             {
-                this.locker.ReleaseMutex();
+                locker.ReleaseMutex();
             }
-            catch { }
+            catch
+            {
+            }
         }
     }
 }

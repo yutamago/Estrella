@@ -2,14 +2,13 @@
 using System.Net.Sockets;
 using Estrella.FiestaLib.Networking;
 using Estrella.Util;
+using Estrella.World.Managers;
 
 namespace Estrella.World.Networking
 {
-    [ServerModule(Util.InitializationStage.Networking)]
+    [ServerModule(InitializationStage.Networking)]
     public sealed class WorldAcceptor : Listener
     {
-        public static WorldAcceptor Instance { get; private set; }
-
         public WorldAcceptor(int port)
             : base(port)
         {
@@ -17,9 +16,11 @@ namespace Estrella.World.Networking
             Log.WriteLine(LogLevel.Info, "WorldAcceptor ready at {0}", port);
         }
 
+        private static WorldAcceptor Instance { get; set; }
+
         public override void OnClientConnect(Socket socket)
         {
-            WorldClient client = new WorldClient(socket);
+            var client = new WorldClient(socket);
             ClientManager.Instance.AddClient(client);
             Log.WriteLine(LogLevel.Debug, "Client connected from {0}", client.Host);
         }

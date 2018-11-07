@@ -1,31 +1,24 @@
 ﻿/*File for this file Basic Copyright 2012 no0dl */
-using System;
-using System.Text;
-using System.Linq;
-using System.Data;
-using MySql.Data.MySqlClient;
-using System.Data.SqlClient;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using Estrella.FiestaLib.Networking;
-using Estrella.FiestaLib;
-using Estrella.FiestaLib.Data;
-using Estrella.World.Data.Guilds.Academy;
-using Estrella.InterLib;
-using Estrella.InterLib.Networking;
-using Estrella.World.Networking;
-using Estrella.World.Managers;
-using Estrella.Util;
 
-namespace Estrella.World.Data.Guilds
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Text;
+using Estrella.FiestaLib;
+using Estrella.FiestaLib.Networking;
+using Estrella.InterLib.Networking;
+using Estrella.Util;
+using Estrella.World.Managers;
+using Estrella.World.Networking;
+using MySql.Data.MySqlClient;
+
+namespace Estrella.World.Data.Guild
 {
     [ServerModule(InitializationStage.Clients)]
     public static class GuildManager
     {
-        public static object ThreadLocker { get; private set; }
-
-
         private static List<Guild> LoadedGuilds;
+        public static object ThreadLocker { get; private set; }
 
         [InitializerMethod]
         public static bool OnAppStart()
@@ -33,15 +26,17 @@ namespace Estrella.World.Data.Guilds
             ThreadLocker = new object();
 
             LoadedGuilds = new List<Guild>();
-            CharacterManager.CharacterLogin += CharacterManager.OneLoadGuildInCharacter;//were load Guild to char
+            CharacterManager.CharacterLogin += CharacterManager.OneLoadGuildInCharacter; //were load Guild to char
             CharacterManager.CharacterLogin += On_CharacterManager_CharacterLogin;
             CharacterManager.OnCharacterLogout += On_CharacterManager_CharacterLogout;
             return true;
         }
+
         public static void AddGuildToList(Guild pGuild)
         {
-         LoadedGuilds.Add(pGuild);
+            LoadedGuilds.Add(pGuild);
         }
+
         private static void On_CharacterManager_CharacterLogin(WorldCharacter Character)
         {
             if (Character.IsInGuild)
@@ -62,7 +57,6 @@ namespace Estrella.World.Data.Guilds
                 guild.SendMemberList(Character.Client);
 
 
-
                 GuildMember member;
                 if (guild.GetMember(Character.Character.Name, out member))
                 {
@@ -78,13 +72,13 @@ namespace Estrella.World.Data.Guilds
 
 
                 //send packet to zone that guild member logged in
-                using (var packet = new InterPacket(InterHeader.ZONE_GuildMemberLogin))
+                using (var packet = new InterPacket(InterHeader.ZoneGuildMemberLogin))
                 {
                     packet.WriteInt(guild.ID);
                     packet.WriteInt(Character.ID);
 
 
-                    ZoneManager.Instance.Broadcast(packet);
+                    ZoneManager.Broadcast(packet);
                 }
             }
             else
@@ -97,7 +91,6 @@ namespace Estrella.World.Data.Guilds
                     Character.Client.SendPacket(packet);
                 }
             }
-
 
 
             //academy
@@ -114,7 +107,7 @@ namespace Estrella.World.Data.Guilds
                         Character.Client.SendPacket(packet);
                     }
 
-                    
+
                     academy.SendMemberList(Character.Client);
                 }
                 else
@@ -123,7 +116,7 @@ namespace Estrella.World.Data.Guilds
                     {
                         packet.Fill(5, 0);
 
-                        
+
                         Character.Client.SendPacket(packet);
                     }
                 }
@@ -139,6 +132,7 @@ namespace Estrella.World.Data.Guilds
                 }
             }
         }
+
         private static void On_CharacterManager_CharacterLogout(WorldCharacter Character)
         {
             GuildMember member;
@@ -156,19 +150,16 @@ namespace Estrella.World.Data.Guilds
 
 
                 //send packet to zone that guild member logged out
-                using (var packet = new InterPacket(InterHeader.ZONE_GuildMemberLogout))
+                using (var packet = new InterPacket(InterHeader.ZoneGuildMemberLogout))
                 {
                     packet.WriteInt(Character.Guild.ID);
                     packet.WriteInt(Character.ID);
 
 
-                    ZoneManager.Instance.Broadcast(packet);
+                    ZoneManager.Broadcast(packet);
                 }
             }
         }
-
-
-
 
 
         public static bool GetGuildByID(int ID, out Guild Guild)
@@ -206,8 +197,9 @@ namespace Estrella.World.Data.Guilds
                 }
             }
 
-            return (Guild != null);
+            return Guild != null;
         }
+
         public static bool GetGuildByName(string Name, out Guild Guild)
         {
             lock (ThreadLocker)
@@ -243,21 +235,12 @@ namespace Estrella.World.Data.Guilds
                 }
             }
 
-            return (Guild != null);
+            return Guild != null;
         }
-
-
-
-
-
-
-
-
 
 
         #region Game Client Handlers
 
-        
         [PacketHandler(CH29Type.GetGuildList)]
         public static void On_GameClient_GetGuildList(WorldClient Client, Packet Packet)
         {
@@ -271,7 +254,6 @@ namespace Estrella.World.Data.Guilds
             if (now.Subtract(Client.Character.LastGuildListRefresh).TotalSeconds >= 60)
             {
                 Client.Character.LastGuildListRefresh = now;
-
 
 
                 const int GuildsPerPacket = 100;
@@ -308,29 +290,28 @@ namespace Estrella.World.Data.Guilds
                                         listPacket = new Packet(SH29Type.SendGuildList);
                                         listPacket.WriteUShort(3137);
                                         listPacket.WriteByte(1);
-                                        listPacket.WriteUShort((ushort)guildCount);
-                                        listPacket.WriteUShort((ushort)Math.Min(GuildsPerPacket, guildCount - globalCount));
+                                        listPacket.WriteUShort((ushort) guildCount);
+                                        listPacket.WriteUShort((ushort) Math.Min(GuildsPerPacket,
+                                            guildCount - globalCount));
                                     }
 
 
-
                                     Guild guild;
-                                    if (GuildManager.GetGuildByID(reader.GetInt32(0), out guild))
+                                    if (GetGuildByID(reader.GetInt32(0), out guild))
                                     {
                                         //write packet
                                         listPacket.WriteInt(guild.ID);
                                         listPacket.WriteString(guild.Name, 16);
                                         listPacket.WriteString(guild.Master.Character.Character.Name, 16);
                                         listPacket.WriteBool(guild.AllowGuildWar);
-                                        listPacket.WriteByte(1);     // unk
-                                        listPacket.WriteUShort((ushort)guild.Members.Count);
+                                        listPacket.WriteByte(1); // unk
+                                        listPacket.WriteUShort((ushort) guild.Members.Count);
                                         listPacket.WriteUShort(100); // unk
                                     }
                                     else
                                     {
                                         Packet.Fill(42, 0); // guild get error
                                     }
-
 
 
                                     globalCount++;
@@ -382,9 +363,9 @@ namespace Estrella.World.Data.Guilds
             else
             {
                 //encrypt guild pw
-               var pwData = Encoding.UTF8.GetBytes(password);
+                var pwData = Encoding.UTF8.GetBytes(password);
 //                InterCrypto.Encrypt(ref pwData, 0, pwData.Length);
-              
+
 
                 Guild guild;
 
@@ -410,33 +391,37 @@ namespace Estrella.World.Data.Guilds
                             cmd.Parameters.Add(new MySqlParameter("@pCreateTime", createTime));
 
                             var idParam = cmd.Parameters.Add(new MySqlParameter("@pID", SqlDbType.Int)
-                                {
-                                    Direction = ParameterDirection.Output
-                                });
+                            {
+                                Direction = ParameterDirection.Output
+                            });
                             result = Convert.ToInt32(cmd.ExecuteScalar());
-                            guildID = (int)idParam.Value;
+                            guildID = (int) idParam.Value;
                         }
 
                         switch (result)
                         {
                             case -1:
                                 //guild name already exists (ToDo: get response code)
-                              
-                                SendGuildCreateResponse(Client, name, password, allowGuildWar, GuildCreateResponse.AlredyExist);
+
+                                SendGuildCreateResponse(Client, name, password, allowGuildWar,
+                                    GuildCreateResponse.AlredyExist);
                                 return;
 
                             case -2: //database error @ insert guild (ToDo: get response code)
-                                SendGuildCreateResponse(Client, name, password, allowGuildWar, GuildCreateResponse.Failed);
+                                SendGuildCreateResponse(Client, name, password, allowGuildWar,
+                                    GuildCreateResponse.Failed);
                                 return;
                             case -3: //database error @ insert guild academy (ToDo: get response code)
-                                SendGuildCreateResponse(Client, name, password, allowGuildWar, GuildCreateResponse.Failed);
+                                SendGuildCreateResponse(Client, name, password, allowGuildWar,
+                                    GuildCreateResponse.Failed);
                                 return;
 
                             case 0:
 
                                 //create guild
-                                guild = new Guild(con, guildID, name, pwData, allowGuildWar, Client.Character, createTime);
-                            //insert guild master (character will get updated)
+                                guild = new Guild(con, guildID, name, pwData, allowGuildWar, Client.Character,
+                                    createTime);
+                                //insert guild master (character will get updated)
                                 guild.AddMember(Client.Character, GuildRank.Master, con, false, false);
                                 //add to loaded guilds
                                 LoadedGuilds.Add(guild);
@@ -452,43 +437,44 @@ namespace Estrella.World.Data.Guilds
 
 
                 Client.Character.
-                //revoke money
-               Client.Character.ChangeMoney(Client.Character.Character.Money - Guild.Price);
+                    //revoke money
+                    Client.Character.ChangeMoney(Client.Character.Character.Money - Guild.Price);
 
                 //let character broadcast guild name packet
-                using (var packet = new Packet(SH29Type.GuildNameResult))
+                using (var packetX = new Packet(SH29Type.GuildNameResult))
                 {
-                    packet.WriteInt(guild.ID);
-                    packet.WriteString(guild.Name, 16);
+                    packetX.WriteInt(guild.ID);
+                    packetX.WriteString(guild.Name, 16);
 
 
-                    BroadcastManager.Instance.BroadcastInRange(Client.Character, packet, true);
+                    BroadcastManager.Instance.BroadcastInRange(Client.Character, packetX, true);
                 }
 
                 //let zone know that a guild has been loaded
-                using (var packet = new InterPacket(InterHeader.ZONE_GuildCreated))
+                using (var packetX = new InterPacket(InterHeader.ZoneGuildCreated))
                 {
-                    packet.WriteInt(guild.ID);
-                    packet.WriteInt(Client.Character.ID);
+                    packetX.WriteInt(guild.ID);
+                    packetX.WriteInt(Client.Character.ID);
 
 
-                    ZoneManager.Instance.Broadcast(packet);
+                    ZoneManager.Broadcast(packetX);
                 }
 
-                
+
                 //set response to success
                 response = GuildCreateResponse.Success;
             }
 
             SendGuildCreateResponse(Client, name, password, allowGuildWar, response);
         }
-        private static void SendGuildCreateResponse(WorldClient Client, string Name, string Password, bool AllowGuildWar, GuildCreateResponse Response)
+
+        private static void SendGuildCreateResponse(WorldClient Client, string Name, string Password,
+            bool AllowGuildWar, GuildCreateResponse Response)
         {
             using (var packet = new Packet(SH29Type.CreateGuildResponse))
             {
-
-                packet.WriteUShort((ushort)Response);
-                packet.WriteInt((Response == GuildCreateResponse.Success ? 32 : 0));
+                packet.WriteUShort((ushort) Response);
+                packet.WriteInt(Response == GuildCreateResponse.Success ? 32 : 0);
 
                 packet.WriteString(Name, 16);
                 packet.WriteString(Password, 8);
@@ -515,7 +501,6 @@ namespace Estrella.World.Data.Guilds
                 {
                     packet.WriteInt(guildID);
                     packet.WriteString(guild.Name, 16);
-
 
 
                     Client.SendPacket(packet);
@@ -554,10 +539,12 @@ namespace Estrella.World.Data.Guilds
             //response packets
             using (var packet = new Packet(SH29Type.UnkMessageChange))
             {
-                packet.WriteHexAsBytes("68 1B 00 92 AD F8 4F 2E 00 00 00 2B 00 00 00 17 00 00 00 07 00 00 00 06 00 00 00 70 00 00 00 06 00 00 00 BC 00 00 00 01 00 00 00 00 00");
+                packet.WriteHexAsBytes(
+                    "68 1B 00 92 AD F8 4F 2E 00 00 00 2B 00 00 00 17 00 00 00 07 00 00 00 06 00 00 00 70 00 00 00 06 00 00 00 BC 00 00 00 01 00 00 00 00 00");
 
                 Client.SendPacket(packet);
             }
+
             using (var packet = new Packet(SH29Type.ClearGuildDetailsMessage))
             {
                 packet.WriteUShort(3137);
@@ -566,12 +553,12 @@ namespace Estrella.World.Data.Guilds
 
                 Client.SendPacket(packet);
             }
+
             using (var packet = new Packet(SH29Type.UpdateGuildMessageResponse))
             {
                 packet.WriteUShort(3137);
                 Client.SendPacket(packet);
             }
-
 
 
             //update guild
@@ -582,7 +569,6 @@ namespace Estrella.World.Data.Guilds
                 Client.Character.Guild.MessageCreateTime = Program.CurrentTime;
 
                 Client.Character.Guild.Save();
-
 
 
                 //broadcast packet to all guild members
@@ -602,13 +588,12 @@ namespace Estrella.World.Data.Guilds
                     packet.WriteString(message, length);
 
 
-                    
                     Client.Character.Guild.Broadcast(packet);
                 }
 
 
                 //send packet to zone that guild message changed
-                using (var packet = new InterPacket(InterHeader.ZONE_GuildMessageUpdate))
+                using (var packet = new InterPacket(InterHeader.ZoneGuildMessageUpdate))
                 {
                     packet.WriteInt(Client.Character.Guild.ID);
                     packet.WriteInt(Client.Character.ID);
@@ -616,7 +601,7 @@ namespace Estrella.World.Data.Guilds
 
                     packet.WriteUShort(length);
                     packet.WriteString(message, length);
-                    ZoneManager.Instance.Broadcast(packet);
+                    ZoneManager.Broadcast(packet);
                 }
             }
         }
@@ -680,16 +665,16 @@ namespace Estrella.World.Data.Guilds
                 packet.WriteString(Client.Character.Character.Name, 16);
 
 
-                
                 target.Client.SendPacket(packet);
             }
         }
+
         private static void SendGuildInviteError(Client Client, string TargetName, GuildInviteError Error)
         {
             using (var packet = new Packet(SH29Type.GuildInviteError))
             {
                 packet.WriteString(TargetName, 16);
-                packet.WriteUShort((ushort)Error);
+                packet.WriteUShort((ushort) Error);
 
 
                 Client.SendPacket(packet);
@@ -706,7 +691,6 @@ namespace Estrella.World.Data.Guilds
             {
                 return;
             }
-
 
 
             //get guild
@@ -729,7 +713,7 @@ namespace Estrella.World.Data.Guilds
                 return;
             }
 
-            len = (byte)(len + 2);
+            len = (byte) (len + 2);
 
 
             if (Client.Character.Guild != null)
@@ -738,7 +722,7 @@ namespace Estrella.World.Data.Guilds
                 {
                     packet.WriteInt(Client.Character.Guild.ID);
                     packet.WriteString(Client.Character.Character.Name, 16);
-                    
+
                     packet.WriteByte(len);
                     packet.WriteString(msg, len);
 
@@ -760,7 +744,7 @@ namespace Estrella.World.Data.Guilds
             }
 
 
-            var newRank = (GuildRank)newRankByte;
+            var newRank = (GuildRank) newRankByte;
             GuildMember member;
             GuildMember target;
             if (Client.Character.Guild != null

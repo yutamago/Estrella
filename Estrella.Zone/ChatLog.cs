@@ -1,15 +1,13 @@
 ﻿using System;
 using System.IO;
-
 using Estrella.Util;
 
 namespace Estrella.Zone
 {
-    [ServerModule(Util.InitializationStage.DataStore)]
+    [ServerModule(InitializationStage.DataStore)]
     public sealed class ChatLog
     {
         private readonly StreamWriter writer;
-        public static ChatLog Instance { get; private set; }
 
         public ChatLog(string filename)
         {
@@ -17,8 +15,10 @@ namespace Estrella.Zone
             writer.AutoFlush = true;
         }
 
-		[InitializerMethod]
-		public static bool Load()
+        public static ChatLog Instance { get; private set; }
+
+        [InitializerMethod]
+        public static bool Load()
         {
             try
             {
@@ -36,11 +36,13 @@ namespace Estrella.Zone
         {
             if (shout)
             {
-                writer.WriteLine("[{0}][SHOUT] {1} : {2}", Program.CurrentTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss"), username, line);
+                writer.WriteLine("[{0}][SHOUT] {1} : {2}",
+                    Program.CurrentTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss"), username, line);
             }
             else
             {
-                writer.WriteLine("[{0}] {1} : {2}", Program.CurrentTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss"), username, line);
+                writer.WriteLine("[{0}] {1} : {2}", Program.CurrentTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss"),
+                    username, line);
             }
         }
     }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Data;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Data;
 using Estrella.Database.DataStore;
 
 namespace Estrella.FiestaLib.Data
@@ -14,10 +10,10 @@ namespace Estrella.FiestaLib.Data
 
         public static AbStateInfo LoadFromDatabase(DataRow row)
         {
-            AbStateInfo info = new AbStateInfo
+            var info = new AbStateInfo
             {
                 ID = GetDataTypes.GetUshort(row["ID"]),
-                InxName = (string)row["InxName"],
+                InxName = (string) row["InxName"]
             };
             return info;
         }

@@ -4,7 +4,8 @@ namespace Estrella.Util
 {
     public static class Extensions
     {
-        public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> instance, TKey key, TValue defaultValue = default(TValue))
+        public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> instance, TKey key,
+            TValue defaultValue = default(TValue))
         {
             TValue result;
             return instance.TryGetValue(key, out result) ? result : defaultValue;

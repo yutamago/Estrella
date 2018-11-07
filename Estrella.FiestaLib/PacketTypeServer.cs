@@ -1,5 +1,4 @@
-﻿
-namespace Estrella.FiestaLib
+﻿namespace Estrella.FiestaLib
 {
     // Named as SHXType , where X = header ID
 
@@ -10,8 +9,9 @@ namespace Estrella.FiestaLib
         Chatblock = 72,
         UpdateClientTime = 73,
         UnkTimePacket = 69,
-        Unk1 = 14,
+        Unk1 = 14
     }
+
     public enum SH19Type : byte
     {
         SendTradeReqest = 2,
@@ -27,8 +27,9 @@ namespace Estrella.FiestaLib
         SendRemoveItemFromHandel = 20,
         SendTradeAgreeMe = 33,
         SendTradeAgreeTo = 34,
-        SendTradeComplett = 36,
+        SendTradeComplett = 36
     }
+
     public enum SH3Type : byte
     {
         IncorrectVersion = 2, //please update client
@@ -40,11 +41,11 @@ namespace Estrella.FiestaLib
         WorldlistNew = 10, // Initially sends this
         WorldServerIP = 12,
         WorldistResend = 28,
-        
+
 
         //Actually used in world
         CharacterList = 20,
-        BackToWorldListFromChar = 52,
+        BackToWorldListFromChar = 52
     }
 
     public enum SH4Type : byte
@@ -69,7 +70,7 @@ namespace Estrella.FiestaLib
         Revive = 79,
         CharacterPoints = 91,
         SetPointOnStat = 95,
-        CharacterGuildacademyinfo = 151,
+        CharacterGuildacademyinfo = 151
     }
 
     public enum SH5Type : byte
@@ -77,7 +78,7 @@ namespace Estrella.FiestaLib
         CharCreationError = 4,
         CharCreationOK = 6,
         CharDeleteOK = 12,
-        SendCharacterChangeNewName = 16,
+        SendCharacterChangeNewName = 16
     }
 
     public enum SH6Type : byte
@@ -87,8 +88,7 @@ namespace Estrella.FiestaLib
         RemoveDrop = 5,
         ChangeMap = 9,
         ChangeZone = 10,
-        TelePorter = 27,
-
+        TelePorter = 27
     }
 
     public enum SH7Type : byte
@@ -101,8 +101,9 @@ namespace Estrella.FiestaLib
         SpawnMultiObject = 9,
         ShowDrop = 10,
         ShowDrops = 11,
-        RemoveObject = 14,
+        RemoveObject = 14
     }
+
     public enum SH8Type : byte
     {
         ChatNormal = 2,
@@ -129,7 +130,7 @@ namespace Estrella.FiestaLib
         MapUnmount = 67,
         UpdateMountFood = 70,
         CastItem = 71,
-        BlockWalk = 74,
+        BlockWalk = 74
     }
 
     public enum SH9Type : byte
@@ -147,15 +148,15 @@ namespace Estrella.FiestaLib
         DieAnimation = 74,
 
         SkillUsePrepareSelf = 78,
-        SkillUsePrepareOthers = 79, 
+        SkillUsePrepareOthers = 79,
 
         SkillAnimationPosition = 81,
         SkillAnimationTarget = 82,
-        SkillAnimation = 87,
+        SkillAnimation = 87
     }
 
     public enum SH12Type : byte
-    { 
+    {
         ModifyItemSlot = 1,
         ModifyEquipSlot = 2,
         InventoryFull = 4,
@@ -167,39 +168,44 @@ namespace Estrella.FiestaLib
         ItemUpgrade = 24,
         ItemUsedOk = 26,
         SendPremiumItemList = 33,
-        SendRewardList = 45,
+        SendRewardList = 45
     }
+
     public enum SH14Type : byte
     {
         // According to my informations, 7 is InviteDeclined.
         // NOTE - IT IS.
-		// Header 7 somehow changed I guess?
-		// seems to be answer or related to CH14::72
-		// new data is CHAR[16] NAME | USHORT UNK (C1 04)
-		// purpose complete unknown
+        // Header 7 somehow changed I guess?
+        // seems to be answer or related to CH14::72
+        // new data is CHAR[16] NAME | USHORT UNK (C1 04)
+        // purpose complete unknown
         InviteDeclined = 7,
         UpdatePartyMemberLoc = 73,
         UpdatePartyMemberStats = 50,
         SetMemberStats = 51,
-		// Invite/Accept might be switched up
+
+        // Invite/Accept might be switched up
         PartyInvite = 3,
         PartyAccept = 4,
         PartyDropState = 76,
         PartyList = 9,
-		// changed.
+
+        // changed.
         PartyLeave = 11,
         GroupList = 85,
-		// might changed as well?
+
+        // might changed as well?
         ChangePartyMaster = 41,
         ChangePartyDrop = 75,
         KickPartyMember = 21,
 
         BreakUp = 30,
 
-		// COMPLETE UNKOWN
-		// DATA: CHAR[16] NAME, thats it.
-		UNK_1 = 71,
+        // COMPLETE UNKOWN
+        // DATA: CHAR[16] NAME, thats it.
+        UNK_1 = 71
     }
+
     public enum SH15Type : byte
     {
         Question = 1,
@@ -207,13 +213,13 @@ namespace Estrella.FiestaLib
         HanlderSkill = 10,
         HandlerStone = 5,
         HandlerTitel = 11,
-        GuildNpcReqest = 12,
+        GuildNpcReqest = 12
     }
 
     //skills & crap?
     public enum SH18Type : byte
     {
-        LearnSkill = 4,
+        LearnSkill = 4
     }
 
     public enum SH20Type : byte
@@ -223,8 +229,9 @@ namespace Estrella.FiestaLib
         ErrorBuyStone = 5,
         ErrorUseStone = 6,
         StartHPStoneCooldown = 8,
-        StartSPStoneCooldown = 10,
+        StartSPStoneCooldown = 10
     }
+
     public enum SH21Type : byte
     {
         FriendListDelete = 6,
@@ -235,11 +242,12 @@ namespace Estrella.FiestaLib
         FriendOffline = 10,
         FriendInviteReject = 11,
         FriendDeleteSend = 12,
-        FriendChangeMap = 13,
+        FriendChangeMap = 13
     }
+
     public enum SH25Type : byte
     {
-        WorldMessage = 2,
+        WorldMessage = 2
     }
 
     public enum SH28Type : byte
@@ -248,7 +256,7 @@ namespace Estrella.FiestaLib
         LoadQuickBarState = 5,
         LoadGameSettings = 11,
         LoadClientSettings = 13,
-        LoadShortCuts = 15,
+        LoadShortCuts = 15
     }
 
     public enum SH29Type : byte
@@ -271,9 +279,9 @@ namespace Estrella.FiestaLib
         GuildChat = 116,
         GuildNameResult = 119,
         ClearGuildDetailsMessage = 191,
-        UnkMessageChange = 196,
-
+        UnkMessageChange = 196
     }
+
     public enum SH37Type : byte
     {
         SendMasterRequestAccept = 3,
@@ -290,9 +298,9 @@ namespace Estrella.FiestaLib
         SendApprenticeReward = 26,
         SendRecivveCopper = 61,
         SendGiveMasterReward = 65,
-        MasterReiveCopperDecline = 69,
-    
+        MasterReiveCopperDecline = 69
     }
+
     public enum SH38Type : byte
     {
         SendAcademyList = 12,
@@ -314,17 +322,19 @@ namespace Estrella.FiestaLib
         AcademyChatBlocked = 106,
         GuildItemList = 110,
         RemoveFromGuildStore = 115,
-        AddToGuildStore = 117,
+        AddToGuildStore = 117
     }
+
     public enum SH42Type : byte
     {
         BlockList = 2,
         AddToBlockList = 6,
         RemoveFromBlockList = 10,
-        ClearBlockList = 14,
+        ClearBlockList = 14
     }
+
     public enum SH31Type : byte
     {
-        LoadUnkown = 7,
+        LoadUnkown = 7
     }
 }
