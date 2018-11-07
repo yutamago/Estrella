@@ -331,16 +331,16 @@ namespace Estrella.World.Data.Group
                 gdata = dbClient.ReadDataTable("SELECT * FROM `groups` WHERE Id = " + pId + "");
             }
 
-            if (gdata != null)
-                foreach (DataRow row in gdata.Rows)
-                    for (var i = 1; i < 4; i++)
-                    {
-                        var memColName = string.Format("Member{0}", i);
-                        if (row.IsNull(memColName))
-                            continue;
-                        var mem = (ushort) row[memColName];
-                        g.Members.Add(GroupMember.LoadFromDatabase(mem));
-                    }
+            if (gdata == null) return g;
+            foreach (DataRow row in gdata.Rows)
+                for (var i = 1; i < 4; i++)
+                {
+                    var memColName = $"Member{i}";
+                    if (row.IsNull(memColName))
+                        continue;
+                    var mem = (ushort) row[memColName];
+                    g.Members.Add(GroupMember.LoadFromDatabase(mem));
+                }
 
             return g;
         }

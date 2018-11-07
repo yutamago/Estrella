@@ -93,7 +93,7 @@ namespace Estrella.Zone
                 Settings.Instance.WorldDBMinPoolSizeZoneWorld, Settings.Instance.WorldDBMaxPoolSizeZoneWorld,
                 Settings.Instance.QueryCachePerClientZoneWorld, Settings.Instance.OverloadFlagsZoneWorld);
             CharDBManager.GetClient();
-            Log.SetLogToFile(string.Format(@"Logs\Zone\{0}.log", DateTime.Now.ToString("yyyy-MM-dd HHmmss")));
+            Log.SetLogToFile($@"Logs\Zone\{DateTime.Now.ToString("yyyy-MM-dd HHmmss")}.log");
             Randomizer = new Random();
             Log.IsDebug = Settings.Instance.Debug;
 

@@ -31,8 +31,8 @@ namespace Estrella.World.Data
             DataTable RewardData = null;
             using (var dbClient = Program.DatabaseManager.GetClient())
             {
-                RewardData = dbClient.ReadDataTable(string.Format("USE `{0}`; SELECT  *FROM MasterRewards;  USE `{1}`",
-                    Settings.Instance.ZoneMysqlDatabase, Settings.Instance.WorldMysqlDatabase));
+                RewardData = dbClient.ReadDataTable(
+                    $"USE `{Settings.Instance.ZoneMysqlDatabase}`; SELECT  *FROM MasterRewards;  USE `{Settings.Instance.WorldMysqlDatabase}`");
             }
 
             if (RewardData != null)
@@ -53,8 +53,8 @@ namespace Estrella.World.Data
             DataTable mapData = null;
             using (var dbClient = Program.DatabaseManager.GetClient())
             {
-                mapData = dbClient.ReadDataTable(string.Format("USE `{0}`; SELECT * FROM `mapinfo`; USE `{1}`",
-                    Settings.Instance.ZoneMysqlDatabase, Settings.Instance.WorldMysqlDatabase));
+                mapData = dbClient.ReadDataTable(
+                    $"USE `{Settings.Instance.ZoneMysqlDatabase}`; SELECT * FROM `mapinfo`; USE `{Settings.Instance.WorldMysqlDatabase}`");
             }
 
             if (mapData != null)

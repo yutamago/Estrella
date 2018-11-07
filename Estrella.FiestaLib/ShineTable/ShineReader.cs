@@ -253,8 +253,7 @@ namespace Estrella.FiestaLib.ShineTable
 
                                     if (lineSplit.Length < i)
                                     {
-                                        throw new Exception(string.Format("Could not read all columns of line {0}",
-                                            lineNR));
+                                        throw new Exception($"Could not read all columns of line {lineNR}");
                                     }
 
                                     // Cannot count on the tabs ...

@@ -42,7 +42,7 @@ namespace Estrella.FiestaLib.SHN
         {
             if (!File.Exists(FileName))
             {
-                throw new FileNotFoundException(string.Format("Could not find SHN File {0}.", FileName));
+                throw new FileNotFoundException($"Could not find SHN File {FileName}.");
             }
 
             byte[] data;

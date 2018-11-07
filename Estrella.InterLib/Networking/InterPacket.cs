@@ -85,15 +85,14 @@ namespace Estrella.InterLib.Networking
         public string Dump()
         {
             return ByteUtils.BytesToHex(_memoryStream.ToArray(),
-                string.Format("Packet (0x{0} - {1}): ", OpCode.ToString("X4"), Length));
+                $"Packet (0x{OpCode.ToString("X4")} - {Length}): ");
         }
 
         public override string ToString()
         {
             var buf = new byte[Length - 2];
             Buffer.BlockCopy(_memoryStream.ToArray(), 2, buf, 0, buf.Length);
-            return string.Format("Opcode: 0x{0:X4} Length: {1} Data: {2}", (ushort) OpCode, buf.Length,
-                ByteUtils.BytesToHex(buf));
+            return $"Opcode: 0x{(ushort) OpCode:X4} Length: {buf.Length} Data: {ByteUtils.BytesToHex(buf)}";
         }
 
         #region Write methods

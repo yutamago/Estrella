@@ -80,7 +80,7 @@ namespace Estrella.Login
                 Settings.Instance.QueryCachePerClient, Settings.Instance.OverloadFlags);
             DatabaseManager.GetClient(); //testclient
 
-            Log.SetLogToFile(string.Format(@"Logs\Login\{0}.log", DateTime.Now.ToString("d_M_yyyy HH_mm_ss")));
+            Log.SetLogToFile($@"Logs\Login\{DateTime.Now.ToString("d_M_yyyy HH_mm_ss")}.log");
 
             if (Reflector.GetInitializerMethods().Any(method => !method.Invoke()))
             {

@@ -471,8 +471,7 @@ namespace Estrella.World.Data
         {
             Group = null;
             GroupMember = null;
-            var query = string.Format(
-                "UPDATE `characters` SET GroupID = 'NULL' WHERE CharID =  '{0}'", ID);
+            var query = $"UPDATE `characters` SET GroupID = 'NULL' WHERE CharID =  '{ID}'";
             Program.DatabaseManager.GetClient().ExecuteQuery(query);
         }
 

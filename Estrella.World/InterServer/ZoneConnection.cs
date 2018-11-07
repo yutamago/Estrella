@@ -181,7 +181,7 @@ namespace Estrella.World.InterServer
             using (var packet = new InterPacket(InterHeader.Assigned))
             {
                 packet.WriteByte(ID);
-                packet.WriteStringLen(string.Format("{0}-{1}", Settings.Instance.GameServiceUri, ID));
+                packet.WriteStringLen($"{Settings.Instance.GameServiceUri}-{ID}");
                 packet.WriteUShort((ushort) (Settings.Instance.ZoneBasePort + ID));
 
                 packet.WriteInt(Maps.Count);

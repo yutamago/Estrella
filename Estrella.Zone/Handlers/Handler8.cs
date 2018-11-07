@@ -251,7 +251,7 @@ namespace Estrella.Zone.Handlers
                         MapInfo mi = null;
                         if (DataProvider.Instance.MapsByName.TryGetValue(npc.Gate.MapServer, out mi))
                         {
-                            var q = new Question(string.Format("Do you want to move to {0} field?", mi.FullName),
+                            var q = new Question($"Do you want to move to {mi.FullName} field?",
                                 AnswerOnGateQuestion, npc);
                             q.Add("Yes", "No");
                             q.Send(character, 500);
