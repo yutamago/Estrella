@@ -28,9 +28,7 @@ namespace Estrella.Zone.Handlers
             byte pSlot;
             if (!pPacket.TryReadByte(out pSlot))
                 return;
-            if (pClient.Character.Trade == null)
-                return;
-            pClient.Character.Trade.RemoveItemToHandel(pClient.Character, pSlot);
+            pClient.Character.Trade?.RemoveItemToHandel(pClient.Character, pSlot);
         }
 
         [PacketHandler(CH19Type.TradeAccept)]
@@ -45,19 +43,13 @@ namespace Estrella.Zone.Handlers
             long money;
             if (!pPacket.TryReadLong(out money))
                 return;
-            if (pClient.Character.Trade != null)
-            {
-                pClient.Character.Trade.ChangeMoneyToTrade(pClient.Character, money);
-            }
+            pClient.Character.Trade?.ChangeMoneyToTrade(pClient.Character, money);
         }
 
         [PacketHandler(CH19Type.TradeLock)]
         public static void TradeLock(ZoneClient pClient, Packet pPacket)
         {
-            if (pClient.Character.Trade != null)
-            {
-                pClient.Character.Trade.TradeLock(pClient.Character);
-            }
+            pClient.Character.Trade?.TradeLock(pClient.Character);
         }
 
         [PacketHandler(CH19Type.TradeAddItem)]
@@ -67,18 +59,13 @@ namespace Estrella.Zone.Handlers
             if (!pPacket.TryReadByte(out pSlot))
                 return;
 
-            if (pClient.Character.Trade == null)
-                return;
-            pClient.Character.Trade.AddItemToHandel(pClient.Character, pSlot);
+            pClient.Character.Trade?.AddItemToHandel(pClient.Character, pSlot);
         }
 
         [PacketHandler(CH19Type.TradeAgree)]
         public static void TradeAgree(ZoneClient pClient, Packet pPacket)
         {
-            if (pClient.Character.Trade == null)
-                return;
-
-            pClient.Character.Trade.AcceptTrade(pClient.Character);
+            pClient.Character.Trade?.AcceptTrade(pClient.Character);
         }
 
         [PacketHandler(CH19Type.TradeBreak)]

@@ -88,8 +88,7 @@ namespace Estrella.Util
 
         public int GetIndex(string pName)
         {
-            int offset;
-            if (columns.TryGetValue(pName.ToLower(), out offset))
+            if (columns.TryGetValue(pName.ToLower(), out var offset))
             {
                 return offset;
             }

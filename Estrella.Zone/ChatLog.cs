@@ -7,12 +7,14 @@ namespace Estrella.Zone
     [ServerModule(InitializationStage.DataStore)]
     public sealed class ChatLog
     {
-        private readonly StreamWriter writer;
+        private readonly StreamWriter _writer;
 
-        public ChatLog(string filename)
+        private ChatLog(string filename)
         {
-            writer = new StreamWriter(File.Open(filename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
-            writer.AutoFlush = true;
+            _writer = new StreamWriter(File.Open(filename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+            {
+                AutoFlush = true
+            };
         }
 
         public static ChatLog Instance { get; private set; }
@@ -34,16 +36,10 @@ namespace Estrella.Zone
 
         public void LogChat(string username, string line, bool shout)
         {
-            if (shout)
-            {
-                writer.WriteLine("[{0}][SHOUT] {1} : {2}",
-                    Program.CurrentTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss"), username, line);
-            }
-            else
-            {
-                writer.WriteLine("[{0}] {1} : {2}", Program.CurrentTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss"),
-                    username, line);
-            }
+            _writer.WriteLine(
+                shout
+                    ? "[{0:yyyy\'-\'MM\'-\'dd\' \'HH\':\'mm\':\'ss}][SHOUT] {1} : {2}"
+                    : "[{0:yyyy\'-\'MM\'-\'dd\' \'HH\':\'mm\':\'ss}] {1} : {2}", Program.CurrentTime, username, line);
         }
     }
 }

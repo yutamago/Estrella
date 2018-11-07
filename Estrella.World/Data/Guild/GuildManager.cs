@@ -510,16 +510,7 @@ namespace Estrella.World.Data.Guild
         [PacketHandler(CH29Type.GuildMemberListRequest)]
         public static void On_GameClient_GuildMemberListRequest(WorldClient Client, Packet Packet)
         {
-            if (Client.Character == null)
-            {
-                return;
-            }
-
-
-            if (Client.Character.Guild != null)
-            {
-                Client.Character.Guild.SendMemberList(Client);
-            }
+            Client.Character?.Guild?.SendMemberList(Client);
         }
 
         [PacketHandler(CH29Type.UpdateGuildMessage)]

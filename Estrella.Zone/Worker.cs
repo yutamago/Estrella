@@ -51,10 +51,7 @@ namespace Estrella.Zone
 
         public void Stop()
         {
-            if (main != null)
-            {
-                main.Abort();
-            }
+            main?.Abort();
         }
 
         private void Work()

@@ -110,14 +110,12 @@ namespace Estrella.Zone.InterServer
 
         public void SendPacket(InterPacket packet)
         {
-            if (client == null) return;
-            client.SendPacket(packet);
+            client?.SendPacket(packet);
         }
 
         public void Disconnect()
         {
-            if (client == null) return;
-            client.Disconnect();
+            client?.Disconnect();
         }
     }
 }

@@ -28,28 +28,25 @@ namespace Estrella.Util
 	    ///     Invokes the <see cref="WorkStarted" />-Event
 	    /// </summary>
 	    protected virtual void OnWorkStarted()
-        {
-            if (WorkStarted != null)
-                WorkStarted(this, new EventArgs());
-        }
+	    {
+		    WorkStarted?.Invoke(this, new EventArgs());
+	    }
 
 	    /// <summary>
 	    ///     Invokes the <see cref="WorkDone" />-Event
 	    /// </summary>
 	    protected virtual void OnWorkDone()
-        {
-            if (WorkDone != null)
-                WorkDone(this, new EventArgs());
-        }
+	    {
+		    WorkDone?.Invoke(this, new EventArgs());
+	    }
 
 	    /// <summary>
 	    ///     Invokes the <see cref="Queued" />-Event
 	    /// </summary>
 	    protected virtual void OnQueued()
-        {
-            if (Queued != null)
-                Queued(this, new EventArgs());
-        }
+	    {
+		    Queued?.Invoke(this, new EventArgs());
+	    }
 
 	    /// <summary>
 	    ///     Perform the action of this UserWorkItem

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Estrella.Util;
 
@@ -43,8 +44,7 @@ namespace Estrella.FiestaLib.Networking
             memoryStream = new MemoryStream(pData);
             reader = new BinaryReader(memoryStream);
 
-            ushort opCode;
-            TryReadUShort(out opCode);
+            TryReadUShort(out var opCode);
             Header = (byte) (opCode >> 10);
             Type = (byte) (opCode & 1023);
             OpCode = opCode;
@@ -159,8 +159,8 @@ namespace Estrella.FiestaLib.Networking
 
         public void Dispose()
         {
-            if (writer != null) writer.Close();
-            if (reader != null) reader.Close();
+            writer?.Close();
+            reader?.Close();
             memoryStream = null;
             writer = null;
             reader = null;
@@ -379,10 +379,8 @@ namespace Estrella.FiestaLib.Networking
 
         public string ReadStringForLogin(int length)
         {
-            string tempString = null;
             var stringRead = reader.ReadChars(length);
-            foreach (var c in stringRead) tempString += c;
-            return tempString;
+            return stringRead.Aggregate<char, string>(null, (current, c) => current + c);
         }
 
         public bool TryReadSByte(out sbyte pValue)
@@ -459,8 +457,7 @@ namespace Estrella.FiestaLib.Networking
         {
             pValue = "";
             if (Remaining < 1) return false;
-            byte len;
-            TryReadByte(out len);
+            TryReadByte(out var len);
             if (Remaining < len) return false;
             return TryReadString(out pValue, len);
         }

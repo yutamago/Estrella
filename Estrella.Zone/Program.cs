@@ -13,15 +13,15 @@ using Estrella.Zone.Networking;
 
 namespace Estrella.Zone
 {
-    class Program
+    internal static class Program
     {
         public static DatabaseManager DatabaseManager;
         public static DatabaseManager CharDBManager;
 
         public static ZoneData ServiceInfo
         {
-            get { return Zones[0]; }
-            set { Zones[0] = value; }
+            get => Zones[0];
+            set => Zones[0] = value;
         }
 
         public static ConcurrentDictionary<byte, ZoneData> Zones { get; set; }
@@ -32,7 +32,7 @@ namespace Estrella.Zone
         public static bool Shutdown { get; private set; }
 
         [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var currentDomain = AppDomain.CurrentDomain;
             currentDomain.UnhandledException += MyHandler;
@@ -93,7 +93,7 @@ namespace Estrella.Zone
                 Settings.Instance.WorldDBMinPoolSizeZoneWorld, Settings.Instance.WorldDBMaxPoolSizeZoneWorld,
                 Settings.Instance.QueryCachePerClientZoneWorld, Settings.Instance.OverloadFlagsZoneWorld);
             CharDBManager.GetClient();
-            Log.SetLogToFile($@"Logs\Zone\{DateTime.Now.ToString("yyyy-MM-dd HHmmss")}.log");
+            Log.SetLogToFile($@"Logs\Zone\{DateTime.Now:yyyy-MM-dd HHmmss}.log");
             Randomizer = new Random();
             Log.IsDebug = Settings.Instance.Debug;
 
@@ -144,26 +144,12 @@ namespace Estrella.Zone
 
         public static ZoneData GetZoneForMap(ushort mapid)
         {
-            foreach (var v in Zones.Values)
-            {
-                if (v.MapsToLoad.Count(m => m.ID == mapid) > 0) return v;
-            }
-
-            return null;
+            return Zones.Values.FirstOrDefault(v => v.MapsToLoad.Count(m => m.ID == mapid) > 0);
         }
 
         public static MapInfo GetMapInfo(ushort mapid)
         {
-            foreach (var v in Zones.Values)
-            {
-                var mi = v.MapsToLoad.Find(m => m.ID == mapid);
-                if (mi != null)
-                {
-                    return mi;
-                }
-            }
-
-            return null;
+            return Zones.Values.Select(v => v.MapsToLoad.Find(m => m.ID == mapid)).FirstOrDefault(mi => mi != null);
         }
 
         public static bool IsLoaded(ushort mapid)

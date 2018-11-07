@@ -463,8 +463,7 @@ namespace Estrella.World.Data.Group
 
         protected virtual void OnBrokeUp()
         {
-            if (BrokeUp != null)
-                BrokeUp(this, new EventArgs());
+            BrokeUp?.Invoke(this, new EventArgs());
             foreach (var mem in Members)
             {
                 RemoveGroupDataInDatabase(mem.CharId);
@@ -477,8 +476,7 @@ namespace Estrella.World.Data.Group
 
         protected virtual void OnChangedMaster(GroupMember pOld, GroupMember pNew)
         {
-            if (ChangedMaster != null)
-                ChangedMaster(this, new ChangedMasterEventArgs(pOld, pNew));
+            ChangedMaster?.Invoke(this, new ChangedMasterEventArgs(pOld, pNew));
         }
 
         public event EventHandler BrokeUp;

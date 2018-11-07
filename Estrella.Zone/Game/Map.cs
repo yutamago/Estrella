@@ -250,10 +250,7 @@ namespace Estrella.Zone.Game
             var toret = new List<ZoneCharacter>();
             foreach (var sursector in input)
             {
-                foreach (var obj in sursector.Objects.Values.Where(o => o is ZoneCharacter))
-                {
-                    toret.Add((ZoneCharacter) obj);
-                }
+                toret.AddRange(sursector.Objects.Values.Where(o => o is ZoneCharacter).Cast<ZoneCharacter>());
             }
 
             return toret;
@@ -275,10 +272,7 @@ namespace Estrella.Zone.Game
             var toret = new List<MapObject>();
             foreach (var sursector in input)
             {
-                foreach (var obj in sursector.Objects.Values.Where(o => !(o is Npc)))
-                {
-                    toret.Add(obj);
-                }
+                toret.AddRange(sursector.Objects.Values.Where(o => !(o is Npc)));
             }
 
             return toret;
@@ -292,22 +286,24 @@ namespace Estrella.Zone.Game
                 foreach (var victimObject in character.MapSector.Objects.Values)
                 {
                     if (victimObject == character) continue; // ...
-                    if (victimObject is Npc) continue; // NPC's are for noobs. Can't despawn
-
-                    if (victimObject is ZoneCharacter)
+                    switch (victimObject)
                     {
-                        // Remove obj for player
-                        var victim = victimObject as ZoneCharacter;
-                        victim.Client.SendPacket(removeObjPacket);
+                        case Npc _:
+                            continue; // NPC's are for noobs. Can't despawn
+                        case ZoneCharacter _:
+                        {
+                            // Remove obj for player
+                            var victim = victimObject as ZoneCharacter;
+                            victim.Client.SendPacket(removeObjPacket);
+                            break;
+                        }
                     }
 
-                    if (character != null && toplayer)
+                    if (!toplayer) continue;
+                    // Despawn victimObject for obj
+                    using (var removeVictimPacket = Handler7.RemoveObject(victimObject))
                     {
-                        // Despawn victimObject for obj
-                        using (var removeVictimPacket = Handler7.RemoveObject(victimObject))
-                        {
-                            character.Client.SendPacket(removeVictimPacket);
-                        }
+                        character.Client.SendPacket(removeVictimPacket);
                     }
                 }
             }
@@ -445,8 +441,7 @@ namespace Estrella.Zone.Game
             foreach (var kvp in Objects.Where(o => o.Value is ZoneCharacter))
             {
                 var victim = (ZoneCharacter) kvp.Value;
-                if (victim.Client != null)
-                    victim.Client.SendPacket(packet);
+                victim.Client?.SendPacket(packet);
             }
         }
 

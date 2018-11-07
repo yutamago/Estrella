@@ -55,10 +55,7 @@ namespace Estrella.FiestaLib.Networking
                 {
                 }
 
-                if (OnDisconnect != null)
-                {
-                    OnDisconnect(this, SessionCloseEventArgs.ConnectionTerminated); //TODO: split
-                }
+                OnDisconnect?.Invoke(this, SessionCloseEventArgs.ConnectionTerminated); //TODO: split
             }
         }
 
@@ -203,8 +200,7 @@ namespace Estrella.FiestaLib.Networking
         private void BeginSend()
         {
             var args = new SocketAsyncEventArgs();
-            ByteArraySegment segment;
-            if (sendSegments.TryPeek(out segment))
+            if (sendSegments.TryPeek(out var segment))
             {
                 args.Completed += EndSend;
                 args.SetBuffer(segment.Buffer, segment.Start, segment.Length);
@@ -234,8 +230,7 @@ namespace Estrella.FiestaLib.Networking
                 return;
             }
 
-            ByteArraySegment segment;
-            if (sendSegments.TryPeek(out segment))
+            if (sendSegments.TryPeek(out var segment))
             {
                 if (segment.Advance(pArguments.BytesTransferred))
                 {

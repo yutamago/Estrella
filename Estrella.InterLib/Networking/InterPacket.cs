@@ -31,8 +31,7 @@ namespace Estrella.InterLib.Networking
             _memoryStream = new MemoryStream(pData);
             _reader = new BinaryReader(_memoryStream);
 
-            ushort opCode;
-            TryReadUShort(out opCode);
+            TryReadUShort(out var opCode);
             OpCode = (InterHeader) opCode;
         }
 
@@ -59,8 +58,8 @@ namespace Estrella.InterLib.Networking
 
         public void Dispose()
         {
-            if (_writer != null) _writer.Close();
-            if (_reader != null) _reader.Close();
+            _writer?.Close();
+            _reader?.Close();
             _memoryStream = null;
             _writer = null;
             _reader = null;
@@ -272,9 +271,8 @@ namespace Estrella.InterLib.Networking
         {
             value = DateTime.MinValue;
 
-            long data;
             if (Remaining < 8
-                || !TryReadLong(out data))
+                || !TryReadLong(out var data))
                 return false;
 
             value = DateTime.FromBinary(data);
@@ -380,10 +378,8 @@ namespace Estrella.InterLib.Networking
         {
             pValue = "";
             if (Remaining < 1) return false;
-            byte len;
-            TryReadByte(out len);
-            if (Remaining < len) return false;
-            return TryReadString(out pValue, len);
+            TryReadByte(out var len);
+            return Remaining >= len && TryReadString(out pValue, len);
         }
 
         public bool TryReadString(out string pValue, int pLen)

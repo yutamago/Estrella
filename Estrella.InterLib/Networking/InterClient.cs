@@ -66,10 +66,7 @@ namespace Estrella.InterLib.Networking
                 {
                 }
 
-                if (OnDisconnect != null)
-                {
-                    OnDisconnect(this, SessionCloseEventArgs.ConnectionTerminated); //TODO: split
-                }
+                OnDisconnect?.Invoke(this, SessionCloseEventArgs.ConnectionTerminated); //TODO: split
             }
         }
 

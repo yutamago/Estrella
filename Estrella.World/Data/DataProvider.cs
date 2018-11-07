@@ -175,23 +175,13 @@ namespace Estrella.World.Data
         public List<ushort> GetMapsForZone(int id)
         {
             int zonecount = Settings.Instance.ZoneCount;
-            if (id == zonecount - 1) //Kindom provider
+            if (id == zonecount - 1) //Kingdom provider
             {
-                var toret = new List<ushort>();
-                foreach (var map in Maps.Values.Where(m => m.Kingdom > 0))
-                {
-                    toret.Add(map.ID);
-                }
-
-                return toret;
+                return Maps.Values.Where(m => m.Kingdom > 0).Select(map => map.ID).ToList();
             }
             else
             {
-                var normalmaps = new List<ushort>();
-                foreach (var map in Maps.Values.Where(m => m.Kingdom == 0))
-                {
-                    normalmaps.Add(map.ID);
-                }
+                var normalmaps = Maps.Values.Where(m => m.Kingdom == 0).Select(map => map.ID).ToList();
 
                 var splitmaps = normalmaps.Count / (zonecount - 1); //normal map zones = total - 1
                 var toret = new List<ushort>();

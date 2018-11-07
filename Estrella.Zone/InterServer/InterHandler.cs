@@ -73,10 +73,8 @@ namespace Estrella.Zone.InterServer
                 return;
 
             var pClient = ClientManager.Instance.GetClientByName(Charname);
-            if (pClient == null)
-                return;
 
-            pClient.Character.GiveMasterRewardItem(ItemID, count);
+            pClient?.Character.GiveMasterRewardItem(ItemID, count);
         }
 
         [InterPacketHandler(InterHeader.Assigned)]
@@ -319,9 +317,7 @@ namespace Estrella.Zone.InterServer
             if (!pPacket.TryReadLong(out NewMoney))
                 return;
             var pClient = ClientManager.Instance.GetClientByCharID(CharID);
-            if (pClient == null)
-                return;
-            pClient.Character.ChangeMoney(NewMoney);
+            pClient?.Character.ChangeMoney(NewMoney);
         }
 
         [InterPacketHandler(InterHeader.NewPartyCreated)]

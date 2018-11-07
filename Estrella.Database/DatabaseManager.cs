@@ -75,10 +75,7 @@ namespace Estrella.Database
         /// </summary>
         internal void StopMonitor()
         {
-            if (mClientMonitor != null)
-            {
-                mClientMonitor.Dispose();
-            }
+            mClientMonitor?.Dispose();
         }
 
         /// <summary>

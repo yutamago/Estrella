@@ -26,9 +26,9 @@ namespace Estrella.InterLib.NetworkObjects
         private void EndReceive(IAsyncResult iar)
         {
             var socket = listener.EndAcceptSocket(iar);
-            if (socket != null && OnIncommingConnection != null)
+            if (socket != null)
             {
-                OnIncommingConnection(socket);
+                OnIncommingConnection?.Invoke(socket);
             }
 
             AcceptedClients++;

@@ -85,8 +85,7 @@ namespace Estrella.World.InterServer
 
         public void SendPacket(InterPacket packet)
         {
-            if (client == null) return;
-            client.SendPacket(packet);
+            client?.SendPacket(packet);
         }
     }
 }

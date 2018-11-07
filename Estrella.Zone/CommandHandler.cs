@@ -17,17 +17,17 @@ namespace Estrella.Zone
     {
         public delegate void Command(ZoneCharacter character, params string[] param);
 
-        private readonly Dictionary<string, CommandInfo> commands = new Dictionary<string, CommandInfo>();
+        private readonly Dictionary<string, CommandInfo> _commands = new Dictionary<string, CommandInfo>();
 
         public CommandHandler()
         {
             LoadCommands();
-            Log.WriteLine(LogLevel.Info, "{0} command(s) registered.", commands.Count);
+            Log.WriteLine(LogLevel.Info, "{0} command(s) registered.", _commands.Count);
         }
 
         public static CommandHandler Instance { get; private set; }
 
-        public void LoadCommands()
+        private void LoadCommands()
         {
             RegisterCommand("&Inv", Inv, 1);
             RegisterCommand("&GiveMoney", GiveMoney, 1, "<long>");
@@ -271,7 +271,7 @@ namespace Estrella.Zone
         private void List(ZoneCharacter character, params string[] param)
         {
             character.DropMessage("Your l33t commands:");
-            foreach (var kvp in commands)
+            foreach (var kvp in _commands)
             {
                 if (kvp.Value.GmLevel <= character.Client.Admin)
                 {
@@ -293,13 +293,13 @@ namespace Estrella.Zone
 
         private void IsGay(ZoneCharacter character, params string[] param)
         {
-            var otherclient = ClientManager.Instance.GetClientByName(param[1]);
-            if (otherclient == null || otherclient.Character == null)
+            var otherClient = ClientManager.Instance.GetClientByName(param[1]);
+            if (otherClient?.Character == null)
             {
                 character.DropMessage("Character not found.");
             }
 
-            var other = otherclient.Character;
+            var other = otherClient.Character;
 
             var question = new Question("Are you gay?", AnswerGay, character);
             question.Add("Yes", "No", "Boobs!");
@@ -453,15 +453,12 @@ namespace Estrella.Zone
             else request = input;
 
             CommandInfo info;
-            if (commands.TryGetValue(request, out info))
+            if (_commands.TryGetValue(request, out info))
             {
                 var output = request + ": ";
                 if (info.Parameters.Length > 0)
                 {
-                    foreach (var par in info.Parameters)
-                    {
-                        output += "[" + par + "] ";
-                    }
+                    output = info.Parameters.Aggregate(output, (current, par) => current + "[" + par + "] ");
                 }
                 else output += "None";
 
@@ -558,20 +555,20 @@ namespace Estrella.Zone
 
         public void RegisterCommand(string command, Command function, byte gmlevel, params string[] param)
         {
-            if (commands.ContainsKey(command))
+            if (_commands.ContainsKey(command))
             {
                 Log.WriteLine(LogLevel.Warn, "{0} already registered as a command.", command);
                 return;
             }
 
             var info = new CommandInfo(command.ToLower(), function, gmlevel, param);
-            commands.Add(command.ToLower(), info);
+            _commands.Add(command.ToLower(), info);
         }
 
         public string[] GetCommandParams(string command)
         {
             CommandInfo info;
-            if (commands.TryGetValue(command, out info))
+            if (_commands.TryGetValue(command, out info))
             {
                 return info.Parameters;
             }
@@ -583,7 +580,7 @@ namespace Estrella.Zone
         {
             if (character == null) return CommandStatus.Error;
             CommandInfo info;
-            if (commands.TryGetValue(command[0].ToLower(), out info))
+            if (_commands.TryGetValue(command[0].ToLower(), out info))
             {
                 if (info.GmLevel > character.Client.Admin)
                 {

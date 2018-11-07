@@ -47,8 +47,7 @@ namespace Estrella.Login.InterServer
             {
                 if (e.Packet.OpCode == InterHeader.Auth)
                 {
-                    string pass;
-                    if (!e.Packet.TryReadString(out pass))
+                    if (!e.Packet.TryReadString(out var pass))
                     {
                         Log.WriteLine(LogLevel.Error, "Couldn't read pass from inter packet.");
                         e.Client.Disconnect();

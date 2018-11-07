@@ -123,10 +123,7 @@ namespace Estrella.Zone.Game
         // Event trigger
         protected virtual void OnHpSpChanged()
         {
-            if (HpSpChanged != null)
-            {
-                HpSpChanged(this, new EventArgs());
-            }
+            HpSpChanged?.Invoke(this, new EventArgs());
         }
 
         // Event-Variables

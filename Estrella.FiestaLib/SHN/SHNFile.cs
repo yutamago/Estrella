@@ -108,14 +108,12 @@ namespace Estrella.FiestaLib.SHN
                 }
 
                 FileName = path;
-                if (OnSaveFinished != null)
-                    OnSaveFinished.Invoke(this);
+                OnSaveFinished?.Invoke(this);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex + ex.StackTrace);
-                if (OnSaveError != null)
-                    OnSaveError.Invoke(this, ex.ToString());
+                OnSaveError?.Invoke(this, ex.ToString());
             }
             finally
             {

@@ -559,8 +559,7 @@ namespace Estrella.World.Data
         {
             LoadGroup();
 
-            if (GotIngame != null)
-                GotIngame(this, new EventArgs());
+            GotIngame?.Invoke(this, new EventArgs());
         }
 
         public void OneIngameLoginLoad()

@@ -894,12 +894,9 @@ namespace Estrella.Zone.Game
                 }
             }
 
-            if (SelectedObject != null)
+            if (SelectedObject is Mob)
             {
-                if (SelectedObject is Mob)
-                {
-                    if ((SelectedObject as Mob).IsDead) SelectedObject = null; // Stop the reference ffs
-                }
+                if ((SelectedObject as Mob).IsDead) SelectedObject = null; // Stop the reference ffs
             }
 
             if (State == PlayerState.Resting)
@@ -2022,10 +2019,7 @@ namespace Estrella.Zone.Game
                     Broadcast(packet);
                 }
 
-                if (Group != null)
-                {
-                    Group.CharacterMoved(GroupMember, oldx, oldy, newx, newy);
-                }
+                Group?.CharacterMoved(GroupMember, oldx, oldy, newx, newy);
             }
         }
 
@@ -2113,17 +2107,14 @@ namespace Estrella.Zone.Game
             Heal();
             InterHandler.SendLevelUpToWorld((byte) pNewLevel, Character.Name);
             LevelUpHandleUsablePoints((byte) (pNewLevel - pOldLevel));
-            if (LevelUp != null)
-                LevelUp(this, new LevelUpEventArgs(pOldLevel, pNewLevel, pMobId));
-            if (Group != null)
-                Group.UpdateCharacterLevel(this);
+            LevelUp?.Invoke(this, new LevelUpEventArgs(pOldLevel, pNewLevel, pMobId));
+            Group?.UpdateCharacterLevel(this);
         }
 
         protected override void OnHpSpChanged()
         {
             base.OnHpSpChanged();
-            if (Group != null)
-                Group.UpdateCharacterHpSp(this);
+            Group?.UpdateCharacterHpSp(this);
         }
     }
 }

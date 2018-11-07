@@ -29,10 +29,7 @@ namespace Estrella.Util
                 Console.Write(header);
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine(buffer);
-                if (Writer != null)
-                {
-                    Writer.WriteLine(header + buffer);
-                }
+                Writer?.WriteLine(header + buffer);
             }
             finally
             {

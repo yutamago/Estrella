@@ -61,8 +61,7 @@ namespace Estrella.World.Managers
 
             var request = new GroupRequest(pClient, pClient.Character.Group, pInvited);
             AddRequest(request);
-            if (pClient.Character.Group != null)
-                pClient.Character.Group.AddInvite(request);
+            pClient.Character.Group?.AddInvite(request);
             SendInvitedPacket(invitedClient, pClient);
         }
 

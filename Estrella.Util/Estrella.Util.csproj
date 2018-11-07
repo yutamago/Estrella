@@ -47,21 +47,24 @@
     <Compile Include="ClientTransfer.cs" />
     <Compile Include="DataTableReaderEx.cs" />
     <Compile Include="DUpdater\DatabaseUpdater.cs" />
-    <Compile Include="Extensions.cs" />
+    <Compile Include="Extensions\IDictionaryExtensions.cs" />
     <Compile Include="InitializationStage.cs" />
     <Compile Include="InvalidPacketException.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="MathUtils.cs" />
-    <Compile Include="Pair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflector.cs" />
-    <Compile Include="SerializableDictionary.cs" />
     <Compile Include="ServerModuleAttribute.cs" />
     <Compile Include="TimedTask.cs" />
-    <Compile Include="TransferType.cs" />
+    <Compile Include="Types\Pair.cs" />
+    <Compile Include="Types\SerializableDictionary.cs" />
+    <Compile Include="Types\TransferType.cs" />
+    <Compile Include="Types\Vector2.cs" />
     <Compile Include="UserWorkItem.cs" />
-    <Compile Include="Vector2.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Exceptions" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -153,8 +153,7 @@ namespace Estrella.Login.Handlers
                 return;
             }
 
-            byte id;
-            if (!pPacket.TryReadByte(out id))
+            if (!pPacket.TryReadByte(out var id))
             {
                 Log.WriteLine(LogLevel.Warn, "Invalid world select.");
                 return;

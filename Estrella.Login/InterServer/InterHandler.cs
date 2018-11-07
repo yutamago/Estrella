@@ -8,11 +8,8 @@ namespace Estrella.Login.InterServer
         [InterPacketHandler(InterHeader.Assign)]
         public static void HandleServerAssignement(WorldConnection wc, InterPacket packet)
         {
-            byte wid;
-            string name, ip;
-            ushort port;
-            if (!packet.TryReadByte(out wid) || !packet.TryReadString(out name) || !packet.TryReadString(out ip) ||
-                !packet.TryReadUShort(out port))
+            if (!packet.TryReadByte(out var wid) || !packet.TryReadString(out var name) || !packet.TryReadString(out var ip) ||
+                !packet.TryReadUShort(out var port))
             {
                 Log.WriteLine(LogLevel.Error, "Could not read World ID in inter server packet.");
                 wc.Disconnect();
