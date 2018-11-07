@@ -14,8 +14,6 @@ namespace Estrella.Database.DataStore
         private const string SelectClientSettings = "SELECT ClientSettings FROM characters WHERE CharID=@characterID";
         private const string SelectGameSettings = "SELECT ClientSettings FROM characters WHERE CharID=@characterID";
 
-        #region Converts
-
         public static bool EnumToBool(string @enum)
         {
             if (@enum == "1")
@@ -25,8 +23,6 @@ namespace Estrella.Database.DataStore
 
             return false;
         }
-
-        #endregion
 
         public static Character ReadCharObjectByIDFromDatabase(int ID, DatabaseManager dbmanager)
         {
@@ -84,8 +80,6 @@ namespace Estrella.Database.DataStore
 
             return ch;
         }
-
-        #region Blobs
 
         public static byte[] GetQuickBar(int charID, DatabaseManager dbManager)
         {
@@ -198,7 +192,5 @@ namespace Estrella.Database.DataStore
                 return null;
             }
         }
-
-        #endregion
     }
 }

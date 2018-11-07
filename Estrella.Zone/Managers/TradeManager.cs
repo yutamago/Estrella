@@ -11,8 +11,6 @@ namespace Estrella.Zone.Managers
     [ServerModule(InitializationStage.Clients)]
     public class TradeManager
     {
-        #region .ctor
-
         public TradeManager()
         {
             TradeReqests = new List<TradeReqest>();
@@ -26,17 +24,9 @@ namespace Estrella.Zone.Managers
             return true;
         }
 
-        #endregion
-
-        #region Properties
-
         public static TradeManager Instance { get; private set; }
 
         private readonly List<TradeReqest> TradeReqests;
-
-        #endregion
-
-        #region Methods
 
         private void SendTradeRequest(TradeReqest pRequest)
         {
@@ -81,7 +71,5 @@ namespace Estrella.Zone.Managers
                 var pTrade = new Trade(Request.pFromTradeClient, pClient.Character);
             }
         }
-
-        #endregion
     }
 }

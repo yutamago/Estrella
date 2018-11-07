@@ -14,8 +14,6 @@ namespace Estrella.World.Managers
     [ServerModule(InitializationStage.Clients)]
     public class MasterManager
     {
-        #region .ctor
-
         public MasterManager()
         {
             _pMasterRequests = new List<MasterRequest>();
@@ -28,16 +26,8 @@ namespace Estrella.World.Managers
             return true;
         }
 
-        #endregion
-
-        #region Properties
-
         public static MasterManager Instance { get; private set; }
         private readonly List<MasterRequest> _pMasterRequests;
-
-        #endregion
-
-        #region Methods
 
         public void AddMasterRequest(WorldClient pClient, string target)
         {
@@ -124,10 +114,6 @@ namespace Estrella.World.Managers
                 _pMasterRequests.Remove(rRequest);
             }
         }
-
-        #endregion
-
-        #region private Methods
 
         private void SendMasterRemoveResponse(WorldClient pClient)
         {
@@ -252,7 +238,5 @@ namespace Estrella.World.Managers
                 pClient.SendPacket(packet);
             }
         }
-
-        #endregion
     }
 }

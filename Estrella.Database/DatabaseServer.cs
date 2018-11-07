@@ -7,8 +7,6 @@ namespace Estrella.Database
     /// </summary>
     public class DatabaseServer
     {
-        #region Constructor
-
         /// <summary>
         ///     Constructs a DatabaseServer object with given details.
         /// </summary>
@@ -29,28 +27,16 @@ namespace Estrella.Database
             mPassword = sPassword != null ? sPassword : "";
         }
 
-        #endregion
-
-        #region Methods
-
         public override string ToString()
         {
             return mUser + "@" + mHost;
         }
-
-        #endregion
-
-        #region Fields
 
         private readonly string mHost;
         private readonly uint mPort;
 
         private readonly string mUser;
         private readonly string mPassword;
-
-        #endregion
-
-        #region Properties
 
         /// <summary>
         ///     The network host of the database server, eg 'localhost' or '85.214.55.189'.
@@ -83,7 +69,5 @@ namespace Estrella.Database
         {
             get { return mPassword; }
         }
-
-        #endregion
     }
 }

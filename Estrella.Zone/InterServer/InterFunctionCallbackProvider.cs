@@ -9,8 +9,6 @@ namespace Estrella.Zone.InterServer
     [ServerModule(InitializationStage.Networking)]
     public class InterFunctionCallbackProvider
     {
-        #region .ctor
-
         public InterFunctionCallbackProvider()
         {
             waithandlers = new Dictionary<long, Mutex>();
@@ -19,20 +17,12 @@ namespace Estrella.Zone.InterServer
             nextId = 0;
         }
 
-        #endregion
-
-        #region Properties
-
         public static InterFunctionCallbackProvider Instance { get; private set; }
 
         private Dictionary<long, Mutex> waithandlers;
         private Dictionary<long, object> results;
         private Dictionary<long, Func<InterPacket, object>> readFuncs;
         private long nextId;
-
-        #endregion
-
-        #region Methods
 
         [InitializerMethod]
         public static bool Initialize()
@@ -87,7 +77,5 @@ namespace Estrella.Zone.InterServer
             nextId++;
             return id;
         }
-
-        #endregion
     }
 }

@@ -12,17 +12,11 @@ namespace Estrella.Zone.Game.Group
 {
     public class Group
     {
-        #region .ctor
-
         public Group()
         {
             Members = new List<GroupMember>();
             LastUpdate = DateTime.Now;
         }
-
-        #endregion
-
-        #region Properties
 
         public long Id { get; private set; }
 
@@ -39,10 +33,6 @@ namespace Estrella.Zone.Game.Group
         public DateTime LastUpdate { get; private set; }
 
         public readonly List<GroupMember> Members;
-
-        #endregion
-
-        #region Methods
 
         public static Group LoadGroupFromDatabaseById(long pId)
         {
@@ -267,8 +257,6 @@ namespace Estrella.Zone.Game.Group
             }
         }
 
-        #region Private
-
         private void AnnouncePacket(Packet pPacket)
         {
             foreach (var mem in Members)
@@ -299,18 +287,10 @@ namespace Estrella.Zone.Game.Group
             }
         }
 
-        #endregion
-
-        #region Eventhandlers
-
         private void OnCharacterLevelUp(object sender, LevelUpEventArgs args)
         {
             UpdateCharacterLevel((ZoneCharacter) sender);
             UpdateCharacterHpSp((ZoneCharacter) sender);
         }
-
-        #endregion
-
-        #endregion
     }
 }

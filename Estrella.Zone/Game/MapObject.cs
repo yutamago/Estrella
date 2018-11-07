@@ -8,8 +8,6 @@ namespace Estrella.Zone.Game
 {
     public abstract class MapObject
     {
-        #region .ctor
-
         public MapObject()
         {
             IsAttackable = true;
@@ -20,10 +18,6 @@ namespace Estrella.Zone.Game
         {
             SelectedBy.Clear();
         }
-
-        #endregion
-
-        #region Properties
 
         public bool IsAdded { get; set; }
         public bool IsAttackable { get; set; }
@@ -56,10 +50,6 @@ namespace Estrella.Zone.Game
         private ushort statUpdateCounter;
         public static readonly TimeSpan HpSpUpdateInterval = TimeSpan.FromSeconds(3);
         protected DateTime lastHpSpUpdate = DateTime.Now;
-
-        #endregion
-
-        #region Methods
 
         public virtual void Attack(MapObject victim)
         {
@@ -130,10 +120,6 @@ namespace Estrella.Zone.Game
         public abstract void Update(DateTime date);
         public abstract Packet Spawn();
 
-        #endregion
-
-        #region Event-Stuff
-
         // Event trigger
         protected virtual void OnHpSpChanged()
         {
@@ -145,7 +131,5 @@ namespace Estrella.Zone.Game
 
         // Event-Variables
         public event EventHandler<EventArgs> HpSpChanged;
-
-        #endregion
     }
 }

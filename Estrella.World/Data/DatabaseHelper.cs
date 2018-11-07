@@ -4,16 +4,10 @@ namespace Estrella.World.Data
 {
     public static class DatabaseHelper
     {
-        #region Queries
-
         public const string RemoveCharacterGroupQuery = "UPDATE `characters` SET GroupID = NULL WHERE Name = \'{0}\'";
 
         public const string UpdateCharacterGroupQuery =
             "UPDATE `characters` SET GroupID = '{0}' , IsGroupMaster = '{1}' WHERE Name = \'{2}\'";
-
-        #endregion
-
-        #region Methods
 
         public static void RemoveCharacterGroup(string pName)
         {
@@ -35,7 +29,5 @@ namespace Estrella.World.Data
                 client.ExecuteQuery(q);
             }
         }
-
-        #endregion
     }
 }

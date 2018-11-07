@@ -37,10 +37,6 @@ namespace Estrella.Login
         {
             var e = (Exception) args.ExceptionObject;
 
-            #region Logging
-
-            #region Write Errors to a log file
-
             // Create a writer and open the file:
             StreamWriter log;
 
@@ -60,10 +56,6 @@ namespace Estrella.Login
 
             // Close the stream:
             log.Close();
-
-            #endregion
-
-            #endregion
 
             Log.WriteLine(LogLevel.Exception, "Unhandled Exception : " + e);
             Console.ReadKey(true);

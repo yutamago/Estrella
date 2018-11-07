@@ -11,12 +11,6 @@ namespace Estrella.World.Data.MasterSystem
 {
     public class MasterMember
     {
-        #region .ctor
-
-        #endregion
-
-        #region Properties
-
         public WorldClient pMember { get; private set; }
         public string pMemberName { get; private set; }
         public DateTime RegisterDate { get; private set; }
@@ -41,10 +35,6 @@ namespace Estrella.World.Data.MasterSystem
             pMemberName = pClient.Character.Character.Name;
             pMember = pClient;
         }
-
-        #endregion
-
-        #region Methods
 
         public static MasterMember LoadFromDatabase(DataRow row)
         {
@@ -103,10 +93,6 @@ namespace Estrella.World.Data.MasterSystem
             }
         }
 
-        #endregion
-
-        #region Packets
-
         private void SetOffline(string name)
         {
             IsOnline = false;
@@ -128,7 +114,5 @@ namespace Estrella.World.Data.MasterSystem
                 pMember.SendPacket(packet);
             }
         }
-
-        #endregion
     }
 }

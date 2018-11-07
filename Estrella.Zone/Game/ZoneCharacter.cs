@@ -25,8 +25,6 @@ namespace Estrella.Zone.Game
 {
     public class ZoneCharacter : MapObject
     {
-        #region .ctor
-
         public ZoneCharacter(int CharID, bool loadequips = true)
         {
             try
@@ -88,27 +86,15 @@ namespace Estrella.Zone.Game
             }
         }
 
-        #endregion
-
-        #region Events
-
         public event EventHandler<LevelUpEventArgs> LevelUp;
-
-        #endregion
-
-        #region Properties
 
         public Character Character { get; private set; }
         public Group.Group Group { get; set; }
         public GroupMember GroupMember { get; set; }
 
-        #region Inventory
-
         public Inventory.Inventory Inventory { get; set; }
         public RewardInventory RewardInventory { get; set; }
         public PremiumInventory PremiumInventory { get; set; }
-
-        #endregion
 
         public bool IsAttacking
         {
@@ -126,13 +112,9 @@ namespace Estrella.Zone.Game
         public const byte ShoutDelay = 10;
         public static readonly TimeSpan HpSpUpdateRate = TimeSpan.FromSeconds(3);
 
-        #region Mount
-
         public bool IsInCasting { get; set; }
         public DateTime LastUse { get; set; }
         public Mount Mount { get; set; }
-
-        #endregion
 
         public long RecviveCoper { get; set; }
 
@@ -189,8 +171,6 @@ namespace Estrella.Zone.Game
         public bool IsInaAcademy { get; set; }
         // End of local variables
 
-        #region Stats
-
         public int Fame
         {
             get { return Character.Fame; }
@@ -214,10 +194,6 @@ namespace Estrella.Zone.Game
             get { return Character.LookInfo.Face; }
             set { Character.LookInfo.Face = value; }
         }
-
-        #endregion
-
-        #region States
 
         public byte StatPoints
         {
@@ -333,22 +309,14 @@ namespace Estrella.Zone.Game
             set { Character.CharacterStats.MagicDef = value; }
         }
 
-        #endregion
-
         //Parrty Shit
-
-        #region Party Variabels
 
         public Dictionary<string, ZoneClient> Party = new Dictionary<string, ZoneClient>();
         public bool IsInParty { get; set; } //check variabel for heath update
         public bool HealthThreadState { get; set; }
         public bool SendGrpInsector { get; set; }
 
-        #endregion
-
         //local shit
-
-        #region ZoneCharacter Variabels
 
         public ZoneClient Client { get; set; }
         public Dictionary<ushort, Skill> SkillsActive { get; private set; }
@@ -374,8 +342,6 @@ namespace Estrella.Zone.Game
         public DateTime NextHPRest { get; set; }
         public DateTime NextSPRest { get; set; }
 
-        #endregion
-
         //lazy loading cheattracker
         private CheatTracker tracker;
 
@@ -383,10 +349,6 @@ namespace Estrella.Zone.Game
         {
             get { return tracker ?? (tracker = new CheatTracker(this)); }
         }
-
-        #endregion
-
-        #region Methods
 
         public bool Save()
         {
@@ -2145,8 +2107,6 @@ namespace Estrella.Zone.Game
             return "ZoneCharacter(" + Name + " | " + ID + ")";
         }
 
-        #region Event-Invoker
-
         protected virtual void OnLevelUp(int pOldLevel, int pNewLevel, ushort pMobId)
         {
             SendLevelUpAnimation(pMobId);
@@ -2165,9 +2125,5 @@ namespace Estrella.Zone.Game
             if (Group != null)
                 Group.UpdateCharacterHpSp(this);
         }
-
-        #endregion
-
-        #endregion
     }
 }

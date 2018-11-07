@@ -11,8 +11,6 @@ namespace Estrella.Zone.Managers
     [ServerModule(InitializationStage.Clients)]
     public class GroupManager
     {
-        #region .ctor
-
         [InitializerMethod]
         public static bool Initialize()
         {
@@ -29,10 +27,6 @@ namespace Estrella.Zone.Managers
             updateQueue = new Queue<Group>();
         }
 
-        #endregion
-
-        #region Properties
-
         public static readonly TimeSpan GroupUpdateInterval = TimeSpan.FromSeconds(3);
         public static GroupManager Instance { get; private set; }
 
@@ -40,10 +34,6 @@ namespace Estrella.Zone.Managers
         private readonly Dictionary<string, Group> groupsByMaster;
         private readonly Dictionary<long, Group> groupsById;
         private readonly Queue<Group> updateQueue;
-
-        #endregion
-
-        #region Methods
 
         public void NewGroupCreated(long pGroupId)
         {
@@ -239,7 +229,5 @@ namespace Estrella.Zone.Managers
 
             return -1;
         }
-
-        #endregion
     }
 }

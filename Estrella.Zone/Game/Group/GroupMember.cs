@@ -2,8 +2,6 @@
 {
     public class GroupMember
     {
-        #region .ctor
-
         public GroupMember()
         {
             IsMaster = false;
@@ -21,10 +19,6 @@
             IsOnline = pIsOnline;
         }
 
-        #endregion
-
-        #region Properties
-
         public bool IsMaster { get; internal set; }
         public bool IsOnline { get; set; }
         public Group Group { get; internal set; }
@@ -32,7 +26,5 @@
         public ZoneCharacter Character { get; internal set; }
 
         public bool IsReadyForUpdates { get; set; }
-
-        #endregion
     }
 }

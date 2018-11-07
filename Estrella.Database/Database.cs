@@ -7,8 +7,6 @@ namespace Estrella.Database
     /// </summary>
     public class Database
     {
-        #region Constructor
-
         /// <summary>
         ///     Constructs a Database instance with given details.
         /// </summary>
@@ -25,17 +23,9 @@ namespace Estrella.Database
             mMaxPoolSize = maxPoolSize;
         }
 
-        #endregion
-
-        #region Fields
-
         private readonly string mName;
         private readonly uint mMinPoolSize;
         private readonly uint mMaxPoolSize;
-
-        #endregion
-
-        #region Properties
 
         /// <summary>
         ///     The name of the database to connect to.
@@ -60,7 +50,5 @@ namespace Estrella.Database
         {
             get { return mMaxPoolSize; }
         }
-
-        #endregion
     }
 }

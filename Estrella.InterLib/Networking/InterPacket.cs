@@ -95,8 +95,6 @@ namespace Estrella.InterLib.Networking
             return $"Opcode: 0x{(ushort) OpCode:X4} Length: {buf.Length} Data: {ByteUtils.BytesToHex(buf)}";
         }
 
-        #region Write methods
-
         public void WriteHexAsBytes(string hexString)
         {
             var bytes = ByteUtils.HexToBytes(hexString);
@@ -250,10 +248,6 @@ namespace Estrella.InterLib.Networking
                 throw new Exception("Unknown type: " + val);
             }
         }
-
-        #endregion
-
-        #region Read methods
 
         public bool TryReadDouble(out double value)
         {
@@ -426,7 +420,5 @@ namespace Estrella.InterLib.Networking
             _memoryStream.Read(pBuffer, 0, pBuffer.Length);
             return true;
         }
-
-        #endregion
     }
 }

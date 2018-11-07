@@ -6,8 +6,6 @@ namespace Estrella.World.Data.Group
 {
     public class GroupRequest
     {
-        #region .ctor
-
         public GroupRequest(WorldClient pFrom, Group pGroup, string pInvited)
         {
             CrationTimeStamp = DateTime.Now;
@@ -16,19 +14,9 @@ namespace Estrella.World.Data.Group
             Group = pGroup;
         }
 
-        #endregion
-
-        #region Properties
-
         public DateTime CrationTimeStamp { get; private set; }
         public Group Group { get; internal set; }
         public WorldClient InvitedClient { get; private set; }
         public WorldClient InviterClient { get; private set; }
-
-        #endregion
-
-        #region Methods
-
-        #endregion
     }
 }

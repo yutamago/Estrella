@@ -12,8 +12,6 @@ namespace Estrella.Database
     /// </summary>
     public class DatabaseManager
     {
-        #region Fields
-
         private DatabaseServer mServer;
         private Database mDatabase;
         private int MaxCacheQuerysPerClient;
@@ -23,14 +21,6 @@ namespace Estrella.Database
         private object mLockObject;
         private int overloadflags;
         private Task mClientMonitor;
-
-        #endregion
-
-        #region Properties
-
-        #endregion
-
-        #region Constructor
 
         /// <summary>
         ///     Constructs a DatabaseManager for a given DatabaseServer and Database.
@@ -69,10 +59,6 @@ namespace Estrella.Database
             mLockObject = new object();
             mClientMonitor.Start();
         }
-
-        #endregion
-
-        #region Methods
 
         /// <summary>
         /// Starts the client monitor thread. The client monitor disconnects inactive clients etc.
@@ -385,7 +371,5 @@ namespace Estrella.Database
                 return Count;
             }
         }
-
-        #endregion
     }
 }

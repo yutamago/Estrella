@@ -110,8 +110,6 @@ namespace Estrella.InterLib
             }
         }
 
-        #region Get methods
-
         /// <summary>
         ///     Gets a Boolean from the file
         /// </summary>
@@ -166,7 +164,5 @@ namespace Estrella.InterLib
         {
             return instance.properties[key].ToString();
         }
-
-        #endregion
     }
 }

@@ -6,8 +6,6 @@ namespace Estrella.World.Data.Group
 {
     public class GroupMember
     {
-        #region .ctor
-
         private GroupMember()
         {
         }
@@ -22,10 +20,6 @@ namespace Estrella.World.Data.Group
             IsOnline = true;
         }
 
-        #endregion
-
-        #region Properties
-
         public WorldCharacter Character { get; private set; }
         public string Name { get; set; }
         public Group Group { get; internal set; }
@@ -33,10 +27,6 @@ namespace Estrella.World.Data.Group
         public WorldClient Client { get; private set; }
         public int CharId { get; private set; }
         public bool IsOnline { get; set; }
-
-        #endregion
-
-        #region Methods
 
         public override int GetHashCode()
         {
@@ -81,7 +71,5 @@ namespace Estrella.World.Data.Group
 
             return member;
         }
-
-        #endregion
     }
 }

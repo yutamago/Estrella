@@ -216,8 +216,6 @@ namespace Estrella.FiestaLib.Networking
             return $"{Header}|{Type} Opcode: 0x{OpCode:X4} Length: {buf.Length} Data: {ByteUtils.BytesToHex(buf)}";
         }
 
-        #region Write methods
-
         public void Padding(int count)
         {
             for (var i = 0; i < count; i++) writer.Write((byte) 00);
@@ -346,10 +344,6 @@ namespace Estrella.FiestaLib.Networking
                 WriteByte(0);
             }
         }
-
-        #endregion
-
-        #region Read methods
 
         public bool ReadSkip(int pLength)
         {
@@ -505,7 +499,5 @@ namespace Estrella.FiestaLib.Networking
             memoryStream.Read(pBuffer, 0, pBuffer.Length);
             return true;
         }
-
-        #endregion
     }
 }

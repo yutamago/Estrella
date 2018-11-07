@@ -13,8 +13,6 @@ namespace Estrella.World.Data.Group
 {
     public class Group
     {
-        #region .ctor
-
         public Group(long id)
         {
             Members = new List<GroupMember>();
@@ -24,10 +22,6 @@ namespace Estrella.World.Data.Group
             DropState = DropState.FreeForAll;
             _gotLastDrop = 0;
         }
-
-        #endregion
-
-        #region Properties
 
         public const int MaxMembers = 5;
         public readonly List<GroupMember> Members;
@@ -53,12 +47,6 @@ namespace Estrella.World.Data.Group
         public bool Exists { get; private set; }
 
         private int _gotLastDrop;
-
-        #endregion
-
-        #region Methods
-
-        #region Public
 
         public bool HasMember(string pName)
         {
@@ -345,10 +333,6 @@ namespace Estrella.World.Data.Group
             return g;
         }
 
-        #endregion
-
-        #region Private
-
         private void UpdateDropStateToMembers()
         {
             using (var packet = new Packet(SH14Type.PartyDropState))
@@ -477,10 +461,6 @@ namespace Estrella.World.Data.Group
             OnChangedMaster(pFrom, pTo);
         }
 
-        #endregion
-
-        #region EventExecuter
-
         protected virtual void OnBrokeUp()
         {
             if (BrokeUp != null)
@@ -501,20 +481,8 @@ namespace Estrella.World.Data.Group
                 ChangedMaster(this, new ChangedMasterEventArgs(pOld, pNew));
         }
 
-        #endregion
-
-        #region EventHandler
-
-        #endregion
-
-        #endregion
-
-        #region Events
-
         public event EventHandler BrokeUp;
         public event EventHandler<ChangedMasterEventArgs> ChangedMaster;
-
-        #endregion
     }
 
     public class ChangedMasterEventArgs : EventArgs

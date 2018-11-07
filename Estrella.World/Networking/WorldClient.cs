@@ -15,18 +15,12 @@ namespace Estrella.World.Networking
 {
     public sealed class WorldClient : Client
     {
-        #region .ctor
-
         public WorldClient(Socket socket)
             : base(socket)
         {
             OnPacket += WorldClient_OnPacket;
             OnDisconnect += WorldClient_OnDisconnect;
         }
-
-        #endregion
-
-        #region Properties
 
         public bool Authenticated { get; set; }
         public string Username { get; set; }
@@ -37,10 +31,6 @@ namespace Estrella.World.Networking
         public WorldCharacter Character { get; set; }
         public DateTime LastPing { get; set; }
         public bool Pong { get; set; }
-
-        #endregion
-
-        #region Methods
 
         private void WorldClient_OnDisconnect(object sender, SessionCloseEventArgs e)
         {
@@ -278,7 +268,5 @@ namespace Estrella.World.Networking
         {
             return AccountId;
         }
-
-        #endregion
     }
 }

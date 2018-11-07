@@ -14,8 +14,6 @@ namespace Estrella.World.Managers
     [ServerModule(InitializationStage.Clients)]
     public class GroupManager
     {
-        #region .ctor
-
         public GroupManager()
         {
             groups = new List<Group>();
@@ -33,10 +31,6 @@ namespace Estrella.World.Managers
             return true;
         }
 
-        #endregion .ctor
-
-        #region Properties
-
         public static GroupManager Instance { get; private set; }
 
         private readonly List<Group> groups;
@@ -46,10 +40,6 @@ namespace Estrella.World.Managers
         private readonly Dictionary<Group, List<GroupRequest>> requestsByGroup;
 
         private long maxId;
-
-        #endregion Properties
-
-        #region Methods
 
         public long GetNextId()
         {
@@ -309,7 +299,5 @@ namespace Estrella.World.Managers
 
             return max;
         }
-
-        #endregion Methods
     }
 }

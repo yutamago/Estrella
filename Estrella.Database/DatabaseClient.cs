@@ -345,8 +345,6 @@ namespace Estrella.Database
             return (uint) (long) pCommand.ExecuteScalar();
         }
 
-        #region ReadMethods
-
         public uint ReadUInt(string query)
         {
             IsBusy = true;
@@ -381,7 +379,5 @@ namespace Estrella.Database
 
             return ret;
         }
-
-        #endregion
     }
 }

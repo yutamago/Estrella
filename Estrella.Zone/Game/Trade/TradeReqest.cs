@@ -4,8 +4,6 @@ namespace Estrella.Zone.Game.Trade
 {
     public class TradeReqest
     {
-        #region .ctor
-
         public TradeReqest(ZoneCharacter pFrom, ushort ToMapObjectID)
         {
             if (pFrom.SelectedObject.MapObjectID == ToMapObjectID)
@@ -17,15 +15,9 @@ namespace Estrella.Zone.Game.Trade
             }
         }
 
-        #endregion
-
-        #region Properties
-
         public DateTime CrationTimeStamp { get; private set; }
         public ZoneCharacter pToTradeClient { get; private set; }
         public ZoneCharacter pFromTradeClient { get; private set; }
         public ushort MapID { get; private set; }
-
-        #endregion
     }
 }

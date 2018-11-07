@@ -239,8 +239,6 @@ namespace Estrella.World.Data.Guild
         }
 
 
-        #region Game Client Handlers
-
         [PacketHandler(CH29Type.GetGuildList)]
         public static void On_GameClient_GetGuildList(WorldClient Client, Packet Packet)
         {
@@ -784,7 +782,5 @@ namespace Estrella.World.Data.Guild
                 }
             }
         }
-
-        #endregion
     }
 }

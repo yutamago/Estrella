@@ -18,14 +18,8 @@ namespace Estrella.World.Data.MasterSystem
             ResponseAnswer = CheckRequest(target, reqeuster);
         }
 
-        #region Properties
-
         public MasterRequest PRequest { get; private set; }
         public bool ResponseAnswer { get; private set; }
-
-        #endregion
-
-        #region Methods
 
         private bool CheckRequestBeforSendRequest(MasterRequest pRequest)
         {
@@ -79,10 +73,6 @@ namespace Estrella.World.Data.MasterSystem
             InvideResponse(reqeuster, target.Character.Character.Name, reqeuster.Character.Character.CharLevel);
             return true;
         }
-
-        #endregion
-
-        #region Packets
 
         public void SendMasterRequest()
         {
@@ -156,7 +146,5 @@ namespace Estrella.World.Data.MasterSystem
                 pclient.SendPacket(packet);
             }
         }
-
-        #endregion
     }
 }

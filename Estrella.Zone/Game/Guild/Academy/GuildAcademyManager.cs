@@ -9,8 +9,6 @@ namespace Estrella.Zone.Game.Guild.Academy
 {
     public static class GuildAcademyManager
     {
-        #region Internal Client Handlers
-
         [InterPacketHandler(InterHeader.ZoneAcademyMemberJoined)]
         public static void On_WorldClient_AcademyMemberJoined(WorldConnector pConnector, InterPacket pPacket)
         {
@@ -172,7 +170,5 @@ namespace Estrella.Zone.Game.Guild.Academy
                 guild.Academy.GuildBuffKeepTime = TimeSpan.FromSeconds(keepTime);
             }
         }
-
-        #endregion
     }
 }

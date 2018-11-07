@@ -8,8 +8,6 @@ namespace Estrella.Util
     [XmlRoot("dictionary")]
     public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IXmlSerializable
     {
-        #region IXmlSerializable Members
-
         public XmlSchema GetSchema()
         {
             return null;
@@ -64,7 +62,5 @@ namespace Estrella.Util
                 writer.WriteEndElement();
             }
         }
-
-        #endregion
     }
 }

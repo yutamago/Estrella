@@ -124,8 +124,6 @@ namespace Estrella.Zone.Game.Guild
         }
 
 
-        #region Internal Client Handlers
-
         [InterPacketHandler(InterHeader.ZoneGuildCreated)]
         public static void On_InterClient_GuildCreated(WorldConnector pConnector, InterPacket pPacket)
         {
@@ -350,7 +348,5 @@ namespace Estrella.Zone.Game.Guild
                 }
             }
         }
-
-        #endregion
     }
 }

@@ -69,10 +69,6 @@ namespace Estrella.World
         {
             var e = (Exception) args.ExceptionObject;
 
-            #region Logging
-
-            #region Write Errors to a log file
-
             // Create a writer and open the file:
 
             var log = !File.Exists("errorlog.txt") ? new StreamWriter("errorlog.txt") : File.AppendText("errorlog.txt");
@@ -84,10 +80,6 @@ namespace Estrella.World
 
             // Close the stream:
             log.Close();
-
-            #endregion
-
-            #endregion
 
             Log.WriteLine(LogLevel.Exception, "Unhandled Exception : " + e);
             Console.ReadKey(true);

@@ -156,8 +156,6 @@ namespace Estrella.World.Data.Guild.Academy
         }
 
 
-        #region Game Client Handlers
-
         [PacketHandler(CH38Type.GetAcademyList)]
         public static void On_GameClient_GetAcademyList(WorldClient client, Packet pPacket)
         {
@@ -486,7 +484,5 @@ namespace Estrella.World.Data.Guild.Academy
                 }
             }
         }
-
-        #endregion
     }
 }

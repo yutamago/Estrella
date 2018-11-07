@@ -7,8 +7,6 @@ namespace Estrella.Zone.Game.Trade
 {
     public sealed class Trade
     {
-        #region .ctor
-
         public Trade(ZoneCharacter pFrom, ZoneCharacter pTo)
         {
             pCharFrom = pFrom;
@@ -17,10 +15,6 @@ namespace Estrella.Zone.Game.Trade
             pCharTo.Trade = this;
             SendTradeBeginn();
         }
-
-        #endregion
-
-        #region Properties
 
         public ZoneCharacter pCharTo { get; private set; }
         public List<TradeItem> pToHandelItemList = new List<TradeItem>();
@@ -37,12 +31,6 @@ namespace Estrella.Zone.Game.Trade
         public List<TradeItem> pFromHandelItemList = new List<TradeItem>();
         public ZoneCharacter pCharFrom { get; private set; }
         public byte pFromItemCounter { get; private set; }
-
-        #endregion
-
-        #region Methods
-
-        #region public
 
         public void ChangeMoneyToTrade(ZoneCharacter pChar, long money)
         {
@@ -168,10 +156,6 @@ namespace Estrella.Zone.Game.Trade
             }
         }
 
-        #endregion
-
-        #region privat
-
         private void SendPacketToAllTradeVendors(Packet packet)
         {
             pCharFrom.Client.SendPacket(packet);
@@ -208,10 +192,6 @@ namespace Estrella.Zone.Game.Trade
             pCharFrom.ChangeMoney(pFromMoney);
             pCharTo.ChangeMoney(pToMoney);
         }
-
-        #endregion
-
-        #region Packets
 
         private void SendTradeLock(ZoneClient pClient)
         {
@@ -329,9 +309,5 @@ namespace Estrella.Zone.Game.Trade
                 pClient.SendPacket(packet);
             }
         }
-
-        #endregion
-
-        #endregion
     }
 }

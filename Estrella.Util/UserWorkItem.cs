@@ -5,8 +5,6 @@ namespace Estrella.Util
 {
     public class UserWorkItem
     {
-        #region .ctor
-
 	    /// <summary>
 	    ///     Instances a new <see cref="UserWorkItem" />-Object
 	    /// </summary>
@@ -15,10 +13,6 @@ namespace Estrella.Util
         {
             Action = act;
         }
-
-        #endregion
-
-        #region Properties
 
 	    /// <summary>
 	    ///     The delegate to Invoke.
@@ -29,12 +23,6 @@ namespace Estrella.Util
 	    ///     Parameters for the Delegate
 	    /// </summary>
 	    protected virtual object[] Parameters { get; set; }
-
-        #endregion
-
-        #region Methods
-
-        #region Protected
 
 	    /// <summary>
 	    ///     Invokes the <see cref="WorkStarted" />-Event
@@ -63,8 +51,6 @@ namespace Estrella.Util
                 Queued(this, new EventArgs());
         }
 
-        #endregion
-
 	    /// <summary>
 	    ///     Perform the action of this UserWorkItem
 	    /// </summary>
@@ -85,10 +71,6 @@ namespace Estrella.Util
             OnQueued();
         }
 
-        #endregion
-
-        #region Events
-
 	    /// <summary>
 	    ///     Called when the <see cref="Action" />-Delegate is started
 	    /// </summary>
@@ -103,7 +85,5 @@ namespace Estrella.Util
 	    ///     Called when the Item is queued to the <see cref="System.Threading.ThreadPool" />
 	    /// </summary>
 	    public event EventHandler Queued;
-
-        #endregion
     }
 }
